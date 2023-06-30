@@ -53,13 +53,19 @@ def get_mixs_dict():
     :return:
     """
     pickle_file = '../data/v6_mixs.schema.json.pickle'
+
+    if not os.path.isfile(pickle_file):
+        my_dict = json.loads(get_data())
+        with open(pickle_file, 'wb') as handle:
+            pickle.dump(my_dict, handle, protocol = pickle.HIGHEST_PROTOCOL)
+
     if os.path.isfile(pickle_file):
         with open(pickle_file, 'rb') as handle:
             my_dict = pickle.load(handle)
     else:
-        my_dict = json.loads(get_data())
-        with open(pickle_file, 'wb') as handle:
-             pickle.dump(my_dict, handle, protocol = pickle.HIGHEST_PROTOCOL)
+        print(f"ERROR no {pickle_file}")
+        sys.exit()
+
     return my_dict
 
 def print_MIXS_review_dict_stats(MIXS_review_dict):
@@ -68,9 +74,9 @@ def print_MIXS_review_dict_stats(MIXS_review_dict):
     :param MIXS_review_dict:
     :return:
     """
-    print(f"Count of top_level MIX-S checklists={len(MIXS_review_dict)}")
-    for checklist_name in MIXS_review_dict:
-        print(f"{checklist_name} field_count={MIXS_review_dict[checklist_name]['count']}")
+    print(f"Count of top_level MIX-S checklists={len(MIXS_review_dict['by_package'])}")
+    for checklist_name in MIXS_review_dict['by_package']:
+        print(f"{checklist_name} field_count={MIXS_review_dict['by_package'][checklist_name]['count']}")
 
 def process_dict(my_dict):
     """
@@ -93,15 +99,18 @@ def process_dict(my_dict):
     #     ic(agr_prop_defs)
 
     MIXS_review_dict = {}
+    MIXS_review_dict["by_package"] = {}
+    MIXS_review_dict["by_term"] = {}
 
     for top_def in my_dict["$defs"]:
         # print(top_def)
         printed_top = False
         for second_def in my_dict["$defs"][top_def]:
             if not printed_top and second_def == 'properties':
-                MIXS_review_dict[top_def] = {}
-                MIXS_review_dict[top_def]["count"] = 0
-                MIXS_review_dict[top_def]["field"] = {}
+                MIXS_review_dict["by_package"][top_def] = {}
+                MIXS_review_dict["by_package"][top_def]["count"] = 0
+                MIXS_review_dict["by_package"][top_def]["field"] = {}
+
                 #print("") #
                 #print(top_def, end = ": ")
                 printed_top = True
@@ -113,15 +122,17 @@ def process_dict(my_dict):
                  #print(f"\t\t{second_def} property_count={len(my_dict['$defs'][top_def][second_def])}", end = " properties: ")
                  for third_def in my_dict["$defs"][top_def][second_def]:
                      #print(f"{third_def}", end = ", ")
-                     MIXS_review_dict[top_def]["field"][third_def] = {}
+                     MIXS_review_dict["by_package"][top_def]["field"][third_def] = {}
                      #sys.exit()
-                 MIXS_review_dict[top_def]["count"] = len(MIXS_review_dict[top_def]["field"])
+                     MIXS_review_dict["by_term"][third_def] = ""
+                 MIXS_review_dict["by_package"][top_def]["count"] = len(MIXS_review_dict["by_package"][top_def]["field"])
             else:
                 pass
     print()
     #ic(MIXS_review_dict)
 
-    print_MIXS_review_dict_stats(MIXS_review_dict)
+    #print_MIXS_review_dict_stats(MIXS_review_dict)
+    return MIXS_review_dict
 
 def url2file(url):
     url = "https://raw.githubusercontent.com/GenomicsStandardsConsortium/mixs/main/mixs/jsonschema/mixs.schema.json"
@@ -129,21 +140,124 @@ def url2file(url):
     r = requests.get(url)
     r_json = r.text
 
-class mixs_v5:
-    def __init__(self,my_dict):
-        self.my_dict = my_dict
+def process_ena_cl(my_dict):
+    """
+    function to parse the ena_cl in a similar way to how the mixs versions have been parsed
+    :param my_dict:
+    :return:
+    """
+    # print(my_dict)
+    # print(my_dict.keys())
+    # print(my_dict["CHECKLIST_SET"].keys())
+    MIXS_review_dict = {}
+    MIXS_review_dict["by_package"] = {}
+    MIXS_review_dict["by_term"] = {}
+
+    # print("----------------------------------")
+    for checklist in my_dict["CHECKLIST_SET"]["CHECKLIST"]:
+        # print(checklist)
+        # print(checklist["@accession"])
+        # print(checklist["@checklistType"])
+        # print(f"name={checklist['DESCRIPTOR']['NAME']} DESCRIPTION={checklist['DESCRIPTOR']['DESCRIPTION']}")
+        checklist_name = checklist['DESCRIPTOR']['NAME']
+        # print(f"- {checklist_name}")
+        if not hasattr(MIXS_review_dict["by_package"],checklist_name):
+            MIXS_review_dict["by_package"][checklist_name] = {}
+        for field_group in checklist['DESCRIPTOR']["FIELD_GROUP"]:
+            # print(field_group)
+            # print(f"\tname={field_group['NAME']} DESCRIPTION={field_group['DESCRIPTION']}")
+            for field in field_group["FIELD"]:
+                # print(f"\t\tfield={field}")
+                if field in ["LABEL", "NAME", "DESCRIPTION", "FIELD_TYPE", "MANDATORY", "MULTIPLICITY", "SYNONYM", "UNITS"]:
+                    continue
+                # print(f"\t\t\tname={field['NAME']} DESCRIPTION={field['DESCRIPTION']}")
+                # print(field)
+                field_name = field['NAME']
+
+                if not hasattr(MIXS_review_dict["by_term"], field_name):
+                    MIXS_review_dict["by_term"][field_name] = {}
+                if not hasattr(MIXS_review_dict["by_package"][checklist_name], field_name):
+                    MIXS_review_dict["by_package"][checklist_name][field_name] = {}
+                # MIXS_review_dict["by_package"][checklist_name][field_name]['name'] = field_name
+
+                description = "no_description"
+                if "DESCRIPTION" in field:
+                    description = field["DESCRIPTION"]
+                else:
+                    #print(f"no DESCRIPTION, so using LABEL for {field_name}")
+                    if  'LABEL' in field:
+                        description = field["LABEL"]
+                        # print(f"no description so using label={description}")
+
+                MIXS_review_dict["by_term"][field_name]['DESCRIPTION'] = description
+                MIXS_review_dict["by_package"][checklist_name][field_name] = MIXS_review_dict["by_term"][field_name]
+                #break
+                #print(".", end="")
+            #break
+        #break
+        #print()
+    return MIXS_review_dict
+
+class mixs:
+    def ingest_ena_cl(self):
+        self.my_dict = process_ena_cl(self.my_dict_raw)
+
+    def __init__(self, my_dict, type):
+        #type could be  "mixs_v5" or "mixs_v6"
+
+
+        if type == "ena_cl":
+            print(f"type = {type}")
+            self.my_dict_raw = my_dict
+            self.ingest_ena_cl()
+        else:
+            self.my_dict = my_dict
+
+
 
     def get_all_term_list(self):
-        return list(self.my_dict['by_term'].keys())
+        my_list = list(self.my_dict['by_term'].keys())
+        my_list.sort()
+        return my_list
 
     def get_all_term_count(self):
         return(len(self.my_dict['by_term'].keys()))
 
+    def print_term_summary(self):
+        print(f"term_count={self.get_all_term_count()}  terms={self.get_all_term_list()}")
+
     def get_all_package_list(self):
-        return list(self.my_dict['by_package'].keys())
+        my_list = list(self.my_dict['by_package'].keys())
+        my_list.sort()
+        return my_list
 
     def get_all_package_count(self):
         return(len(self.my_dict['by_package'].keys()))
+
+    def print_package_summary(self):
+        print(f"package_count={self.get_all_package_count()} packages={self.get_all_package_list()}")
+
+def get_ena_dict():
+    # curl https://www.ebi.ac.uk/ena/browser/api/xml/ERC000001-ERC000999 | xq >  ENA_checklists.json
+    json_file = "../data/ENA/ENA_checklists.json"
+    pickle_file = json_file + ".pickle"
+
+    if os.path.isfile(pickle_file):
+        with open(pickle_file, 'rb') as handle:
+            my_dict = pickle.load(handle)
+    elif os.path.isfile(json_file):
+        ic(f"about to open {json_file}")
+        with open(json_file) as f:
+            my_dict = json.load(f)
+            ic(my_dict)
+            with open(pickle_file, 'wb') as handle:
+                pickle.dump(my_dict, handle, protocol = pickle.HIGHEST_PROTOCOL)
+    else:
+        print("ERROR: unable to find file: {json_file}")
+        print("Run: curl https://www.ebi.ac.uk/ena/browser/api/xml/ERC000001-ERC000999 | xq >  ..data/ENA/ENA_checklists.json")
+        sys.exit()
+
+    return my_dict
 
 
 def get_mixs_v5_dict():
@@ -204,16 +318,45 @@ def get_mixs_v5_dict():
 
     return mixs_v5_dict
 
+def clean_list(my_list):
+    term_list_clean = list(map(str.lower, my_list))
+    term_list_clean = [s.replace(' ', '_') for s in term_list_clean]
+    term_list_clean = [s.replace('-', '_') for s in term_list_clean]
+    return term_list_clean
 
 def main():
+    ena_cl_dict = get_ena_dict()
+    ena_cl_obj = mixs(ena_cl_dict, "ena_cl")
+    ena_cl_obj.print_term_summary()
+    ena_cl_obj.print_package_summary()
+
     mixs_v5_dict = get_mixs_v5_dict()
-    mixs_v5_obj = mixs_v5(mixs_v5_dict )
-    print(f"term_count={mixs_v5_obj.get_all_term_count()}  terms={mixs_v5_obj.get_all_term_list()}")
-    print(f"package_count={mixs_v5_obj.get_all_package_count()} packages={mixs_v5_obj.get_all_package_list()}")
-    sys.exit()
+    mixs_v5_obj = mixs(mixs_v5_dict, "mixs_v5")
+    mixs_v5_obj.print_package_summary()
+    mixs_v5_obj.print_term_summary()
+
     my_dict_v6 = get_mixs_dict()
-    ic(len(my_dict_v6))
-    process_dict(my_dict_v6)
+    mixs_v6_dict = process_dict(my_dict_v6)
+    mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6")
+    mixs_v6_obj.print_package_summary()
+    mixs_v6_obj.print_term_summary()
+
+    print("======MIXS v5 verses v6=========")
+    print(f"mixs_v5 term count={mixs_v5_obj.get_all_term_count()} mixs_v6 term count={mixs_v6_obj.get_all_term_count()}")
+    term_matches = list(set(mixs_v5_obj.get_all_term_list()).intersection(mixs_v6_obj.get_all_term_list()))
+    print(f"EXACT term_match_count={len(term_matches)}")
+    mixs_v5_clean_term_list = clean_list(mixs_v5_obj.get_all_term_list())
+    mixs_v6_clean_term_list = clean_list(mixs_v6_obj.get_all_term_list())
+
+        #list(map(lambda x: x.lower(), mixs_v5_obj.get_all_term_list()))
+    term_matches = list(set(mixs_v5_clean_term_list).intersection(mixs_v6_clean_term_list))
+    print(f"clean term_match_count={len(term_matches)}")
+
+
+
+
+
+
 
 
 if __name__ == '__main__':
