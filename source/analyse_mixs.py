@@ -204,7 +204,7 @@ class mixs:
 
     def __init__(self, my_dict, type):
         #type could be  "mixs_v5" or "mixs_v6"
-
+        self.type = type
 
         if type == "ena_cl":
             print(f"type = {type}")
@@ -213,7 +213,8 @@ class mixs:
         else:
             self.my_dict = my_dict
 
-
+    def get_type(self):
+        return self.type
 
     def get_all_term_list(self):
         my_list = list(self.my_dict['by_term'].keys())
@@ -236,6 +237,10 @@ class mixs:
 
     def print_package_summary(self):
         print(f"package_count={self.get_all_package_count()} packages={self.get_all_package_list()}")
+
+    def print_summaries(self):
+        self.print_term_summary()
+        self.print_package_summary()
 
 def get_ena_dict():
     # curl https://www.ebi.ac.uk/ena/browser/api/xml/ERC000001-ERC000999 | xq >  ENA_checklists.json
@@ -324,36 +329,66 @@ def clean_list(my_list):
     term_list_clean = [s.replace('-', '_') for s in term_list_clean]
     return term_list_clean
 
+def unique_elements_left(left_list,term_matches):
+    left_list_set = set(left_list)
+    difference = left_list_set.difference(set(term_matches))
+    difference = list(difference)
+    difference.sort()
+
+    return difference
+
+
+def do_stats(ena_cl_obj, mixs_v5_obj, mixs_v6_obj):
+
+    def various(left, right):
+        term_matches = list(set(left.get_all_term_list()).intersection(right.get_all_term_list()))
+        print(f"EXACT term_match_count={len(term_matches)}")
+        difference = unique_elements_left(right.get_all_term_list(), term_matches)
+        print(f"unique={left.get_type()} (exact terms):  count={len(difference)} terms={difference}")
+        difference = unique_elements_left(left.get_all_term_list(), term_matches)
+        print(f"unique={right.get_type()} (exact terms):  count={len(difference)} terms={difference}")
+        print()
+        left_clean_term_list = clean_list(left.get_all_term_list())
+        right_clean_term_list = clean_list(left.get_all_term_list())
+        term_matches = list(set(left_clean_term_list).intersection(right_clean_term_list))
+        print(f"clean term_match_count={len(term_matches)} ")
+
+
+
+    clean_des = "lower case + underscoring spaces and hyphens"
+    print(f"Cleaning is: {clean_des}")
+
+    print("\n======MIXS v5 verses ENA=========")
+    print(f"mixs_v5 term count={mixs_v5_obj.get_all_term_count()} ena_cl term count={ena_cl_obj.get_all_term_count()}")
+    various(mixs_v5_obj,ena_cl_obj)
+
+
+
+    sys.exit()
+
+    print("\n======MIXS v6 verses ENA=========")
+    print(f"mixs_v6 term count={mixs_v6_obj.get_all_term_count()} ena_cl term count={ena_cl_obj.get_all_term_count()}")
+    various(mixs_v6_obj, ena_cl_obj)
+
+    print("\n======MIXS v5 verses v6=========")
+    print(f"mixs_v5 term count={mixs_v5_obj.get_all_term_count()} mixs_v6 term count={mixs_v6_obj.get_all_term_count()}")
+    various(mixs_v5_obj, mixs_v6_obj)
+
 def main():
     ena_cl_dict = get_ena_dict()
     ena_cl_obj = mixs(ena_cl_dict, "ena_cl")
-    ena_cl_obj.print_term_summary()
-    ena_cl_obj.print_package_summary()
+    ena_cl_obj.print_summaries()
 
     mixs_v5_dict = get_mixs_v5_dict()
     mixs_v5_obj = mixs(mixs_v5_dict, "mixs_v5")
-    mixs_v5_obj.print_package_summary()
-    mixs_v5_obj.print_term_summary()
+    mixs_v5_obj.print_summaries()
 
     my_dict_v6 = get_mixs_dict()
     mixs_v6_dict = process_dict(my_dict_v6)
     mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6")
-    mixs_v6_obj.print_package_summary()
-    mixs_v6_obj.print_term_summary()
+    mixs_v6_obj.print_summaries()
 
-    print("======MIXS v5 verses v6=========")
-    print(f"mixs_v5 term count={mixs_v5_obj.get_all_term_count()} mixs_v6 term count={mixs_v6_obj.get_all_term_count()}")
-    term_matches = list(set(mixs_v5_obj.get_all_term_list()).intersection(mixs_v6_obj.get_all_term_list()))
-    print(f"EXACT term_match_count={len(term_matches)}")
-    mixs_v5_clean_term_list = clean_list(mixs_v5_obj.get_all_term_list())
-    mixs_v6_clean_term_list = clean_list(mixs_v6_obj.get_all_term_list())
-
-        #list(map(lambda x: x.lower(), mixs_v5_obj.get_all_term_list()))
-    term_matches = list(set(mixs_v5_clean_term_list).intersection(mixs_v6_clean_term_list))
-    print(f"clean term_match_count={len(term_matches)}")
-
-
-
+    do_stats(ena_cl_obj, mixs_v5_obj, mixs_v6_obj)
 
 
 
