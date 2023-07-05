@@ -327,6 +327,8 @@ def clean_list(my_list):
     term_list_clean = list(map(str.lower, my_list))
     term_list_clean = [s.replace(' ', '_') for s in term_list_clean]
     term_list_clean = [s.replace('-', '_') for s in term_list_clean]
+    term_list_clean = [s.replace('/', '_') for s in term_list_clean]
+    term_list_clean = [s.removesuffix("_") for s in term_list_clean]
     return term_list_clean
 
 def unique_elements_left(left_list,term_matches):
@@ -340,35 +342,70 @@ def unique_elements_left(left_list,term_matches):
 
 def do_stats(ena_cl_obj, mixs_v5_obj, mixs_v6_obj):
 
-    def various(left, right):
-        term_matches = list(set(left.get_all_term_list()).intersection(right.get_all_term_list()))
-        print(f"EXACT term_match_count={len(term_matches)}")
-        difference = unique_elements_left(right.get_all_term_list(), term_matches)
-        print(f"unique={left.get_type()} (exact terms):  count={len(difference)} terms={difference}")
-        difference = unique_elements_left(left.get_all_term_list(), term_matches)
-        print(f"unique={right.get_type()} (exact terms):  count={len(difference)} terms={difference}")
-        print()
-        left_clean_term_list = clean_list(left.get_all_term_list())
-        right_clean_term_list = clean_list(left.get_all_term_list())
-        term_matches = list(set(left_clean_term_list).intersection(right_clean_term_list))
-        print(f"clean term_match_count={len(term_matches)} ")
+    def list2file(my_list, file_name):
+        print(f"{file_name}")
+        with open(file_name,"w") as f:
+            f.write("\n".join(my_list))
 
+    def various(left, right):
+        """
+        function to print out the statistics for the lists of terms in the left and right objects,
+        is an interlude to allow the print_exact_term_stats to be more simple to just process lists
+        :param left: MIXs object
+        :param right: MIXs object
+        :return:
+        """
+        message = ""
+        print_exact_term_stats(left.get_all_term_list(), left.type, right.get_all_term_list(), right.type, message)
+        print()
+        print_cleaned_term_stats(left.get_all_term_list(), left.type, right.get_all_term_list(), right.type, message)
+
+    def print_exact_term_stats(left_list, left_type, right_list, right_type, message):
+        """
+
+        :param left_list:
+        :param left_type: name of the left type
+        :param right_list:
+        :param right_type: name of the right type
+        :param message: This allows other functions to reuse this code, but still "know: where
+              currently: "harmonised" and "exact"
+        :return:
+        """
+        print(left_list)
+        print(right_list)
+
+        if message == "":
+            message = "exact"
+        left_set = set(left_list)
+        right_set = set(right_list)
+        term_matches = list(left_set.intersection(right_set))
+        print(f"{message} term_match_count={len(term_matches)}")
+        print(f"matches={term_matches}")
+        difference = unique_elements_left(left_list, term_matches)
+        print(f"unique={left_type} ({message} terms):  count={len(difference)} terms={difference}")
+        list2file(difference, message + "_" + left_type + "_vs_" + right_type + "_unique.txt")
+        difference = unique_elements_left(right_list, term_matches)
+        print(f"unique={right_type} ({message} terms):  count={len(difference)} terms={difference}")
+        list2file(difference, message + "_" + right_type + "_vs_" + left_type + "_unique.txt")
+
+
+    def print_cleaned_term_stats(left_list, left_type, right_list, right_type, message):
+        left_clean_term_list = clean_list(left_list)
+        right_clean_term_list = clean_list(right_list)
+        message = "harmonised"
+        print_exact_term_stats(left_clean_term_list, left_type, right_clean_term_list, right_type, message)
 
 
     clean_des = "lower case + underscoring spaces and hyphens"
     print(f"Cleaning is: {clean_des}")
 
-    print("\n======MIXS v5 verses ENA=========")
-    print(f"mixs_v5 term count={mixs_v5_obj.get_all_term_count()} ena_cl term count={ena_cl_obj.get_all_term_count()}")
-    various(mixs_v5_obj,ena_cl_obj)
-
-
-
-    sys.exit()
-
-    print("\n======MIXS v6 verses ENA=========")
-    print(f"mixs_v6 term count={mixs_v6_obj.get_all_term_count()} ena_cl term count={ena_cl_obj.get_all_term_count()}")
-    various(mixs_v6_obj, ena_cl_obj)
+    # print("\n======MIXS v5 verses ENA=========")
+    # print(f"mixs_v5 term count={mixs_v5_obj.get_all_term_count()} ena_cl term count={ena_cl_obj.get_all_term_count()}")
+    # various(mixs_v5_obj,ena_cl_obj)
+    #
+    # print("\n======MIXS v6 verses ENA=========")
+    # print(f"mixs_v6 term count={mixs_v6_obj.get_all_term_count()} ena_cl term count={ena_cl_obj.get_all_term_count()}")
+    # various(mixs_v6_obj, ena_cl_obj)
 
     print("\n======MIXS v5 verses v6=========")
     print(f"mixs_v5 term count={mixs_v5_obj.get_all_term_count()} mixs_v6 term count={mixs_v6_obj.get_all_term_count()}")
