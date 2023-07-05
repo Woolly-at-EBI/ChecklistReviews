@@ -224,8 +224,16 @@ class mixs:
     def get_all_term_count(self):
         return(len(self.my_dict['by_term'].keys()))
 
-    def print_term_summary(self):
-        print(f"term_count={self.get_all_term_count()}  terms={self.get_all_term_list()}")
+    def print_term_summary(self, top):
+        """
+
+        :param top: = top # number to print, if "", print all
+        :return:
+        """
+        if top == "":
+            print(f"term_count={self.get_all_term_count()}  terms={self.get_all_term_list()}")
+        else:
+            print(f"term_count={self.get_all_term_count()} first {top} terms={self.get_all_term_list()[0:top]}")
 
     def get_all_package_list(self):
         my_list = list(self.my_dict['by_package'].keys())
@@ -239,7 +247,7 @@ class mixs:
         print(f"package_count={self.get_all_package_count()} packages={self.get_all_package_list()}")
 
     def print_summaries(self):
-        self.print_term_summary()
+        self.print_term_summary(10)
         self.print_package_summary()
 
 def get_ena_dict():
@@ -283,7 +291,7 @@ def get_mixs_v5_dict():
         xlsx_file = '../data/mixs_v5.xlsx'
 
         df_mixs5 = pandas.read_excel(xlsx_file, sheet_name = 'environmental_packages')
-        print(df_mixs5.head(5))
+        # print(df_mixs5.head(5))
         # print(df_mixs5.head(5).to_dict(orient = 'records'))
         mixs_v5_simple_dict = df_mixs5.to_dict(orient = 'index')
         mixs_v5_dict = {}
@@ -343,9 +351,10 @@ def unique_elements_left(left_list,term_matches):
 def do_stats(ena_cl_obj, mixs_v5_obj, mixs_v6_obj):
 
     def list2file(my_list, file_name):
-        print(f"{file_name}")
+        #print(f"{file_name}")
         with open(file_name,"w") as f:
             f.write("\n".join(my_list))
+        return file_name
 
     def various(left, right):
         """
@@ -371,21 +380,23 @@ def do_stats(ena_cl_obj, mixs_v5_obj, mixs_v6_obj):
               currently: "harmonised" and "exact"
         :return:
         """
-        print(left_list)
-        print(right_list)
+        # print(left_list)
+        # print(right_list)
 
         if message == "":
             message = "exact"
         left_set = set(left_list)
         right_set = set(right_list)
+        top_num = 10
         term_matches = list(left_set.intersection(right_set))
         print(f"{message} term_match_count={len(term_matches)}")
-        print(f"matches={term_matches}")
+        print(f"first {top_num}  matches={term_matches[0:top_num]}")
+
         difference = unique_elements_left(left_list, term_matches)
-        print(f"unique={left_type} ({message} terms):  count={len(difference)} terms={difference}")
+        print(f"unique={left_type} ({message} terms):  count={len(difference)} first {top_num} terms={difference[0:top_num]}")
         list2file(difference, message + "_" + left_type + "_vs_" + right_type + "_unique.txt")
         difference = unique_elements_left(right_list, term_matches)
-        print(f"unique={right_type} ({message} terms):  count={len(difference)} terms={difference}")
+        print(f"unique={right_type} ({message} terms):  count={len(difference)} first {top_num} terms={difference[0:top_num]}")
         list2file(difference, message + "_" + right_type + "_vs_" + left_type + "_unique.txt")
 
 
@@ -399,16 +410,19 @@ def do_stats(ena_cl_obj, mixs_v5_obj, mixs_v6_obj):
     clean_des = "lower case + underscoring spaces and hyphens"
     print(f"Cleaning is: {clean_des}")
 
-    # print("\n======MIXS v5 verses ENA=========")
-    # print(f"mixs_v5 term count={mixs_v5_obj.get_all_term_count()} ena_cl term count={ena_cl_obj.get_all_term_count()}")
-    # various(mixs_v5_obj,ena_cl_obj)
-    #
-    # print("\n======MIXS v6 verses ENA=========")
-    # print(f"mixs_v6 term count={mixs_v6_obj.get_all_term_count()} ena_cl term count={ena_cl_obj.get_all_term_count()}")
-    # various(mixs_v6_obj, ena_cl_obj)
+    print("\n======MIXS v5 verses ENA=========")
+    print(f"mixs_v5 term count={mixs_v5_obj.get_all_term_count()}")
+    print(f"ena_cl term count={ena_cl_obj.get_all_term_count()}\n")
+    various(mixs_v5_obj,ena_cl_obj)
+
+    print("\n======MIXS v6 verses ENA=========")
+    print(f"mixs_v6 term count={mixs_v6_obj.get_all_term_count()}")
+    print(f" ena_cl term count={ena_cl_obj.get_all_term_count()}\n")
+    various(mixs_v6_obj, ena_cl_obj)
 
     print("\n======MIXS v5 verses v6=========")
-    print(f"mixs_v5 term count={mixs_v5_obj.get_all_term_count()} mixs_v6 term count={mixs_v6_obj.get_all_term_count()}")
+    print(f"mixs_v5 term count={mixs_v5_obj.get_all_term_count()}")
+    print(f"mixs_v6 term count={mixs_v6_obj.get_all_term_count()}\n")
     various(mixs_v5_obj, mixs_v6_obj)
 
 def main():
