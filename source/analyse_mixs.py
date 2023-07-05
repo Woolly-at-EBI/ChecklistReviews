@@ -394,10 +394,12 @@ def do_stats(ena_cl_obj, mixs_v5_obj, mixs_v6_obj):
 
         difference = unique_elements_left(left_list, term_matches)
         print(f"unique={left_type} ({message} terms):  count={len(difference)} first {top_num} terms={difference[0:top_num]}")
-        list2file(difference, message + "_" + left_type + "_vs_" + right_type + "_unique.txt")
+        outfile=list2file(difference, message + "_" + left_type + "_vs_" + right_type + "_unique.txt")
+        print(f"output to: {outfile}")
         difference = unique_elements_left(right_list, term_matches)
         print(f"unique={right_type} ({message} terms):  count={len(difference)} first {top_num} terms={difference[0:top_num]}")
-        list2file(difference, message + "_" + right_type + "_vs_" + left_type + "_unique.txt")
+        outfile=list2file(difference, message + "_" + right_type + "_vs_" + left_type + "_unique.txt")
+        print(f"output to: {outfile}")
 
 
     def print_cleaned_term_stats(left_list, left_type, right_list, right_type, message):
