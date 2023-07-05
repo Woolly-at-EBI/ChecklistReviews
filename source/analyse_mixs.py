@@ -18,7 +18,8 @@ import sys
 import os
 import os.path
 import pickle
-import pandas
+import pandas as pd
+import numpy as np
 
 def get_data():
     """
@@ -290,7 +291,7 @@ def get_mixs_v5_dict():
         # https://github.com/GenomicsStandardsConsortium/mixs-legacy/blob/master/mixs5/mixs_v5.xlsx
         xlsx_file = '../data/mixs_v5.xlsx'
 
-        df_mixs5 = pandas.read_excel(xlsx_file, sheet_name = 'environmental_packages')
+        df_mixs5 = pd.read_excel(xlsx_file, sheet_name = 'environmental_packages')
         # print(df_mixs5.head(5))
         # print(df_mixs5.head(5).to_dict(orient = 'records'))
         mixs_v5_simple_dict = df_mixs5.to_dict(orient = 'index')
@@ -356,20 +357,21 @@ def do_stats(ena_cl_obj, mixs_v5_obj, mixs_v6_obj):
             f.write("\n".join(my_list))
         return file_name
 
-    def various(left, right):
+    def various(left, right, stats_dict):
         """
         function to print out the statistics for the lists of terms in the left and right objects,
         is an interlude to allow the print_exact_term_stats to be more simple to just process lists
         :param left: MIXs object
         :param right: MIXs object
-        :return:
+        :return: dict
         """
         message = ""
-        print_exact_term_stats(left.get_all_term_list(), left.type, right.get_all_term_list(), right.type, message)
-        print()
-        print_cleaned_term_stats(left.get_all_term_list(), left.type, right.get_all_term_list(), right.type, message)
 
-    def print_exact_term_stats(left_list, left_type, right_list, right_type, message):
+        print_exact_term_stats(left.get_all_term_list(), left.type, right.get_all_term_list(), right.type, message, stats_dict)
+        print()
+        print_cleaned_term_stats(left.get_all_term_list(), left.type, right.get_all_term_list(), right.type, message, stats_dict)
+
+    def print_exact_term_stats(left_list, left_type, right_list, right_type, message, stats_dict):
         """
 
         :param left_list:
@@ -391,57 +393,92 @@ def do_stats(ena_cl_obj, mixs_v5_obj, mixs_v6_obj):
         term_matches = list(left_set.intersection(right_set))
         print(f"{message} term_match_count={len(term_matches)}")
         print(f"first {top_num}  matches={term_matches[0:top_num]}")
+        if left_type not in stats_dict:
+            stats_dict[left_type] = {}
+        if right_type not in stats_dict[left_type]:
+            stats_dict[left_type][right_type] = {}
+        stats_dict[left_type][right_type][message] = {}
+        stats_dict[left_type][right_type][message]["matches"] = len(term_matches)
 
         difference = unique_elements_left(left_list, term_matches)
         print(f"unique={left_type} ({message} terms):  count={len(difference)} first {top_num} terms={difference[0:top_num]}")
-        outfile=list2file(difference, message + "_" + left_type + "_vs_" + right_type + "_unique.txt")
+        outfile = list2file(difference, message + "_" + left_type + "_vs_" + right_type + "_unique.txt")
+        stats_dict[left_type][right_type][message]["uniq_left"] = len(difference)
         print(f"output to: {outfile}")
         difference = unique_elements_left(right_list, term_matches)
         print(f"unique={right_type} ({message} terms):  count={len(difference)} first {top_num} terms={difference[0:top_num]}")
-        outfile=list2file(difference, message + "_" + right_type + "_vs_" + left_type + "_unique.txt")
+        outfile = list2file(difference, message + "_" + right_type + "_vs_" + left_type + "_unique.txt")
         print(f"output to: {outfile}")
+        stats_dict[left_type][right_type][message]["uniq_right"] = len(difference)
 
 
-    def print_cleaned_term_stats(left_list, left_type, right_list, right_type, message):
+    def print_cleaned_term_stats(left_list, left_type, right_list, right_type, message, stats_dict):
         left_clean_term_list = clean_list(left_list)
         right_clean_term_list = clean_list(right_list)
         message = "harmonised"
-        print_exact_term_stats(left_clean_term_list, left_type, right_clean_term_list, right_type, message)
+        print_exact_term_stats(left_clean_term_list, left_type, right_clean_term_list, right_type, message, stats_dict)
 
-
+    stats_dict = {}
     clean_des = "lower case + underscoring spaces and hyphens"
     print(f"Cleaning is: {clean_des}")
 
     print("\n======MIXS v5 verses ENA=========")
     print(f"mixs_v5 term count={mixs_v5_obj.get_all_term_count()}")
     print(f"ena_cl term count={ena_cl_obj.get_all_term_count()}\n")
-    various(mixs_v5_obj,ena_cl_obj)
+    various(mixs_v5_obj,ena_cl_obj, stats_dict)
 
     print("\n======MIXS v6 verses ENA=========")
     print(f"mixs_v6 term count={mixs_v6_obj.get_all_term_count()}")
     print(f" ena_cl term count={ena_cl_obj.get_all_term_count()}\n")
-    various(mixs_v6_obj, ena_cl_obj)
+    various(mixs_v6_obj, ena_cl_obj, stats_dict)
+    #
+    # print("\n======MIXS v5 verses v6=========")
+    # print(f"mixs_v5 term count={mixs_v5_obj.get_all_term_count()}")
+    # print(f"mixs_v6 term count={mixs_v6_obj.get_all_term_count()}\n")
+    # various(mixs_v5_obj, mixs_v6_obj, stats_dict)
+    #
+    print(stats_dict)
+    return stats_dict
+def unpack(stats_dict):
+    df = pd.DataFrame(columns = ['left_repo', 'right_repo', 'match_type', 'matches', 'uniq_left', 'uniq_right'])
+    #df = df.astype({'match_total': 'int', 'uniq_right_total': 'int', 'uniq_right_total': 'int'})
+    for left_term in stats_dict:
+        print(f"{left_term}")
+        for right_term in stats_dict[left_term]:
+            print(f"\t{right_term}")
+            for match_type in stats_dict[left_term][right_term]:
+                print(f"\t\t{match_type}")
+                temp_dict = {'left_repo': [left_term], 'right_repo': [right_term], 'match_type': [match_type], 'matches':[0], 'uniq_left':[0], 'uniq_right':[0]}
+                for matches in stats_dict[left_term][right_term][match_type]:
+                    print(f"\t\t\t{matches} total={stats_dict[left_term][right_term][match_type][matches]}")
+                    temp_dict[matches] = stats_dict[left_term][right_term][match_type][matches]
+                # df = df.append(temp_dict, ignore_index=True)
+                df_temp = pd.DataFrame.from_dict(temp_dict, orient = 'columns')
+                # df_temp.reset_index(inplace = True)
+                #df.reset_index(inplace = True, drop = True)
+                df = pd.concat([df, df_temp])
+                # df = df.loc[~df.index.duplicated(keep = 'first')]
 
-    print("\n======MIXS v5 verses v6=========")
-    print(f"mixs_v5 term count={mixs_v5_obj.get_all_term_count()}")
-    print(f"mixs_v6 term count={mixs_v6_obj.get_all_term_count()}\n")
-    various(mixs_v5_obj, mixs_v6_obj)
+
+
+    print(df)
 
 def main():
     ena_cl_dict = get_ena_dict()
     ena_cl_obj = mixs(ena_cl_dict, "ena_cl")
-    ena_cl_obj.print_summaries()
+    #ena_cl_obj.print_summaries()
 
     mixs_v5_dict = get_mixs_v5_dict()
     mixs_v5_obj = mixs(mixs_v5_dict, "mixs_v5")
-    mixs_v5_obj.print_summaries()
+    #mixs_v5_obj.print_summaries()
 
     my_dict_v6 = get_mixs_dict()
     mixs_v6_dict = process_dict(my_dict_v6)
     mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6")
-    mixs_v6_obj.print_summaries()
+    #mixs_v6_obj.print_summaries()
 
-    do_stats(ena_cl_obj, mixs_v5_obj, mixs_v6_obj)
+    stats_dict = do_stats(ena_cl_obj, mixs_v5_obj, mixs_v6_obj)
+    unpack(stats_dict)
 
 
 
