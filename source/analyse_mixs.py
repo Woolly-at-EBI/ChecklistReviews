@@ -19,7 +19,12 @@ import os
 import os.path
 import pickle
 import pandas as pd
+pd.set_option('display.max_rows', 500)
+pd.set_option('display.max_columns', 500)
+pd.set_option('display.width', 1000)
+import plotly.express as px
 import numpy as np
+
 
 def get_data():
     """
@@ -399,17 +404,26 @@ def do_stats(ena_cl_obj, mixs_v5_obj, mixs_v6_obj):
             stats_dict[left_type][right_type] = {}
         stats_dict[left_type][right_type][message] = {}
         stats_dict[left_type][right_type][message]["matches"] = len(term_matches)
+        pair = left_type + right_type
+        pair = pair.replace("mixs_", "").replace("ena_cl","_vs_ena").replace("v5v6", "v5_vs_v6")
+        stats_dict[left_type][right_type][message]["pair"] = pair
+
+        print(f"PAIR-{pair}")
+
 
         difference = unique_elements_left(left_list, term_matches)
         print(f"unique={left_type} ({message} terms):  count={len(difference)} first {top_num} terms={difference[0:top_num]}")
         outfile = list2file(difference, message + "_" + left_type + "_vs_" + right_type + "_unique.txt")
         stats_dict[left_type][right_type][message]["uniq_left"] = len(difference)
+        stats_dict[left_type][right_type][message]["left_pc_matched"] = int(len(term_matches)*100/(len(term_matches)+ len(difference)))
         print(f"output to: {outfile}")
         difference = unique_elements_left(right_list, term_matches)
         print(f"unique={right_type} ({message} terms):  count={len(difference)} first {top_num} terms={difference[0:top_num]}")
         outfile = list2file(difference, message + "_" + right_type + "_vs_" + left_type + "_unique.txt")
         print(f"output to: {outfile}")
         stats_dict[left_type][right_type][message]["uniq_right"] = len(difference)
+        stats_dict[left_type][right_type][message]["right_pc_matched"] = int(
+            len(term_matches) * 100 / (len(term_matches) + len(difference)))
 
 
     def print_cleaned_term_stats(left_list, left_type, right_list, right_type, message, stats_dict):
@@ -432,20 +446,21 @@ def do_stats(ena_cl_obj, mixs_v5_obj, mixs_v6_obj):
     print(f" ena_cl term count={ena_cl_obj.get_all_term_count()}\n")
     various(mixs_v6_obj, ena_cl_obj, stats_dict)
     #
-    # print("\n======MIXS v5 verses v6=========")
-    # print(f"mixs_v5 term count={mixs_v5_obj.get_all_term_count()}")
-    # print(f"mixs_v6 term count={mixs_v6_obj.get_all_term_count()}\n")
-    # various(mixs_v5_obj, mixs_v6_obj, stats_dict)
-    #
+    print("\n======MIXS v5 verses v6=========")
+    print(f"mixs_v5 term count={mixs_v5_obj.get_all_term_count()}")
+    print(f"mixs_v6 term count={mixs_v6_obj.get_all_term_count()}\n")
+    various(mixs_v5_obj, mixs_v6_obj, stats_dict)
+
     print(stats_dict)
     return stats_dict
 def unpack(stats_dict):
-    df = pd.DataFrame(columns = ['left_repo', 'right_repo', 'match_type', 'matches', 'uniq_left', 'uniq_right'])
-    #df = df.astype({'match_total': 'int', 'uniq_right_total': 'int', 'uniq_right_total': 'int'})
+    df = pd.DataFrame(columns = ['left_repo', 'right_repo', 'match_type', 'matches', 'uniq_left', 'left_pc_matched', 'uniq_right', 'right_pc_matched'])
+    df = df.astype({'matches': 'int', 'uniq_left': 'int', 'left_pc_matched': 'int', 'uniq_right': 'int', 'right_pc_matched': 'int'})
     for left_term in stats_dict:
         print(f"{left_term}")
         for right_term in stats_dict[left_term]:
             print(f"\t{right_term}")
+
             for match_type in stats_dict[left_term][right_term]:
                 print(f"\t\t{match_type}")
                 temp_dict = {'left_repo': [left_term], 'right_repo': [right_term], 'match_type': [match_type], 'matches':[0], 'uniq_left':[0], 'uniq_right':[0]}
@@ -463,7 +478,25 @@ def unpack(stats_dict):
 
     print(df)
 
+    return df
+def plot_df(df, image_dir):
+    import plotly.io as pio
+    pd.options.plotting.backend = "plotly"
+    pio.renderers.default = "browser"
+    print(df)
+
+    fig = df.plot.bar(x="pair", y="right_pc_matched", color="match_type", text="pair", title="Comparisons of Different Versions of Checklist by Counts of Matching Terms")
+    fig.show()
+    out_file =  image_dir + "matches_table_plot.png"
+    fig.write_image(out_file)
+    return out_file
+
 def main():
+    report_file = "../docs/report.md"
+    image_dir = "../docs/images/"
+    report = open(report_file,"w")
+    print(report.write("# Review of the MIX-S checklists proposed by GSC\n"))
+
     ena_cl_dict = get_ena_dict()
     ena_cl_obj = mixs(ena_cl_dict, "ena_cl")
     #ena_cl_obj.print_summaries()
@@ -478,7 +511,14 @@ def main():
     #mixs_v6_obj.print_summaries()
 
     stats_dict = do_stats(ena_cl_obj, mixs_v5_obj, mixs_v6_obj)
-    unpack(stats_dict)
+    df = unpack(stats_dict)
+
+    outfilename = plot_df(df, image_dir )
+    print(report.write('![Table comparisons](' + outfilename + ')\n\n'))
+    print(report.write(df.to_markdown()))
+
+    print(f"closing {report_file}")
+    report.close()
 
 
 

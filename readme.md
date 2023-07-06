@@ -3,7 +3,7 @@
 created: Peter Woollard 16th May 2023
 
 ## Purpose:
-To enable an efficient review if the MIX-S checklists proposed by GSC
+To enable an efficient review of the v6 MIX-S checklists proposed by GSC
 GSC checklists: https://github.com/GenomicsStandardsConsortium/mixs/tree/main/mixs
 
 The review report is being compiled here:
