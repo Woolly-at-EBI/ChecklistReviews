@@ -27,6 +27,11 @@ pd.set_option('display.width', 1000)
 import plotly.express as px
 import numpy as np
 
+import plotly.io as pio
+
+pio.renderers.default = "browser"
+
+import plotly.express as px
 
 def get_data():
     """
@@ -213,13 +218,13 @@ def process_ena_cl(my_dict):
             # ic(MIXS_review_dict["by_term"])
             # sys.exit()
             for checklist_name in MIXS_review_dict["by_package"]:
-                ic(checklist_name)
+                #ic(checklist_name)
                 # ic(MIXS_review_dict["by_package"][checklist_name])
                 if hasattr(MIXS_review_dict["by_package"][checklist_name], 'field'):
                     MIXS_review_dict["by_package"][checklist_name]['count'] = len(
                         MIXS_review_dict["by_package"][checklist_name]['field'].keys())
-                else:
-                    ic("WARNING: package seems to be missing any fields!", checklist_name)
+                #else:
+                #ic("WARNING: package seems to be missing any fields!", checklist_name)
 
         # print()
         # end of for each checklist
@@ -315,7 +320,7 @@ class mixs:
     #     self.cl_details_dict
 
     def get_term_list_for_package(self, package_cl_name):
-        ic("inside get_term_list_for_package", package_cl_name)
+        # ic("inside get_term_list_for_package", package_cl_name)
         # ic(self.my_dict['by_package'][package_cl_name])
         return list(self.my_dict['by_package'][package_cl_name]['field'].keys())
 
@@ -604,7 +609,7 @@ def compare2termLists(left_term_list, right_term_list, comparisonStatsPackage):
     :param comparisonStatsPackage:
     :return:
     """
-    ic("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    # ic("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
     clean_left_set = cleanList2set(left_term_list)
     # comparisonStatsPackage['left_term_list'] = clean_left_set
@@ -625,7 +630,7 @@ def compare2termLists(left_term_list, right_term_list, comparisonStatsPackage):
     pc_left_of_right = math.floor(
         (len(intersection) * 100) / len(clean_right_set)) / 100  # get it as a 2 dp decimal fraction
     comparisonStatsPackage['pc_left_of_right'] = pc_left_of_right
-    ic(f"{len(clean_left_set)} {len(clean_right_set)} union:{len(union)} intersection:{len(intersection)}  pc_left_of_right:{pc_left_of_right}")
+    # ic(f"{len(clean_left_set)} {len(clean_right_set)} union:{len(union)} intersection:{len(intersection)}  pc_left_of_right:{pc_left_of_right}")
     comparisonStatsPackage['length_left'] = len(clean_left_set)
     comparisonStatsPackage['length_union'] = len(union)
     comparisonStatsPackage['length_intersection'] = len(intersection)
@@ -633,7 +638,7 @@ def compare2termLists(left_term_list, right_term_list, comparisonStatsPackage):
 
 
 def compare2packages(comparison, left_package_name, right_package_name, left_obj, right_obj, comparisonStats):
-    ic(comparison)
+    # ic(comparison)
     com_package_names = left_package_name + "::" + right_package_name
     comparisonStats[comparison]['by_package'][com_package_names] = {}
     comparisonStatsPackage = comparisonStats[comparison]['by_package'][com_package_names]
@@ -646,8 +651,34 @@ def cleanList2set(term_list):
     clean_term_list = clean_list(term_list)
     return (set(clean_term_list))
 
-def processComparisonStats(comparisonStats):
+def plot_pair_df(df):
     """
+
+    :param df:
+    :return:
+    """
+
+    fig = px.scatter(df, x = "pc_left_of_right", y = "length_intersection", color = "short_mixs_v6",
+                     size = 'length_left', hover_data = 'pair')
+    # fig.show()
+    cut_off = 0.2
+    title = "heatmap of fract"
+    df_pc = df[['pc_left_of_right', 'ena','mixs_v6']]
+    # df_pc = df_pc.loc[(df_pc['pc_left_of_right'] >= cut_off)]
+    new_df = df_pc.pivot(index='ena', columns='mixs_v6')['pc_left_of_right']
+    ic(new_df)
+    fig = px.imshow(new_df)
+    fig.show()
+
+    # df_pc = df_pc.loc[(df_pc['pc_left_of_right'] < 0.3)]
+    # new_df = df_pc.pivot(index='ena', columns='mixs_v6')['pc_left_of_right']
+    # ic(new_df)
+    # fig = px.imshow(new_df)
+    # fig.show()
+
+
+def processComparisonStats(comparisonStats):
+    """ processComparisonStats
 
     :param comparisonStats:
     :return:
@@ -661,18 +692,23 @@ def processComparisonStats(comparisonStats):
         # ic(pair)
         sub_dict = comparisonStats[comparison_source]['by_package'][pair]
         pair_list = pair.split('::')
-        sub_dict['left_name'] = pair_list[0]
-        sub_dict['right_name'] = pair_list[1]
+        sub_dict[source_list[0]] = pair_list[0]
+        sub_dict[source_list[1]] = pair_list[1]
         sub_dict['left_source'] = source_list[0]
         sub_dict['right_source'] = source_list[1]
+        sub_dict['pair'] = pair
         # ic(sub_dict)
         reorg_dict.append(sub_dict)
 
     df = pd.DataFrame.from_dict(reorg_dict)
-    ic(df.head())
+    df['short_ena'] = df['ena'].str.extract(r"([A-Za-z]+ [A-Za-z]+ [A-Za-z]+)")
+    df['short_mixs_v6'] = df['mixs_v6'].str.extract(r"([A-Z][a-z]+)")
+    ic(df.head(10))
+    plot_pair_df(df)
+    ic(df['short_ena'].unique())
+    ic(df['short_mixs_v6'].unique())
+    # ic(df['mixs_v6'].unique())
 
-
-    sys.exit()
 
 def compareChecklists(ena_cl_obj, mixs_v6_obj):
     """
@@ -688,16 +724,14 @@ def compareChecklists(ena_cl_obj, mixs_v6_obj):
 
     count = 0
     for left_package_name in ena_cl_obj.get_all_package_list():
-        ic(left_package_name)
+        #ic(left_package_name)
         for right_package_name in mixs_v6_obj.get_all_package_list():
-            if count > 10:
-                break
-            ic(right_package_name)
+            # if count > 10:
+            #     break
+            # ic(right_package_name)
             compare2packages('ena::mixs_v6', left_package_name, right_package_name, ena_cl_obj, mixs_v6_obj,
                          comparisonStats)
             count += 1
-
-
     # ic(comparisonStats)
     processComparisonStats(comparisonStats)
     sys.exit()
