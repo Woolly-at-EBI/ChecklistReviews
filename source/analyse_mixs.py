@@ -595,6 +595,15 @@ def plot_df(df, image_dir):
 
 
 def compare2termLists(left_term_list, right_term_list, comparisonStatsPackage):
+    """
+    does comparison of two term lets, including some simple harmonisation(cleaning)
+    The results are going into the relevant part of a dictionary collecting statistics.
+    currently much is commented out, as did not want to load up the stats dictionary with excessive terms.
+    :param left_term_list:
+    :param right_term_list:
+    :param comparisonStatsPackage:
+    :return:
+    """
     ic("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
     clean_left_set = cleanList2set(left_term_list)
@@ -633,6 +642,69 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
     # ic(ena_cl_obj.get_term_list_for_package(test_ena_cl_name))
     # ic(mixs_v6_obj.get_term_list_for_package(test_mixs_v6_cl_name))
 
+def cleanList2set(term_list):
+    clean_term_list = clean_list(term_list)
+    return (set(clean_term_list))
+
+def processComparisonStats(comparisonStats):
+    """
+
+    :param comparisonStats:
+    :return:
+    """
+
+    reorg_dict = []
+    comparison_source = 'ena::mixs_v6'
+    source_list = comparison_source.split('::')
+
+    for pair in comparisonStats[comparison_source]['by_package']:
+        # ic(pair)
+        sub_dict = comparisonStats[comparison_source]['by_package'][pair]
+        pair_list = pair.split('::')
+        sub_dict['left_name'] = pair_list[0]
+        sub_dict['right_name'] = pair_list[1]
+        sub_dict['left_source'] = source_list[0]
+        sub_dict['right_source'] = source_list[1]
+        # ic(sub_dict)
+        reorg_dict.append(sub_dict)
+
+    df = pd.DataFrame.from_dict(reorg_dict)
+    ic(df.head())
+
+
+    sys.exit()
+
+def compareChecklists(ena_cl_obj, mixs_v6_obj):
+    """
+    Comparing all possible pairs of checklists
+    :param ena_cl_obj:
+    :param mixs_v6_obj:
+    :return:
+    """
+    comparisonStats = {'ena::mixs_v6': {'by_package': {}}}
+
+    # ic(ena_cl_obj.get_all_package_list())
+    # ic(mixs_v6_obj.get_all_package_list())
+
+    count = 0
+    for left_package_name in ena_cl_obj.get_all_package_list():
+        ic(left_package_name)
+        for right_package_name in mixs_v6_obj.get_all_package_list():
+            if count > 10:
+                break
+            ic(right_package_name)
+            compare2packages('ena::mixs_v6', left_package_name, right_package_name, ena_cl_obj, mixs_v6_obj,
+                         comparisonStats)
+            count += 1
+
+
+    # ic(comparisonStats)
+    processComparisonStats(comparisonStats)
+    sys.exit()
+    return comparisonStats
+
+
+
 
 def compareSelectChecklists(ena_cl_obj, mixs_v6_obj):
     comparisonStats = {'ena::mixs_v6': {'by_package': {}}}
@@ -640,9 +712,7 @@ def compareSelectChecklists(ena_cl_obj, mixs_v6_obj):
     # ic(ena_cl_obj.get_all_package_list())
     # ic(mixs_v6_obj.get_all_package_list())
 
-    def cleanList2set(term_list):
-        clean_term_list = clean_list(term_list)
-        return (set(clean_term_list))
+
 
     targets = ["AIR"]
     for target in targets:
@@ -667,7 +737,7 @@ def compareSelectChecklists(ena_cl_obj, mixs_v6_obj):
 
         compare2packages('ena::mixs_v6', test_ena_cl_name, test_mixs_v6_cl_name, ena_cl_obj, mixs_v6_obj,
                          comparisonStats)
-    ic(comparisonStats)
+
 
 
 def main():
@@ -689,7 +759,9 @@ def main():
 
     # get_v6_cl_details
 
-    compareSelectChecklists(ena_cl_obj, mixs_v6_obj)
+    # compareSelectChecklists(ena_cl_obj, mixs_v6_obj)
+    compareChecklists(ena_cl_obj, mixs_v6_obj)
+
 
     ic("early exit")
     sys.exit()
