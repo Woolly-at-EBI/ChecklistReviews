@@ -657,18 +657,49 @@ def plot_pair_df(df):
     :param df:
     :return:
     """
+    #import dash_bio
 
-    fig = px.scatter(df, x = "pc_left_of_right", y = "length_intersection", color = "short_mixs_v6",
-                     size = 'length_left', hover_data = 'pair')
+    #fig = px.scatter(df, x = "pc_left_of_right", y = "length_intersection", color = "short_mixs_v6", size = 'length_left', hover_data = 'pair')
     # fig.show()
     cut_off = 0.2
-    title = "heatmap of fract"
+    title = "Heatmap of Fraction of ENA Checklists Terms in Different MIXS v6 packages"
+    subtitle = '<br><sup>The terms are lightly harmonised before matching e.g. lower cased</sup>'
+    title += subtitle
     df_pc = df[['pc_left_of_right', 'ena','mixs_v6']]
     # df_pc = df_pc.loc[(df_pc['pc_left_of_right'] >= cut_off)]
     new_df = df_pc.pivot(index='ena', columns='mixs_v6')['pc_left_of_right']
     ic(new_df)
-    fig = px.imshow(new_df)
+    fig = px.imshow(new_df, color_continuous_scale='Greens', width=2000, height=1000, aspect='auto', title=title)
+    fig.update_layout(yaxis=dict(title_text="ENA Checklists",
+         tickfont=dict(size=8)),
+                      xaxis = dict(title_text = "MIXs v6 Packages",
+                                  tickfont = dict(size = 8))
+                      )
+    fig.update_layout(title_text = title, title_x = 0.5)
+    fig.update_xaxes(tickangle = 45)
+    fig.update_yaxes(tickangle = 45)
     fig.show()
+    fig.write_image("/Users/woollard/projects/ChecklistReviews/docs/ENAvsMIXSv6_heatmap.jpg")
+
+
+    ic(len(df['ena'].unique()))
+
+    # dash_bio.Clustergram(
+    #     data = new_df,
+    #     column_labels = list(new_df.columns.values),
+    #     row_labels = list(new_df.index),
+    #     height = 800,
+    #     width = 700,
+    #     color_list = {
+    #         'row': ['#636EFA', '#00CC96', '#19D3F3'],
+    #         'col': ['#AB63FA', '#EF553B'],
+    #         'bg': '#506784'
+    #     },
+    #     line_width = 2
+    # )
+
+
+    sys.exit()
 
     # df_pc = df_pc.loc[(df_pc['pc_left_of_right'] < 0.3)]
     # new_df = df_pc.pivot(index='ena', columns='mixs_v6')['pc_left_of_right']
@@ -704,10 +735,38 @@ def processComparisonStats(comparisonStats):
     df['short_ena'] = df['ena'].str.extract(r"([A-Za-z]+ [A-Za-z]+ [A-Za-z]+)")
     df['short_mixs_v6'] = df['mixs_v6'].str.extract(r"([A-Z][a-z]+)")
     ic(df.head(10))
-    plot_pair_df(df)
+
+
+
     ic(df['short_ena'].unique())
     ic(df['short_mixs_v6'].unique())
     # ic(df['mixs_v6'].unique())
+
+    # for each ENA checklist, get the maximum length of intersections
+    new_df = df[['ena', 'length_intersection']].drop_duplicates()
+    ic(new_df.head().to_string(index=False))
+    idx = new_df.groupby(['ena'])['length_intersection'].transform(max) == new_df['length_intersection']
+    print(new_df[idx].to_string(index = False))
+
+    # for each ENA checklist, get the checklists with >= 20% overlap with at least one GSC MIx
+    new_df = df[['ena', 'pc_left_of_right']].drop_duplicates()
+    ic(new_df.head().to_string(index=False))
+    idx = new_df.groupby(['ena'])['pc_left_of_right'].transform(max) == new_df['pc_left_of_right']
+
+    print("each ENA checklist with >= 20% overlap with at least one GSC MIx")
+    tmp_df = new_df[idx].query('pc_left_of_right >= 0.2')
+    print(tmp_df.to_string(index = False))
+    print(f"{tmp_df['ena'].unique()} \ntotal={len(tmp_df['ena'].unique())}")
+
+    print("each ENA checklist with a maximum < 20% overlap with any GSC MIx")
+    tmp_df = new_df[idx].query('pc_left_of_right < 0.2')
+    print(tmp_df.to_string(index = False))
+    print(f"{tmp_df['ena'].unique()} \ntotal={len(tmp_df['ena'].unique())}")
+
+
+
+    sys.exit()
+    plot_pair_df(df)
 
 
 def compareChecklists(ena_cl_obj, mixs_v6_obj):
