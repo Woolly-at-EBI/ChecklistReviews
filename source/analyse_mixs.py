@@ -736,33 +736,84 @@ def processComparisonStats(comparisonStats):
     df['short_mixs_v6'] = df['mixs_v6'].str.extract(r"([A-Z][a-z]+)")
     ic(df.head(10))
 
-
-
     ic(df['short_ena'].unique())
     ic(df['short_mixs_v6'].unique())
     # ic(df['mixs_v6'].unique())
 
+    print("***********************************************************************************************************")
     # for each ENA checklist, get the maximum length of intersections
-    new_df = df[['ena', 'length_intersection']].drop_duplicates()
-    ic(new_df.head().to_string(index=False))
-    idx = new_df.groupby(['ena'])['length_intersection'].transform(max) == new_df['length_intersection']
-    print(new_df[idx].to_string(index = False))
+    sources = ['ena', 'mixs_v6']
+    for source in sources:
+        ic(source)
+        if source == 'ena':
+            target_cols = [source, 'length_intersection']
+        else:
+            target_cols = [source, 'length_intersection', 'short_mixs_v6']
 
-    # for each ENA checklist, get the checklists with >= 20% overlap with at least one GSC MIx
-    new_df = df[['ena', 'pc_left_of_right']].drop_duplicates()
-    ic(new_df.head().to_string(index=False))
-    idx = new_df.groupby(['ena'])['pc_left_of_right'].transform(max) == new_df['pc_left_of_right']
+        new_df = df[target_cols].drop_duplicates()
+        # ic(new_df.head().to_string(index=False))
+        idx = new_df.groupby([source])['length_intersection'].transform(max) == new_df['length_intersection']
+        # print(new_df[idx].to_string(index = False))
 
-    print("each ENA checklist with >= 20% overlap with at least one GSC MIx")
-    tmp_df = new_df[idx].query('pc_left_of_right >= 0.2')
-    print(tmp_df.to_string(index = False))
-    print(f"{tmp_df['ena'].unique()} \ntotal={len(tmp_df['ena'].unique())}")
+        # for each ENA or Mixs checklist, get the checklists with >= 20% overlap with at least one GSC MIx
+        new_df = df
+        target_cols = [source]
+        if source == 'short_mixs_v6':
+            target_cols.append('short_mixs_v6')
+        alltarget_cols = target_cols
+        alltarget_cols.append('pc_left_of_right')
 
-    print("each ENA checklist with a maximum < 20% overlap with any GSC MIx")
-    tmp_df = new_df[idx].query('pc_left_of_right < 0.2')
-    print(tmp_df.to_string(index = False))
-    print(f"{tmp_df['ena'].unique()} \ntotal={len(tmp_df['ena'].unique())}")
+        # idx = new_df.groupby(target_cols)['pc_left_of_right'].transform(max) == new_df['pc_left_of_right']
+        max_df = new_df[alltarget_cols].groupby(target_cols).max().reset_index()
+        #print(max_df.to_string(index = False))
 
+        if source == 'mixs_v6':
+            #print(max_df.head(20).to_string(index = False))
+            #print("max")
+            max_df = new_df[['short_mixs_v6', 'pc_left_of_right']].groupby('short_mixs_v6').max().reset_index().sort_values(by='pc_left_of_right')
+            max_df.rename(columns={"pc_left_of_right": "maxPC_intersection"}, inplace=True)
+            #print(max_df.head(20).to_string(index = False))
+            #print("average(mean)")
+            mean_pc_df = new_df[['short_mixs_v6', 'pc_left_of_right']].groupby('short_mixs_v6').mean().reset_index().sort_values(by='pc_left_of_right')  #  average().reset_index()
+            mean_pc_df.rename(columns = {"pc_left_of_right": "MeanPC_intersection"}, inplace = True)
+            #print(mean_pc_df.head(20).to_string(index = False))
+            mean_ints_df = df[['short_mixs_v6', 'length_intersection']].groupby('short_mixs_v6').mean().reset_index().sort_values(by='length_intersection')  #  average().reset_index()
+            mean_ints_df.rename(columns = {"length_intersection": "MeanLen_intersection"}, inplace = True)
+            #print(mean_ints_df.head(20).to_string(index = False))
+            #print("Count of rows")
+            tmp_df = df[['mixs_v6', 'short_mixs_v6']].drop_duplicates()
+            package_count_df = tmp_df.groupby('short_mixs_v6').count().reset_index()
+            package_count_df.rename(columns = {"mixs_v6": "package_count"}, inplace = True)
+            #print(package_count_df.head(20).to_string(index = False))
+
+            title="Statistics of the MIXS v6 packages with matches from the ENA checklists"
+            print(title)
+            title += "<BR><sub>size=packages count for each collection</sub>"
+            stats_df = max_df.merge(mean_pc_df, on='short_mixs_v6').merge(package_count_df, on='short_mixs_v6')
+            stats_df["maxPC_intersection"] = stats_df["maxPC_intersection"] * 100
+            stats_df = stats_df.astype({'maxPC_intersection': 'int'})
+
+            stats_df["MeanPC_intersection"] = stats_df["MeanPC_intersection"] * 100
+            print(stats_df.head(20).to_string(index = False))
+            fig = px.scatter(stats_df, title=title, x='maxPC_intersection', y='MeanPC_intersection', size='package_count',
+                             color='package_count', text='short_mixs_v6',  color_continuous_scale=px.colors.sequential.Viridis)
+            fig.update_traces(textposition = 'top center')
+            fig.show()
+            fig.write_image("/Users/woollard/projects/ChecklistReviews/docs/ENAvsMIXSv6_ScatterPlot.jpg")
+
+            sys.exit()
+
+
+
+        print(f"each {source} checklist with >= 20% overlap with at least one GSC MIx")
+        tmp_df = max_df.query('pc_left_of_right >= 0.2')
+        # print(tmp_df.to_string(index = False))
+        print(f"{tmp_df[source].unique()} \ntotal={len(tmp_df[source].unique())}")
+
+        print("each {source} checklist with a maximum < 20% overlap with any GSC MIx")
+        tmp_df = max_df.query('pc_left_of_right < 0.2')
+        # print(tmp_df.to_string(index = False))
+        print(f"{tmp_df[source].unique()} \ntotal={len(tmp_df[source].unique())}")
 
 
     sys.exit()
