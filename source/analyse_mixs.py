@@ -33,6 +33,8 @@ pio.renderers.default = "browser"
 
 import plotly.express as px
 
+image_dir = "../docs/images/"
+
 
 def get_data():
     """
@@ -82,6 +84,41 @@ def get_mixs_dict():
 
     return my_dict
 
+def add_term_package_count(my_dict):
+    """
+    for all the term_name's add the package_name and count.
+    slightly verbose, being careful in case the dictionary has already been partially populated.
+
+    :param my_dict:
+    :return: my_dict
+    """
+
+
+    for package_name in my_dict["by_package"]:
+        for term_name in my_dict["by_package"][package_name]["field"]:
+            if term_name in my_dict["by_term"] and 'packages' in my_dict["by_term"][term_name]:
+                my_dict["by_term"][term_name]['packages'].append(package_name)
+                my_dict["by_term"][term_name]['count'] += 1
+            else:
+               if term_name not in my_dict["by_term"]:
+                   my_dict["by_term"][term_name] = {}
+               my_dict["by_term"][term_name]['packages'] = [package_name]
+               my_dict["by_term"][term_name]['count'] = 1
+    my_dict["by_term_count"] = {}
+
+    # now to add by_term_count
+    for term_name in my_dict["by_term"]:
+        my_total = my_dict["by_term"][term_name]['count']
+        if my_total not in my_dict["by_term_count"]:
+            my_dict["by_term_count"][my_total] = {}
+        my_dict["by_term_count"][my_total][term_name] = {}
+        my_dict["by_term_count"][my_total][term_name]['packages'] = my_dict["by_term"][term_name]['packages']
+
+
+    #ic(my_dict["by_term_count"])
+    #sys.exit()
+    return my_dict
+
 
 def print_MIXS_review_dict_stats(MIXS_review_dict):
     """
@@ -94,8 +131,9 @@ def print_MIXS_review_dict_stats(MIXS_review_dict):
         print(f"{checklist_name} field_count={MIXS_review_dict['by_package'][checklist_name]['count']}")
 
 
-def process_dict(my_dict):
+def process_mixs_dict(my_dict):
     """
+    /used for mixs5 at least
 
     :param my_dict:
     :return:
@@ -120,6 +158,7 @@ def process_dict(my_dict):
 
     for top_def in my_dict["$defs"]:
         # print(top_def)
+        package_name = top_def
         printed_top = False
         for second_def in my_dict["$defs"][top_def]:
             if not printed_top and second_def == 'properties':
@@ -139,13 +178,21 @@ def process_dict(my_dict):
                 for third_def in my_dict["$defs"][top_def][second_def]:
                     # print(f"{third_def}", end = ", ")
                     MIXS_review_dict["by_package"][top_def]["field"][third_def] = {}
+                    term_name = third_def
+                    #ic(term_name)
                     # sys.exit()
-                    MIXS_review_dict["by_term"][third_def] = ""
-                MIXS_review_dict["by_package"][top_def]["count"] = len(MIXS_review_dict["by_package"][top_def]["field"])
+                    # if term_name in MIXS_review_dict["by_term"]:
+                    #     MIXS_review_dict["by_term"][term_name]['packages'].append(package_name)
+                    #     MIXS_review_dict["by_term"][term_name]['count'] += 1
+                    # else:
+                    #     MIXS_review_dict["by_term"][term_name] = {'packages': [package_name], 'count': 1}
+
+                MIXS_review_dict["by_package"][package_name]["count"] = len(MIXS_review_dict["by_package"][package_name]["field"])
             else:
                 pass
-    print()
     # ic(MIXS_review_dict)
+
+    MIXS_review_dict = add_term_package_count(MIXS_review_dict)
 
     # print_MIXS_review_dict_stats(MIXS_review_dict)
     return MIXS_review_dict
@@ -195,9 +242,9 @@ def process_ena_cl(my_dict):
                 field_name = field['NAME']
                 # ic(field_name)
 
-                if not hasattr(MIXS_review_dict["by_term"], field_name):
+                if field_name not in MIXS_review_dict["by_term"]:
                     MIXS_review_dict["by_term"][field_name] = {}
-                if not hasattr(MIXS_review_dict["by_package"][checklist_name]['field'], field_name):
+                if field_name not in MIXS_review_dict["by_package"][checklist_name]['field']:
                     MIXS_review_dict["by_package"][checklist_name]['field'][field_name] = {}
                 # MIXS_review_dict["by_package"][checklist_name][field_name]['name'] = field_name
 
@@ -221,7 +268,7 @@ def process_ena_cl(my_dict):
             for checklist_name in MIXS_review_dict["by_package"]:
                 # ic(checklist_name)
                 # ic(MIXS_review_dict["by_package"][checklist_name])
-                if hasattr(MIXS_review_dict["by_package"][checklist_name], 'field'):
+                if 'field' in MIXS_review_dict["by_package"][checklist_name]:
                     MIXS_review_dict["by_package"][checklist_name]['count'] = len(
                         MIXS_review_dict["by_package"][checklist_name]['field'].keys())
                 # else:
@@ -230,6 +277,10 @@ def process_ena_cl(my_dict):
         # print()
         # end of for each checklist
         # sys.exit()
+
+    MIXS_review_dict = add_term_package_count(MIXS_review_dict)
+
+
     return MIXS_review_dict
 
 
@@ -287,6 +338,56 @@ class mixs:
         my_list = list(self.my_dict['by_term'].keys())
         my_list.sort()
         return my_list
+
+    def get_terms_by_freq(self):
+        """
+
+        :return:  40: {'term_count_with_freq': 2,
+                        'terms': dict_keys(['collection date', 'geographic location (country and/or sea)'])}}
+        """
+        ic()
+
+        my_just_freq = {}
+
+        if "by_term_count" not in self.my_dict:
+            add_term_package_count(self.my_dict)
+
+        freq_keys = sorted(self.my_dict["by_term_count"].keys(), reverse = True)
+        #ic("KEYS=+++++++++++++++++++++++++")
+        #ic(freq_keys)
+        #ic(self.my_dict["by_term_count"][40].keys())
+        for freq_key in freq_keys:
+            my_just_freq[freq_key] = {}
+            my_just_freq[freq_key]["terms"] = list(self.my_dict["by_term_count"][freq_key].keys())
+            my_just_freq[freq_key]["term_count_with_freq"] = len(my_just_freq[freq_key]["terms"] )
+        #ic(my_just_freq)
+        #sys.exit()
+        return my_just_freq
+
+        #
+        #
+        # total_count =0
+        # # my_dict["by_term_count"]
+        # ic(self.my_dict["by_term_count"].keys())
+        # ic(self.my_dict["by_term_count"])
+        #
+        # return (self.my_dict["by_term_count"])
+
+    def get_term_top(self,first_number):
+        """
+        get_term_top - get the first 10, or whatever in terms of frequency
+        :param first_number:
+        :return:
+        """
+        my_just_freq = self.get_terms_by_freq()
+        total_found_so_far = 0
+        top_terms = []
+        for freq_key in my_just_freq:
+            ic(my_just_freq[freq_key]["terms"])
+            top_terms.extend(list(my_just_freq[freq_key]["terms"]))
+            if len(top_terms) >= first_number:
+                return top_terms[0:first_number-1]
+        return top_terms
 
     def get_all_term_count(self):
         return (len(self.my_dict['by_term'].keys()))
@@ -787,7 +888,9 @@ def processComparisonStats(comparisonStats):
 
     ic(df['short_ena'].unique())
     ic(df['short_mixs_v6'].unique())
-    # ic(df['mixs_v6'].unique())
+    # ic(df['mixs_v6'].unique()
+    #
+    #
 
     print("***********************************************************************************************************")
     # for each ENA checklist, get the maximum length of intersections
@@ -818,8 +921,6 @@ def processComparisonStats(comparisonStats):
 
         if source == 'mixs_v6':
             mixs6_matches_plots(df, new_df)
-
-            sys.exit()
 
         print(f"each {source} checklist with >= 20% overlap with at least one GSC MIx")
         tmp_df = max_df.query('pc_left_of_right >= 0.2')
@@ -859,62 +960,95 @@ def compareChecklists(ena_cl_obj, mixs_v6_obj):
             count += 1
     # ic(comparisonStats)
     processComparisonStats(comparisonStats)
-    sys.exit()
+
     return comparisonStats
 
+#
+# def compareSelectChecklists(ena_cl_obj, mixs_v6_obj):
+#     comparisonStats = {'ena::mixs_v6': {'by_package': {}}}
+#
+#     # ic(ena_cl_obj.get_all_package_list())
+#     # ic(mixs_v6_obj.get_all_package_list())
+#
+#     targets = ["AIR"]
+#     for target in targets:
+#         ic(target)
+#         target_lower = target.lower()
+#         # for target in ena_cl_obj.get_all_package_list():
+#         ena_res = [i for i in ena_cl_obj.get_all_package_list() if target_lower in i.lower()]
+#         ic(ena_res)
+#
+#         mixs_v6_res = [i for i in mixs_v6_obj.get_all_package_list() if target_lower in i.lower()]
+#         # ic(mixs_v6_res)
+#
+#         # get the first off the list
+#         if len(ena_res) > 0 and len(mixs_v6_res) > 0:
+#             test_ena_cl_name = ' '.join([ena_res[0]])
+#             test_mixs_v6_cl_name = ' '.join([mixs_v6_res[0]])
+#             print(f"test_ena_cl_name={test_ena_cl_name} test_mixs_v6_cl_name={test_mixs_v6_cl_name}")
+#         else:
+#             ic("ERROR: no matching checklists found in at least one of ENA or mixs_v6")
+#             continue
+#         ic("==================================================================")
+#
+#         compare2packages('ena::mixs_v6', test_ena_cl_name, test_mixs_v6_cl_name, ena_cl_obj, mixs_v6_obj,
+#                          comparisonStats)
 
-def compareSelectChecklists(ena_cl_obj, mixs_v6_obj):
-    comparisonStats = {'ena::mixs_v6': {'by_package': {}}}
+def analyse_term_matches(ena_cl_obj, mixs_v6_obj):
+    """
+    badly named.
+    Actually analysing the term frequencies.
 
-    # ic(ena_cl_obj.get_all_package_list())
-    # ic(mixs_v6_obj.get_all_package_list())
+    :param ena_cl_obj:
+    :param mixs_v6_obj:
+    :return:
+    """
 
-    targets = ["AIR"]
-    for target in targets:
-        ic(target)
-        target_lower = target.lower()
-        # for target in ena_cl_obj.get_all_package_list():
-        ena_res = [i for i in ena_cl_obj.get_all_package_list() if target_lower in i.lower()]
-        ic(ena_res)
+    def get_df(obj):
+        df = pd.DataFrame.from_dict(obj.get_terms_by_freq(), orient = 'index')
+        df["term_freq"] = df.index
+        df = df.sort_values(by=["term_freq"], ascending=False)
+        df = df[["term_freq", "term_count_with_freq", "terms"]]
+        #print(df.head(10).to_string(index=False))
+        blankIndex=[''] * len(df)
+        df.index=blankIndex
+        print(df.head(10))
+        return df
 
-        mixs_v6_res = [i for i in mixs_v6_obj.get_all_package_list() if target_lower in i.lower()]
-        ic(mixs_v6_res)
+    def do_hist(df,source):
+        df['term_frequency'] = df.index
+        ic(df.head())
+        title = "Frequency of terms in the " + source + " Checklist"
+        fig = px.histogram(df, x = 'term_frequency', y = 'term_count_with_freq', nbins = 50, title = title)
+        fig.show()
+        fig.write_image(image_dir + 'term_frequency_hist_' + source + '.jpg')
 
-        # get the first off the list
-        if len(ena_res) > 0 and len(mixs_v6_res) > 0:
-            test_ena_cl_name = ' '.join([ena_res[0]])
-            test_mixs_v6_cl_name = ' '.join([mixs_v6_res[0]])
-            print(f"test_ena_cl_name={test_ena_cl_name} test_mixs_v6_cl_name={test_mixs_v6_cl_name}")
-        else:
-            ic("ERROR: no matching checklists found in at least one of ENA or mixs_v6")
-            continue
-        ic("==================================================================")
+    ena_df = get_df(ena_cl_obj)
+    #do_hist(ena_df, 'ENA')
 
-        compare2packages('ena::mixs_v6', test_ena_cl_name, test_mixs_v6_cl_name, ena_cl_obj, mixs_v6_obj,
-                         comparisonStats)
+    mixs_v6_df = get_df(mixs_v6_obj)
+    #do_hist(mixs_v6_df, 'MIXS_v6')
+
+
 
 
 def main():
     report_file = "../docs/report.md"
-    image_dir = "../docs/images/"
+
     report = open(report_file, "w")
     print(report.write("# Review of the MIX-S checklists proposed by GSC\n"))
 
     ena_cl_dict = get_ena_dict()
     ena_cl_obj = mixs(ena_cl_dict, "ena_cl")
-    # ena_cl_obj.get_all_checklists()
-    # ena_cl_obj.print_summaries()
-
-    # get_ena_cl_details(ena_cl_dict)
 
     my_dict_v6 = get_mixs_dict()
-    mixs_v6_dict = process_dict(my_dict_v6)
+    mixs_v6_dict = process_mixs_dict(my_dict_v6)
     mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6")
-
-    # get_v6_cl_details
 
     # compareSelectChecklists(ena_cl_obj, mixs_v6_obj)
     compareChecklists(ena_cl_obj, mixs_v6_obj)
+
+    analyse_term_matches(ena_cl_obj, mixs_v6_obj)
 
     ic("early exit")
     sys.exit()
