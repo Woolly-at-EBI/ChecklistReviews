@@ -425,7 +425,96 @@ class mixs:
         # ic("inside get_term_list_for_package", package_cl_name)
         # ic(self.my_dict['by_package'][package_cl_name])
         return list(self.my_dict['by_package'][package_cl_name]['field'].keys())
+# **********************************************************************************
 
+class COMPARISONS:
+    """ not yet a proper or even rich object...
+        if more development, need to improve this.
+        (still it served a purpose and broke up an excessively long routine)
+    """
+    def __init__(self, comparisonStats,comparison_source):
+        ic()
+        ic(comparison_source)
+        self.source_list = []
+        self.source_list = comparison_source.split('::')
+        self.comparisonStats = comparisonStats
+        self.ingest()
+
+    def left_source(self):
+        return self.source_list[0]
+    def right_source(self):
+        return self.source_list[1]
+
+
+    def put_reorg_df(self, df):
+        self.reorg_df = df
+        self.reorg_df['short_ena'] = df['ena'].str.extract(r"([A-Za-z]+ [A-Za-z]+ [A-Za-z]+)")
+        self.reorg_df['short_mixs_v6'] = df['mixs_v6'].str.extract(r"([A-Z][a-z]+)")
+
+    def process_max_intersection_len(self):
+        """
+
+        :return:
+        """
+        # for each ENA checklist, get the maximum length of intersections
+        #sources = source_list  # ['ena', 'mixs_v6']
+        for source in self.source_list:
+            ic(source)
+            if source == 'ena':
+                target_cols = [source, 'length_intersection']
+            else:
+                target_cols = [source, 'length_intersection', 'short_mixs_v6']
+            new_df = self.reorg_df[target_cols].drop_duplicates()
+            # ic(new_df.head().to_string(index=False))
+
+            # for each ENA or Mixs checklist, get the checklists with >= 20% overlap with at least one GSC MIx
+            new_df = self.reorg_df
+            target_cols = [source]
+            if source == 'short_mixs_v6':
+                target_cols.append('short_mixs_v6')
+            alltarget_cols = target_cols
+            alltarget_cols.append('pc_left_of_right')
+
+            max_df = new_df[alltarget_cols].groupby(target_cols).max().reset_index()
+            # print(max_df.to_string(index = False))
+
+            if source == 'mixs_v6':
+                mixs6_matches_plots(self.reorg_df, new_df)
+            print(f"each {source} checklist with >= 20% overlap with at least one GSC MIx")
+            tmp_df = max_df.query('pc_left_of_right >= 0.2')
+            # print(tmp_df.to_string(index = False))
+            print(f"{tmp_df[source].unique()} \ntotal={len(tmp_df[source].unique())}")
+            print("each {source} checklist with a maximum < 20% overlap with any GSC MIx")
+            tmp_df = max_df.query('pc_left_of_right < 0.2')
+            # print(tmp_df.to_string(index = False))
+            print(f"{tmp_df[source].unique()} \ntotal={len(tmp_df[source].unique())}")
+            # end of process_max_intersection_len
+
+    def ingest(self):
+        reorg_dict = []
+        comparison_source = 'ena::mixs_v6'
+        comparisonStats = self.comparisonStats
+
+        for pair in comparisonStats[comparison_source]['by_package']:
+            # ic(pair)
+            sub_dict = comparisonStats[comparison_source]['by_package'][pair]
+            pair_list = pair.split('::')
+            sub_dict[self.left_source()] = pair_list[0]
+            sub_dict[self.right_source()] = pair_list[1]
+            sub_dict['left_source'] = self.left_source()
+            sub_dict['right_source'] = self.right_source()
+            sub_dict['pair'] = pair
+            # ic(sub_dict)
+            reorg_dict.append(sub_dict)
+        self.put_reorg_df(pd.DataFrame.from_dict(reorg_dict))
+        df = self.reorg_df
+        ic(df.head(5))
+        ic(df['short_ena'].unique())
+        ic(df['short_mixs_v6'].unique())
+
+        self.process_max_intersection_len()
+
+# **********************************************************************************
 
 def get_ena_dict():
     # curl https://www.ebi.ac.uk/ena/browser/api/xml/ERC000001-ERC000999 | xq >  ENA_checklists.json
@@ -649,6 +738,7 @@ def do_stats(ena_cl_obj, mixs_v5_obj, mixs_v6_obj):
     print(f" ena_cl term count={ena_cl_obj.get_all_term_count()}\n")
     various(mixs_v6_obj, ena_cl_obj, stats_dict)
 
+
     #
     print("\n======MIXS v5 verses v6=========")
     print(f"mixs_v5 term count={mixs_v5_obj.get_all_term_count()}")
@@ -660,6 +750,11 @@ def do_stats(ena_cl_obj, mixs_v5_obj, mixs_v6_obj):
 
 
 def unpack(stats_dict):
+    """
+    left term is ENA and right term is MIXS
+    :param stats_dict:
+    :return:
+    """
     df = pd.DataFrame(
         columns = ['left_repo', 'right_repo', 'match_type', 'matches', 'uniq_left', 'left_pc_matched', 'uniq_right',
                    'right_pc_matched'])
@@ -683,6 +778,9 @@ def unpack(stats_dict):
                 # df.reset_index(inplace = True, drop = True)
                 df = pd.concat([df, df_temp])
                 # df = df.loc[~df.index.duplicated(keep = 'first')]
+
+    print(stats_dict)
+    sys.exit()
     print(df)
     return df
 
@@ -854,86 +952,19 @@ def mixs6_matches_plots(df, new_df):
                      color = 'package_count', text = 'short_mixs_v6',
                      color_continuous_scale = px.colors.sequential.Viridis)
     fig.update_traces(textposition = 'top center')
-    fig.show()
+    #fig.show()
     fig.write_image("/Users/woollard/projects/ChecklistReviews/docs/ENAvsMIXSv6_ScatterPlot.jpg")
 
 
-def processComparisonStats(comparisonStats):
+def processComparisonStats(comparisonStats, pair):
     """ processComparisonStats
 
     :param comparisonStats:
-    :return:
+    :return: comparison_obj
     """
+    comparison_obj = COMPARISONS(comparisonStats, pair)
+    return comparison_obj
 
-    reorg_dict = []
-    comparison_source = 'ena::mixs_v6'
-    source_list = comparison_source.split('::')
-
-    for pair in comparisonStats[comparison_source]['by_package']:
-        # ic(pair)
-        sub_dict = comparisonStats[comparison_source]['by_package'][pair]
-        pair_list = pair.split('::')
-        sub_dict[source_list[0]] = pair_list[0]
-        sub_dict[source_list[1]] = pair_list[1]
-        sub_dict['left_source'] = source_list[0]
-        sub_dict['right_source'] = source_list[1]
-        sub_dict['pair'] = pair
-        # ic(sub_dict)
-        reorg_dict.append(sub_dict)
-
-    df = pd.DataFrame.from_dict(reorg_dict)
-    df['short_ena'] = df['ena'].str.extract(r"([A-Za-z]+ [A-Za-z]+ [A-Za-z]+)")
-    df['short_mixs_v6'] = df['mixs_v6'].str.extract(r"([A-Z][a-z]+)")
-    ic(df.head(10))
-
-    ic(df['short_ena'].unique())
-    ic(df['short_mixs_v6'].unique())
-    # ic(df['mixs_v6'].unique()
-    #
-    #
-
-    print("***********************************************************************************************************")
-    # for each ENA checklist, get the maximum length of intersections
-    sources = ['ena', 'mixs_v6']
-    for source in sources:
-        ic(source)
-        if source == 'ena':
-            target_cols = [source, 'length_intersection']
-        else:
-            target_cols = [source, 'length_intersection', 'short_mixs_v6']
-
-        new_df = df[target_cols].drop_duplicates()
-        # ic(new_df.head().to_string(index=False))
-        idx = new_df.groupby([source])['length_intersection'].transform(max) == new_df['length_intersection']
-        # print(new_df[idx].to_string(index = False))
-
-        # for each ENA or Mixs checklist, get the checklists with >= 20% overlap with at least one GSC MIx
-        new_df = df
-        target_cols = [source]
-        if source == 'short_mixs_v6':
-            target_cols.append('short_mixs_v6')
-        alltarget_cols = target_cols
-        alltarget_cols.append('pc_left_of_right')
-
-        # idx = new_df.groupby(target_cols)['pc_left_of_right'].transform(max) == new_df['pc_left_of_right']
-        max_df = new_df[alltarget_cols].groupby(target_cols).max().reset_index()
-        # print(max_df.to_string(index = False))
-
-        if source == 'mixs_v6':
-            mixs6_matches_plots(df, new_df)
-
-        print(f"each {source} checklist with >= 20% overlap with at least one GSC MIx")
-        tmp_df = max_df.query('pc_left_of_right >= 0.2')
-        # print(tmp_df.to_string(index = False))
-        print(f"{tmp_df[source].unique()} \ntotal={len(tmp_df[source].unique())}")
-
-        print("each {source} checklist with a maximum < 20% overlap with any GSC MIx")
-        tmp_df = max_df.query('pc_left_of_right < 0.2')
-        # print(tmp_df.to_string(index = False))
-        print(f"{tmp_df[source].unique()} \ntotal={len(tmp_df[source].unique())}")
-
-    sys.exit()
-    plot_pair_df(df)
 
 
 def compareChecklists(ena_cl_obj, mixs_v6_obj):
@@ -942,8 +973,19 @@ def compareChecklists(ena_cl_obj, mixs_v6_obj):
     :param ena_cl_obj:
     :param mixs_v6_obj:
     :return:
+
+    {'ena::mixs_v6':
+       {'by_package':
+         {'COMPARE-ECDC-EFSA pilot food-associated reporting standard::Agriculture':
+            {'pc_left_of_right': 0.0, 'length_left': 7, 'length_union': 173,
+            'length_intersection': 1, 'ena': 'COMPARE-ECDC-EFSA pilot food-associated reporting standard',
+            'mixs_v6': 'Agriculture',
+            'left_source': 'ena', 'right_source': 'mixs_v6',
+            'pair': 'COMPARE-ECDC-EFSA pilot food-associated reporting standard::Agriculture'},
+
     """
-    comparisonStats = {'ena::mixs_v6': {'by_package': {}}}
+    pair_string = 'ena::mixs_v6'
+    comparisonStats = {pair_string: {'by_package': {}}}
 
     # ic(ena_cl_obj.get_all_package_list())
     # ic(mixs_v6_obj.get_all_package_list())
@@ -955,13 +997,15 @@ def compareChecklists(ena_cl_obj, mixs_v6_obj):
             # if count > 10:
             #     break
             # ic(right_package_name)
-            compare2packages('ena::mixs_v6', left_package_name, right_package_name, ena_cl_obj, mixs_v6_obj,
+
+            compare2packages(pair_string, left_package_name, right_package_name, ena_cl_obj, mixs_v6_obj,
                              comparisonStats)
             count += 1
     # ic(comparisonStats)
-    processComparisonStats(comparisonStats)
+    comparison_obj = processComparisonStats(comparisonStats, pair_string )
 
-    return comparisonStats
+
+    return comparison_obj
 
 #
 # def compareSelectChecklists(ena_cl_obj, mixs_v6_obj):
@@ -1046,7 +1090,10 @@ def main():
     mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6")
 
     # compareSelectChecklists(ena_cl_obj, mixs_v6_obj)
-    compareChecklists(ena_cl_obj, mixs_v6_obj)
+    comparison_obj = compareChecklists(ena_cl_obj, mixs_v6_obj)
+    print(comparison_obj.comparisonStats)
+    ic("early exit")
+    sys.exit()
 
     analyse_term_matches(ena_cl_obj, mixs_v6_obj)
 
