@@ -1038,6 +1038,38 @@ def compareChecklists(ena_cl_obj, mixs_v6_obj):
 #         compare2packages('ena::mixs_v6', test_ena_cl_name, test_mixs_v6_cl_name, ena_cl_obj, mixs_v6_obj,
 #                          comparisonStats)
 
+
+def do_pairwise_term_matches(left_term_list, right_term_list):
+
+    def clean_term(term):
+        clean = term.lower().replace(' ', '_').replace('-', '_').replace('/', '_').removesuffix("_")
+        return clean
+
+    ic()
+    clean_hash = {}
+    pairwise_matches = {}
+    for left in left_term_list:
+        clean_hash[left] = clean_term(left)
+    for right in right_term_list:
+        clean_hash[right] = clean_term(right)
+
+    pairwise_matches["left"] = {}
+    for left in left_term_list:
+        pairwise_matches["left"][left] = {}
+        for right in right_term_list:
+            if left == right:
+                if 'exact' not in pairwise_matches["left"][left]:
+                    pairwise_matches["left"][left]["exact"] = ""
+                pairwise_matches["left"][left]["exact"][right] = ""
+            elif clean_hash[left] == clean_hash[right]:
+                if 'harmonised' not in pairwise_matches["left"][left]:
+                      pairwise_matches["left"][left]["harmonised"] = ""
+                pairwise_matches["left"][left]["harmonised"][right] = ""
+
+
+    sys.exit()
+
+
 def analyse_term_matches(ena_cl_obj, mixs_v6_obj):
     """
     badly named.
@@ -1067,6 +1099,8 @@ def analyse_term_matches(ena_cl_obj, mixs_v6_obj):
         fig.show()
         fig.write_image(image_dir + 'term_frequency_hist_' + source + '.jpg')
 
+    do_pairwise_term_matches(ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list())
+
     ena_df = get_df(ena_cl_obj)
     #do_hist(ena_df, 'ENA')
 
@@ -1092,8 +1126,7 @@ def main():
     # compareSelectChecklists(ena_cl_obj, mixs_v6_obj)
     comparison_obj = compareChecklists(ena_cl_obj, mixs_v6_obj)
     print(comparison_obj.comparisonStats)
-    ic("early exit")
-    sys.exit()
+
 
     analyse_term_matches(ena_cl_obj, mixs_v6_obj)
 
