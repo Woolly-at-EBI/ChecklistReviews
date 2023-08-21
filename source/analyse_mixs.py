@@ -33,6 +33,7 @@ pio.renderers.default = "browser"
 
 import plotly.express as px
 
+
 def get_data():
     """
 
@@ -218,13 +219,13 @@ def process_ena_cl(my_dict):
             # ic(MIXS_review_dict["by_term"])
             # sys.exit()
             for checklist_name in MIXS_review_dict["by_package"]:
-                #ic(checklist_name)
+                # ic(checklist_name)
                 # ic(MIXS_review_dict["by_package"][checklist_name])
                 if hasattr(MIXS_review_dict["by_package"][checklist_name], 'field'):
                     MIXS_review_dict["by_package"][checklist_name]['count'] = len(
                         MIXS_review_dict["by_package"][checklist_name]['field'].keys())
-                #else:
-                #ic("WARNING: package seems to be missing any fields!", checklist_name)
+                # else:
+                # ic("WARNING: package seems to be missing any fields!", checklist_name)
 
         # print()
         # end of for each checklist
@@ -396,7 +397,7 @@ def get_mixs_v5_dict():
                     continue
                 else:
                     mixs_v5_dict['by_package'][checklist_env_package_name][package_item][key] = \
-                    mixs_v5_simple_dict[index][key]
+                        mixs_v5_simple_dict[index][key]
                     mixs_v5_dict['by_term'][package_item][key] = mixs_v5_simple_dict[index][key]
             # print(mixs_v5_dict)
         # sys.exit()
@@ -647,9 +648,11 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
     # ic(ena_cl_obj.get_term_list_for_package(test_ena_cl_name))
     # ic(mixs_v6_obj.get_term_list_for_package(test_mixs_v6_cl_name))
 
+
 def cleanList2set(term_list):
     clean_term_list = clean_list(term_list)
     return (set(clean_term_list))
+
 
 def plot_pair_df(df):
     """
@@ -657,30 +660,30 @@ def plot_pair_df(df):
     :param df:
     :return:
     """
-    #import dash_bio
+    # import dash_bio
 
-    #fig = px.scatter(df, x = "pc_left_of_right", y = "length_intersection", color = "short_mixs_v6", size = 'length_left', hover_data = 'pair')
+    # fig = px.scatter(df, x = "pc_left_of_right", y = "length_intersection", color = "short_mixs_v6", size = 'length_left', hover_data = 'pair')
     # fig.show()
     cut_off = 0.2
     title = "Heatmap of Fraction of ENA Checklists Terms in Different MIXS v6 packages"
     subtitle = '<br><sup>The terms are lightly harmonised before matching e.g. lower cased</sup>'
     title += subtitle
-    df_pc = df[['pc_left_of_right', 'ena','mixs_v6']]
+    df_pc = df[['pc_left_of_right', 'ena', 'mixs_v6']]
     # df_pc = df_pc.loc[(df_pc['pc_left_of_right'] >= cut_off)]
-    new_df = df_pc.pivot(index='ena', columns='mixs_v6')['pc_left_of_right']
+    new_df = df_pc.pivot(index = 'ena', columns = 'mixs_v6')['pc_left_of_right']
     ic(new_df)
-    fig = px.imshow(new_df, color_continuous_scale='Greens', width=2000, height=1000, aspect='auto', title=title)
-    fig.update_layout(yaxis=dict(title_text="ENA Checklists",
-         tickfont=dict(size=8)),
+    fig = px.imshow(new_df, color_continuous_scale = 'Greens', width = 2000, height = 1000, aspect = 'auto',
+                    title = title)
+    fig.update_layout(yaxis = dict(title_text = "ENA Checklists",
+                                   tickfont = dict(size = 8)),
                       xaxis = dict(title_text = "MIXs v6 Packages",
-                                  tickfont = dict(size = 8))
+                                   tickfont = dict(size = 8))
                       )
     fig.update_layout(title_text = title, title_x = 0.5)
     fig.update_xaxes(tickangle = 45)
     fig.update_yaxes(tickangle = 45)
     fig.show()
     fig.write_image("/Users/woollard/projects/ChecklistReviews/docs/ENAvsMIXSv6_heatmap.jpg")
-
 
     ic(len(df['ena'].unique()))
 
@@ -698,7 +701,6 @@ def plot_pair_df(df):
     #     line_width = 2
     # )
 
-
     sys.exit()
 
     # df_pc = df_pc.loc[(df_pc['pc_left_of_right'] < 0.3)]
@@ -706,6 +708,53 @@ def plot_pair_df(df):
     # ic(new_df)
     # fig = px.imshow(new_df)
     # fig.show()
+
+
+def mixs6_matches_plots(df, new_df):
+    """
+    :param df:
+    :param new_df:
+    :return:
+    """
+
+    # print(max_df.head(20).to_string(index = False))
+    # print("max")
+    max_df = new_df[['short_mixs_v6', 'pc_left_of_right']].groupby('short_mixs_v6').max().reset_index().sort_values(
+        by = 'pc_left_of_right')
+    max_df.rename(columns = {"pc_left_of_right": "maxPC_intersection"}, inplace = True)
+    # print(max_df.head(20).to_string(index = False))
+    # print("average(mean)")
+    mean_pc_df = new_df[['short_mixs_v6', 'pc_left_of_right']].groupby(
+        'short_mixs_v6').mean().reset_index().sort_values(by = 'pc_left_of_right')  # average().reset_index()
+    mean_pc_df.rename(columns = {"pc_left_of_right": "MeanPC_intersection"}, inplace = True)
+    # print(mean_pc_df.head(20).to_string(index = False))
+    mean_ints_df = df[['short_mixs_v6', 'length_intersection']].groupby(
+        'short_mixs_v6').mean().reset_index().sort_values(by = 'length_intersection')  # average().reset_index()
+    mean_ints_df.rename(columns = {"length_intersection": "MeanLen_intersection"}, inplace = True)
+    # print(mean_ints_df.head(20).to_string(index = False))
+    # print("Count of rows")
+    tmp_df = df[['mixs_v6', 'short_mixs_v6']].drop_duplicates()
+    package_count_df = tmp_df.groupby('short_mixs_v6').count().reset_index()
+    package_count_df.rename(columns = {"mixs_v6": "package_count"}, inplace = True)
+    # print(package_count_df.head(20).to_string(index = False))
+    stats_df = max_df.merge(mean_pc_df, on = 'short_mixs_v6').merge(package_count_df, on = 'short_mixs_v6')
+
+    title = "Statistics of the MIXS v6 packages with matches from the ENA checklists"
+    print(title)
+    title += "<BR><sub>size=packages count for each collection</sub>"
+
+    stats_df["maxPC_intersection"] = stats_df["maxPC_intersection"] * 100
+    stats_df = stats_df.astype({'maxPC_intersection': 'int'})
+
+    stats_df["MeanPC_intersection"] = stats_df["MeanPC_intersection"] * 100
+    print(stats_df.head(20).to_string(index = False))
+    fig = px.scatter(stats_df, title = title, x = 'maxPC_intersection', y = 'MeanPC_intersection',
+                     size = 'package_count',
+                     color = 'package_count', text = 'short_mixs_v6',
+                     color_continuous_scale = px.colors.sequential.Viridis)
+    fig.update_traces(textposition = 'top center')
+    fig.show()
+    fig.write_image("/Users/woollard/projects/ChecklistReviews/docs/ENAvsMIXSv6_ScatterPlot.jpg")
 
 
 def processComparisonStats(comparisonStats):
@@ -765,45 +814,12 @@ def processComparisonStats(comparisonStats):
 
         # idx = new_df.groupby(target_cols)['pc_left_of_right'].transform(max) == new_df['pc_left_of_right']
         max_df = new_df[alltarget_cols].groupby(target_cols).max().reset_index()
-        #print(max_df.to_string(index = False))
+        # print(max_df.to_string(index = False))
 
         if source == 'mixs_v6':
-            #print(max_df.head(20).to_string(index = False))
-            #print("max")
-            max_df = new_df[['short_mixs_v6', 'pc_left_of_right']].groupby('short_mixs_v6').max().reset_index().sort_values(by='pc_left_of_right')
-            max_df.rename(columns={"pc_left_of_right": "maxPC_intersection"}, inplace=True)
-            #print(max_df.head(20).to_string(index = False))
-            #print("average(mean)")
-            mean_pc_df = new_df[['short_mixs_v6', 'pc_left_of_right']].groupby('short_mixs_v6').mean().reset_index().sort_values(by='pc_left_of_right')  #  average().reset_index()
-            mean_pc_df.rename(columns = {"pc_left_of_right": "MeanPC_intersection"}, inplace = True)
-            #print(mean_pc_df.head(20).to_string(index = False))
-            mean_ints_df = df[['short_mixs_v6', 'length_intersection']].groupby('short_mixs_v6').mean().reset_index().sort_values(by='length_intersection')  #  average().reset_index()
-            mean_ints_df.rename(columns = {"length_intersection": "MeanLen_intersection"}, inplace = True)
-            #print(mean_ints_df.head(20).to_string(index = False))
-            #print("Count of rows")
-            tmp_df = df[['mixs_v6', 'short_mixs_v6']].drop_duplicates()
-            package_count_df = tmp_df.groupby('short_mixs_v6').count().reset_index()
-            package_count_df.rename(columns = {"mixs_v6": "package_count"}, inplace = True)
-            #print(package_count_df.head(20).to_string(index = False))
-
-            title="Statistics of the MIXS v6 packages with matches from the ENA checklists"
-            print(title)
-            title += "<BR><sub>size=packages count for each collection</sub>"
-            stats_df = max_df.merge(mean_pc_df, on='short_mixs_v6').merge(package_count_df, on='short_mixs_v6')
-            stats_df["maxPC_intersection"] = stats_df["maxPC_intersection"] * 100
-            stats_df = stats_df.astype({'maxPC_intersection': 'int'})
-
-            stats_df["MeanPC_intersection"] = stats_df["MeanPC_intersection"] * 100
-            print(stats_df.head(20).to_string(index = False))
-            fig = px.scatter(stats_df, title=title, x='maxPC_intersection', y='MeanPC_intersection', size='package_count',
-                             color='package_count', text='short_mixs_v6',  color_continuous_scale=px.colors.sequential.Viridis)
-            fig.update_traces(textposition = 'top center')
-            fig.show()
-            fig.write_image("/Users/woollard/projects/ChecklistReviews/docs/ENAvsMIXSv6_ScatterPlot.jpg")
+            mixs6_matches_plots(df, new_df)
 
             sys.exit()
-
-
 
         print(f"each {source} checklist with >= 20% overlap with at least one GSC MIx")
         tmp_df = max_df.query('pc_left_of_right >= 0.2')
@@ -814,7 +830,6 @@ def processComparisonStats(comparisonStats):
         tmp_df = max_df.query('pc_left_of_right < 0.2')
         # print(tmp_df.to_string(index = False))
         print(f"{tmp_df[source].unique()} \ntotal={len(tmp_df[source].unique())}")
-
 
     sys.exit()
     plot_pair_df(df)
@@ -834,13 +849,13 @@ def compareChecklists(ena_cl_obj, mixs_v6_obj):
 
     count = 0
     for left_package_name in ena_cl_obj.get_all_package_list():
-        #ic(left_package_name)
+        # ic(left_package_name)
         for right_package_name in mixs_v6_obj.get_all_package_list():
             # if count > 10:
             #     break
             # ic(right_package_name)
             compare2packages('ena::mixs_v6', left_package_name, right_package_name, ena_cl_obj, mixs_v6_obj,
-                         comparisonStats)
+                             comparisonStats)
             count += 1
     # ic(comparisonStats)
     processComparisonStats(comparisonStats)
@@ -848,15 +863,11 @@ def compareChecklists(ena_cl_obj, mixs_v6_obj):
     return comparisonStats
 
 
-
-
 def compareSelectChecklists(ena_cl_obj, mixs_v6_obj):
     comparisonStats = {'ena::mixs_v6': {'by_package': {}}}
 
     # ic(ena_cl_obj.get_all_package_list())
     # ic(mixs_v6_obj.get_all_package_list())
-
-
 
     targets = ["AIR"]
     for target in targets:
@@ -883,7 +894,6 @@ def compareSelectChecklists(ena_cl_obj, mixs_v6_obj):
                          comparisonStats)
 
 
-
 def main():
     report_file = "../docs/report.md"
     image_dir = "../docs/images/"
@@ -905,7 +915,6 @@ def main():
 
     # compareSelectChecklists(ena_cl_obj, mixs_v6_obj)
     compareChecklists(ena_cl_obj, mixs_v6_obj)
-
 
     ic("early exit")
     sys.exit()
