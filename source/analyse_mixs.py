@@ -33,6 +33,7 @@ import plotly.io as pio
 pio.renderers.default = "browser"
 
 import plotly.express as px
+from wordcloud import WordCloud
 
 image_dir = "../docs/images/"
 
@@ -340,6 +341,15 @@ class mixs:
         my_list.sort()
         return my_list
 
+    def get_terms_with_freq(self):
+        """
+                :return:  {'Food_Product_type': 12,
+                                        'Food_source': 12,
+                                        'HACCP_term': 36,
+        """
+        self.get_terms_by_freq()
+        return self.term_with_freq
+
     def get_terms_by_freq(self):
         """
 
@@ -347,11 +357,14 @@ class mixs:
                         'terms': dict_keys(['collection date', 'geographic location (country and/or sea)'])}}
         """
         ic()
+        if hasattr(self, 'my_just_freq'):
+            return self.my_just_freq
 
         my_just_freq = {}
-
         if "by_term_count" not in self.my_dict:
             add_term_package_count(self.my_dict)
+
+        self.term_with_freq = {}
 
         freq_keys = sorted(self.my_dict["by_term_count"].keys(), reverse = True)
         #ic("KEYS=+++++++++++++++++++++++++")
@@ -361,9 +374,14 @@ class mixs:
             my_just_freq[freq_key] = {}
             my_just_freq[freq_key]["terms"] = list(self.my_dict["by_term_count"][freq_key].keys())
             my_just_freq[freq_key]["term_count_with_freq"] = len(my_just_freq[freq_key]["terms"] )
+            for term in my_just_freq[freq_key]["terms"]:
+                self.term_with_freq[term] = freq_key
         #ic(my_just_freq)
         #sys.exit()
-        return my_just_freq
+
+
+        self.my_just_freq = my_just_freq
+        return self.my_just_freq
 
         #
         #
@@ -484,11 +502,11 @@ class COMPARISONS:
             print(f"each {source} checklist with >= 20% overlap with at least one GSC MIx")
             tmp_df = max_df.query('pc_left_of_right >= 0.2')
             # print(tmp_df.to_string(index = False))
-            print(f"{tmp_df[source].unique()} \ntotal={len(tmp_df[source].unique())}")
+            #print(f"{tmp_df[source].unique()} \ntotal={len(tmp_df[source].unique())}")
             print("each {source} checklist with a maximum < 20% overlap with any GSC MIx")
             tmp_df = max_df.query('pc_left_of_right < 0.2')
             # print(tmp_df.to_string(index = False))
-            print(f"{tmp_df[source].unique()} \ntotal={len(tmp_df[source].unique())}")
+            #print(f"{tmp_df[source].unique()} \ntotal={len(tmp_df[source].unique())}")
             # end of process_max_intersection_len
 
     def ingest(self):
@@ -1124,6 +1142,9 @@ class pairwise_term_matches:
             self.left_harmonised_matching_list = left_ordered_list
             self.right_harmonised_matching_list = right_ordered_list
 
+        self.right_all_matches_set = self.right_exact_matched_set
+        self.right_all_matches_set.union(self.left_harmonised_matched_set)
+
     def get_clean_hash(self):
         clean_hash = {}
         pairwise_matches = {}
@@ -1141,14 +1162,19 @@ class pairwise_term_matches:
         return df
 
 
-def do_pairwise_term_matches(pair_string, left_term_list, right_term_list):
+def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, mixs_v6_obj):
     """
     making use of sets as sets don't allow duplicates
     :param pair_string:  # left_list_name '::' right_list_name
     :param left_term_list:
     :param right_term_list:
+    :param mixs_v6_obj:
     :return: pairwise_obj:
     """
+    ic()
+    ic(pair_string)
+    ic(left_term_list)
+    ic(right_term_list)
     pairwise_obj = pairwise_term_matches(pair_string, left_term_list, right_term_list)
     # ic(pairwise_matches)
     ic(len(left_term_list))
@@ -1163,6 +1189,44 @@ def do_pairwise_term_matches(pair_string, left_term_list, right_term_list):
 
     print("Exact Matches")
     print(sorted(pairwise_obj.left_exact_matched_set))
+    ic(mixs_v6_obj.type)
+
+    print("mixs_v6 Terms without matches, these are the most frequent")
+    #ic(mixs_v6_obj.get_terms_by_freq())
+    mixsv6_all_match_freq = mixs_v6_obj.get_terms_with_freq()
+    #df = pd.DataFrame(list(zip(self.left_harmonised_matching_list, self.right_harmonised_matching_list)),
+    #                  columns = [self.left_name, self.right_name]).sort_values(self.left_name)
+
+    mixsv6_no_match_freq = { "by_freq": {}, "by_term": {}}
+    for right in pairwise_obj.right_not_matched_set:
+        mixsv6_no_match_freq["by_term"][right] = mixsv6_all_match_freq[right]
+        ic(right)
+        freq = mixsv6_all_match_freq[right]
+        if freq not in mixsv6_no_match_freq["by_freq"]:
+            mixsv6_no_match_freq["by_freq"][freq] = []
+        #ic(type(mixsv6_no_match_freq["by_freq"][freq]))
+        #ic(type(right))
+        mixsv6_no_match_freq["by_freq"][freq].append(right)
+
+    ic(mixsv6_no_match_freq["by_term"])
+
+    df = pd.DataFrame.from_dict(mixsv6_no_match_freq["by_term"], orient='index',columns=["frequency"])
+    df["term"] = df.index
+    df = df.sort_values("frequency", ascending = False)
+    df = df[["term", "frequency"]]
+    print(df.head(10).to_string(justify='left', index=False))
+
+    #doing wordcoud
+    text_freq_dict=df.head(10).to_dict()
+    ic()
+    ic(text_freq_dict)
+    wordcloud = WordCloud(min_word_length = 3,
+                          background_color = 'white')
+    wordcloud.generate_from_frequencies(text_freq_dict)
+    plt.imshow(wordcloud, interpolation = 'bilinear')
+    plt.axis('off')
+    plt.show()
+
     sys.exit()
 
     print("Harmonised Matches")
@@ -1201,7 +1265,7 @@ def analyse_term_matches(ena_cl_obj, mixs_v6_obj):
         fig.write_image(image_dir + 'term_frequency_hist_' + source + '.jpg')
 
     pair_string = ena_cl_obj.type + "::" + mixs_v6_obj.type
-    do_pairwise_term_matches(pair_string, ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list())
+    do_pairwise_term_matches(pair_string, ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list(), mixs_v6_obj)
 
     ena_df = get_df(ena_cl_obj)
     #do_hist(ena_df, 'ENA')
@@ -1227,7 +1291,7 @@ def main():
 
     # compareSelectChecklists(ena_cl_obj, mixs_v6_obj)
     comparison_obj = compareChecklists(ena_cl_obj, mixs_v6_obj)
-    print(comparison_obj.comparisonStats)
+    #print(comparison_obj.comparisonStats)
 
 
     analyse_term_matches(ena_cl_obj, mixs_v6_obj)
