@@ -1039,90 +1039,96 @@ def compareChecklists(ena_cl_obj, mixs_v6_obj):
 #         compare2packages('ena::mixs_v6', test_ena_cl_name, test_mixs_v6_cl_name, ena_cl_obj, mixs_v6_obj,
 #                          comparisonStats)
 
+def clean_term(term):
+    # ic(term)
+    clean = term.lower().replace(' ', '_').replace('-', '_').replace('/', '_').removesuffix("_")
+    return clean
+
+
+class pairwise_term_matches:
+    def __init__(self,left_term_list, right_term_list):
+
+        self.left_term_list = left_term_list
+        self.right_term_list = right_term_list
+        ic()
+
+        clean_hash = self.get_clean_hash()
+        ic(clean_hash)
+
+        pairwise_matches = { 'left': {"exact": {}, "harmonised": {}, "no_matches": {}}, 'right': {"no_matches": {}}}
+        left_pairwise_matches = pairwise_matches["left"]
+        right_pairwise_matches = pairwise_matches["right"]
+        self.right_exact_matched_set = set()
+        self.left_exact_matched_set = set()
+        self.right_harmonised_matched_set = set()
+        self.left_harmonised_matched_set = set()
+        self.right_not_matched_set = set()
+        self.left_not_matched_set = set()
+
+        for left in left_term_list:
+            exact_matches_found = False
+            harmonised_matches_found = False
+            left_pairwise_matches["exact"][left] = {}
+            left_pairwise_matches["harmonised"][left] = {}
+            for right in right_term_list:
+                right_match_found = False
+                if left == right:
+                    left_pairwise_matches["exact"][left][right] = ""
+                    exact_matches_found = True
+                    self.right_exact_matched_set.add(right)
+                    self.left_exact_matched_set.add(left)
+                elif clean_hash[left] == clean_hash[right]:
+                    left_pairwise_matches["harmonised"][left][right] = ""
+                    harmonised_matches_found = True
+                    self.right_harmonised_matched_set.add(right)
+                    self.left_harmonised_matched_set.add(left)
+            if not exact_matches_found:
+                del left_pairwise_matches["exact"][left]
+            elif not harmonised_matches_found:
+                del left_pairwise_matches["harmonised"][left]
+            if not exact_matches_found and not harmonised_matches_found:
+                left_pairwise_matches["no_matches"][left] = ""
+                self.left_not_matched_set.add(left)
+
+        #some terms may be classified as harmonised as well as exact, so resolving that.
+        self.left_exact_matched_set.difference_update(self.left_harmonised_matched_set)
+        self.right_exact_matched_set.difference_update(self.right_harmonised_matched_set)
+
+        self.right_not_matched_set = set(right_term_list)
+        self.right_not_matched_set.difference_update(self.right_exact_matched_set)
+        self.right_not_matched_set.difference_update(self.right_harmonised_matched_set)
+
+    def get_clean_hash(self):
+        clean_hash = {}
+        pairwise_matches = {}
+        for left in self.left_term_list:
+            clean_hash[left] = clean_term(left)
+        for right in self.right_term_list:
+            clean_hash[right] = clean_term(right)
+        self.clean_hash = clean_hash
+        return self.clean_hash
+
 
 def do_pairwise_term_matches(left_term_list, right_term_list):
     """
     making use of sets as sets don't allow duplicates
     :param left_term_list:
     :param right_term_list:
-    :return:
+    :return: pairwise_obj
     """
-
-    def clean_term(term):
-        #ic(term)
-        clean = term.lower().replace(' ', '_').replace('-', '_').replace('/', '_').removesuffix("_")
-        return clean
-
-    ic()
-    clean_hash = {}
-    pairwise_matches = {}
-    for left in left_term_list:
-        clean_hash[left] = clean_term(left)
-    for right in right_term_list:
-        clean_hash[right] = clean_term(right)
-
-    ic(clean_hash)
-
-    pairwise_matches = { 'left': {"exact": {}, "harmonised": {}, "no_matches": {}}, 'right': {"no_matches": {}}}
-
-    left_pairwise_matches = pairwise_matches["left"]
-    right_pairwise_matches = pairwise_matches["right"]
-    right_exact_matched_set = set()
-    left_exact_matched_set = set()
-    right_harmonised_matched_set = set()
-    left_harmonised_matched_set = set()
-    right_not_matched_set = set()
-    left_not_matched_set = set()
-    right_all_matched_set = set()
-
-    for left in left_term_list:
-        exact_matches_found = False
-        harmonised_matches_found = False
-        left_pairwise_matches["exact"][left] = {}
-        left_pairwise_matches["harmonised"][left] = {}
-        for right in right_term_list:
-            right_match_found = False
-            if left == right:
-                left_pairwise_matches["exact"][left][right] = ""
-                exact_matches_found = True
-                right_exact_matched_set.add(right)
-                left_exact_matched_set.add(left)
-            elif clean_hash[left] == clean_hash[right]:
-                left_pairwise_matches["harmonised"][left][right] = ""
-                harmonised_matches_found = True
-                right_harmonised_matched_set.add(right)
-                left_harmonised_matched_set.add(left)
-        if not exact_matches_found:
-            del left_pairwise_matches["exact"][left]
-        elif not harmonised_matches_found:
-            del left_pairwise_matches["harmonised"][left]
-        if not exact_matches_found and not harmonised_matches_found:
-            left_pairwise_matches["no_matches"][left] = ""
-            left_not_matched_set.add(left)
-
-    #some terms may be classified as harmonised as well as exact, so resolving that.
-    left_exact_matched_set.difference_update(left_harmonised_matched_set)
-    right_exact_matched_set.difference_update(right_harmonised_matched_set)
-    ic(len(right_term_list))
-    right_not_matched_set = set(right_term_list)
-    right_not_matched_set = set(right_not_matched_set.difference_update(right_exact_matched_set))
-    right_not_matched_set = set(right_not_matched_set.difference_update(right_harmonised_matched_set))
-    ic(len(right_not_matched_set))
-
-    sys.exit()
-    
-            
-    #ic(pairwise_matches)
+    pairwise_obj = pairwise_term_matches(left_term_list, right_term_list)
+    # ic(pairwise_matches)
     ic(len(left_term_list))
-    ic(len(left_exact_matched_set))
-    ic(len(left_harmonised_matched_set))
-    ic(len(left_not_matched_set))
+    ic(len(pairwise_obj.left_exact_matched_set))
+    ic(len(pairwise_obj.left_harmonised_matched_set))
+    ic(len(pairwise_obj.left_not_matched_set))
 
     ic(len(right_term_list))
-    ic(len(right_exact_matched_set))
-    ic(len(right_harmonised_matched_set))
-    ic(len(right_not_matched_set))
-    sys.exit()
+    ic(len(pairwise_obj.right_exact_matched_set))
+    ic(len(pairwise_obj.right_harmonised_matched_set))
+    ic(len(pairwise_obj.right_not_matched_set))
+
+    return pairwise_obj
 
 
 def analyse_term_matches(ena_cl_obj, mixs_v6_obj):
