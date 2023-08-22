@@ -1046,16 +1046,25 @@ def clean_term(term):
 
 
 class pairwise_term_matches:
-    def __init__(self,left_term_list, right_term_list):
+    """pairwise_term_matches object as simple object orientated to reduce complexity and saves passing a big hash.
+
+    """
+    def process_names(self,pair_string):
+        self.pair_string = pair_string
+        ic(pair_string)
+        pair_source = pair_string.split('::')
+        self.left_name = pair_source[0]
+        self.right_name = pair_source[1]
+
+    def __init__(self, pair_string, left_term_list, right_term_list):
+        self.process_names(pair_string)
 
         self.left_term_list = left_term_list
         self.right_term_list = right_term_list
-        ic()
-
         clean_hash = self.get_clean_hash()
-        ic(clean_hash)
 
         pairwise_matches = { 'left': {"exact": {}, "harmonised": {}, "no_matches": {}}, 'right': {"no_matches": {}}}
+        self.pairwise_matches = pairwise_matches
         left_pairwise_matches = pairwise_matches["left"]
         right_pairwise_matches = pairwise_matches["right"]
         self.right_exact_matched_set = set()
@@ -1091,12 +1100,29 @@ class pairwise_term_matches:
                 self.left_not_matched_set.add(left)
 
         #some terms may be classified as harmonised as well as exact, so resolving that.
-        self.left_exact_matched_set.difference_update(self.left_harmonised_matched_set)
-        self.right_exact_matched_set.difference_update(self.right_harmonised_matched_set)
+        self.left_harmonised_matched_set.difference_update(self.left_exact_matched_set)
+        self.right_harmonised_matched_set.difference_update(self.right_exact_matched_set)
 
         self.right_not_matched_set = set(right_term_list)
         self.right_not_matched_set.difference_update(self.right_exact_matched_set)
         self.right_not_matched_set.difference_update(self.right_harmonised_matched_set)
+
+        #left_pairwise_matches["exact"][left] = {}
+        #left_pairwise_matches["harmonised"][left] = {}
+        self.set_harmonised_matches()
+
+
+    def set_harmonised_matches(self):
+        ic()
+
+        left_ordered_list = []
+        right_ordered_list = []
+        for left in self.left_harmonised_matched_set:
+            left_ordered_list.append(left)
+            right = ', '.join(list(self.pairwise_matches["left"]["harmonised"][left].keys()))
+            right_ordered_list.append(right)
+            self.left_harmonised_matching_list = left_ordered_list
+            self.right_harmonised_matching_list = right_ordered_list
 
     def get_clean_hash(self):
         clean_hash = {}
@@ -1108,15 +1134,22 @@ class pairwise_term_matches:
         self.clean_hash = clean_hash
         return self.clean_hash
 
+    def get_harmonised_match_df(self):
+        df = pd.DataFrame(list(zip(self.left_harmonised_matching_list, self.right_harmonised_matching_list)),
+                          columns = [self.left_name, self.right_name]).sort_values(self.left_name)
 
-def do_pairwise_term_matches(left_term_list, right_term_list):
+        return df
+
+
+def do_pairwise_term_matches(pair_string, left_term_list, right_term_list):
     """
     making use of sets as sets don't allow duplicates
+    :param pair_string:  # left_list_name '::' right_list_name
     :param left_term_list:
     :param right_term_list:
-    :return: pairwise_obj
+    :return: pairwise_obj:
     """
-    pairwise_obj = pairwise_term_matches(left_term_list, right_term_list)
+    pairwise_obj = pairwise_term_matches(pair_string, left_term_list, right_term_list)
     # ic(pairwise_matches)
     ic(len(left_term_list))
     ic(len(pairwise_obj.left_exact_matched_set))
@@ -1127,6 +1160,13 @@ def do_pairwise_term_matches(left_term_list, right_term_list):
     ic(len(pairwise_obj.right_exact_matched_set))
     ic(len(pairwise_obj.right_harmonised_matched_set))
     ic(len(pairwise_obj.right_not_matched_set))
+
+    print("Exact Matches")
+    print(sorted(pairwise_obj.left_exact_matched_set))
+    sys.exit()
+
+    print("Harmonised Matches")
+    print(pairwise_obj.get_harmonised_match_df().to_string(index = False))
 
     return pairwise_obj
 
@@ -1160,7 +1200,8 @@ def analyse_term_matches(ena_cl_obj, mixs_v6_obj):
         fig.show()
         fig.write_image(image_dir + 'term_frequency_hist_' + source + '.jpg')
 
-    do_pairwise_term_matches(ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list())
+    pair_string = ena_cl_obj.type + "::" + mixs_v6_obj.type
+    do_pairwise_term_matches(pair_string, ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list())
 
     ena_df = get_df(ena_cl_obj)
     #do_hist(ena_df, 'ENA')
