@@ -650,8 +650,8 @@ def generate_clean_dict(my_list):
         clean_dict[clean_term] = my_list[pos]
         raw_dict[my_list[pos]] = clean_term
         pos += 1
-    print(clean_dict)
-    print(raw_dict)
+    # print(clean_dict)
+    # print(raw_dict)
     return clean_dict, raw_dict
 
 
@@ -905,7 +905,17 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
         print(f"\n\tlength_right={comparisonStatsPackage['length_right']}", end = "")
         print(f"\n\tpc_left_of_right={comparisonStatsPackage['pc_left_of_right']*100}%")
 
-    def term_comparison_df(left_obj, right_obj, left_package_name, right_package_name):
+    def create_term_comparison_df(left_obj, right_obj, left_package_name, right_package_name):
+        """
+        given the above objects, runs the comparison functions for the desired 2 packages
+        returns a dataframe summarising any matches. The match_type can be exact or harmonised.
+        Harmonised is a very simple clean of the terms, it is not doing abbreviations etc. yet.
+        :param left_obj:
+        :param right_obj:
+        :param left_package_name:
+        :param right_package_name:
+        :return:  df[["left_term", "match_type", "match"]]
+        """
         print("=============================================================================")
         ic()
         print("====" + left_obj.type + "====")
@@ -922,7 +932,6 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
                                                            comparisonStatsPackage)
 
         my_dict = { }
-
         left_list = sorted(left_obj.get_term_list_for_package(left_package_name))
         left_clean_dict, left_raw_dict = generate_clean_dict(left_list)
         right_term_list = right_obj.get_term_list_for_package(right_package_name)
@@ -940,23 +949,22 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
                     my_dict[left_term]["match"] = right_clean_dict[left_clean]
                 else:
                     my_dict[left_term]["match_type"] = "harmonised"
-                    my_dict[left_term]["match"] =  right_clean_dict[left_clean]
+                    my_dict[left_term]["match"] = right_clean_dict[left_clean]
             elif left_term in core_comparisonStatsPackage["clean_intersection_set"]:
-                print(left_term)
                 if left_term in core_term_list:
-                    my_dict[left_term]["match_type"]= "exact"
+                    my_dict[left_term]["match_type"] = "exact"
                     my_dict[left_term]["match"] = core_clean_dict[left_clean]
                 else:
                     my_dict[left_term]["match_type"] = "harmonised"
                     my_dict[left_term]["match"] = core_clean_dict[left_clean]
 
-        print(my_dict)
+
         df = pd.DataFrame.from_dict(my_dict, orient='index')
         df["left_term"] = df.index
-        df = df[["left_term","match_type", "match"]]
-        print(df)
+        df = df[["left_term", "match_type", "match"]]
 
-        sys.exit()
+
+        return df
 
 
 
@@ -978,7 +986,9 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
     comparisonStatsPackage = compare2termLists(left_obj.get_term_list_for_package(left_package_name), right_obj.get_term_list_for_package("Core"), comparisonStatsPackage)
     print(f"Intersection = {comparisonStatsPackage['clean_intersection_set']}")
 
-    term_comparison_df(left_obj, right_obj, left_package_name, right_package_name)
+    term_comparison_df = create_term_comparison_df(left_obj, right_obj, left_package_name, right_package_name)
+    print(term_comparison_df.to_string(justify='left', index=False))
+
 
 def cleanList2set(term_list):
     clean_term_list = clean_list(term_list)
