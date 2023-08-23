@@ -27,13 +27,14 @@ pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 import plotly.express as px
 import numpy as np
+import matplotlib.pyplot as plt
 
 import plotly.io as pio
 
 pio.renderers.default = "browser"
 
 import plotly.express as px
-from wordcloud import WordCloud
+# from wordcloud import WordCloud
 
 image_dir = "../docs/images/"
 
@@ -1162,6 +1163,26 @@ class pairwise_term_matches:
         return df
 
 
+# def do_textWordCloud(df, title):
+#     # doing wordcloud for the text
+#     text_freq_dict = df.to_dict()
+#     ic()
+#     ic(text_freq_dict)
+#
+#     wordcloud = WordCloud(min_word_length = 3, width = 1200, height = 1000,
+#                           background_color = 'white')
+#     wordcloud.generate_from_frequencies(frequencies = text_freq_dict['frequency'])
+#     plt.imshow(wordcloud, interpolation = 'bilinear')
+#     plt.axis('off')
+#     plt.title(title)
+#     plt.rcParams['figure.figsize'] = [15, 15]  # for square canvas
+#     plt.rcParams['figure.subplot.left'] = 0
+#     plt.rcParams['figure.subplot.bottom'] = 0
+#     plt.rcParams['figure.subplot.right'] = 1
+#     plt.rcParams['figure.subplot.top'] = 1
+#     # plt.show()
+#     plt.savefig(image_dir + "mixsv6_wordcloud.png")
+
 def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, mixs_v6_obj):
     """
     making use of sets as sets don't allow duplicates
@@ -1214,18 +1235,12 @@ def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, mixs_
     df["term"] = df.index
     df = df.sort_values("frequency", ascending = False)
     df = df[["term", "frequency"]]
-    print(df.head(10).to_string(justify='left', index=False))
+    print(df.head(100).to_string(justify='left', index=False))
 
-    #doing wordcoud
-    text_freq_dict=df.head(10).to_dict()
-    ic()
-    ic(text_freq_dict)
-    wordcloud = WordCloud(min_word_length = 3,
-                          background_color = 'white')
-    wordcloud.generate_from_frequencies(text_freq_dict)
-    plt.imshow(wordcloud, interpolation = 'bilinear')
-    plt.axis('off')
-    plt.show()
+    title = "Terms in MIXSv6 not matching ENA terms,\n( sized by the number of packages they occur in )"
+
+    # do_textWordCloud(df, title)
+
 
     sys.exit()
 
