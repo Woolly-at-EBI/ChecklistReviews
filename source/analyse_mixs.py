@@ -618,12 +618,14 @@ def get_mixs_v5_dict():
     return mixs_v5_dict
 
 
+
+
 def clean_list(my_list):
     """
-    function to do some simple cleaning on textual lists.
-    e.g. make lower case and use underscore as the main delimiter.
-    :param my_list:
-    :return: clean_list
+        function to do some simple cleaning on textual lists.
+        e.g. make lower case and use underscore as the main delimiter.
+        :param my_list:
+        :return: clean_list
     """
     term_list_clean = list(map(str.lower, my_list))
     term_list_clean = [s.replace(' ', '_') for s in term_list_clean]
@@ -631,6 +633,28 @@ def clean_list(my_list):
     term_list_clean = [s.replace('/', '_') for s in term_list_clean]
     term_list_clean = [s.removesuffix("_") for s in term_list_clean]
     return term_list_clean
+
+
+def generate_clean_dict(my_list):
+    """
+    re-uses the clean_list to keep it consistent
+    :param my_list:
+    :return: clean_dict, raw_dict
+    a hash of clean term as the index, and original term as the value and vice versa
+    """
+    my_clean_list = clean_list(my_list)
+    clean_dict = {}
+    raw_dict = {}
+    pos=0
+    for clean_term in my_clean_list:
+        clean_dict[clean_term] = my_list[pos]
+        raw_dict[my_list[pos]] = clean_term
+        pos += 1
+    print(clean_dict)
+    print(raw_dict)
+    return clean_dict, raw_dict
+
+
 
 
 def unique_elements_left(left_list, term_matches):
@@ -826,10 +850,22 @@ def compare2termLists(left_term_list, right_term_list, comparisonStatsPackage):
     currently much is commented out, as did not want to load up the stats dictionary with excessive terms.
     :param left_term_list:
     :param right_term_list:
-    :param comparisonStatsPackage:
+    :param comparisonStatsPackage:  # is optional
     :return:
+
+    comparisonStatsPackage['length_union']
+    comparisonStatsPackage['length_intersection']
+    comparisonStatsPackage['clean_intersection_set']
+    comparisonStatsPackage['left_diff_set']
+    comparisonStatsPackage['right_diff_set']
+    comparisonStatsPackage['pc_left_of_right']
+    comparisonStatsPackage['length_left']
+    comparisonStatsPackage['length_right']
     """
     # ic("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+
+    if not comparisonStatsPackage:
+        comparisonStatsPackage = {}
 
     clean_left_set = cleanList2set(left_term_list)
     # comparisonStatsPackage['left_term_list'] = clean_left_set
@@ -838,9 +874,8 @@ def compare2termLists(left_term_list, right_term_list, comparisonStatsPackage):
     union = clean_right_set.union(clean_left_set)
     # comparisonStatsPackage['union_term_list'] = union
 
-    intersection = clean_right_set.intersection(clean_left_set)
+    clean_intersection = clean_right_set.intersection(clean_left_set)
     # comparisonStatsPackage['intersection_term_list'] = intersection
-    # ic(intersection)
     left_diff = clean_left_set.difference(clean_right_set)
     # comparisonStatsPackage['left_diff_list'] = left_diff
 
@@ -848,25 +883,102 @@ def compare2termLists(left_term_list, right_term_list, comparisonStatsPackage):
     right_diff = clean_right_set.difference(clean_left_set)
     # ic(right_diff)
     pc_left_of_right = math.floor(
-        (len(intersection) * 100) / len(clean_right_set)) / 100  # get it as a 2 dp decimal fraction
+        (len(clean_intersection) * 100) / len(clean_right_set)) / 100  # get it as a 2 dp decimal fraction
     comparisonStatsPackage['pc_left_of_right'] = pc_left_of_right
     # ic(f"{len(clean_left_set)} {len(clean_right_set)} union:{len(union)} intersection:{len(intersection)}  pc_left_of_right:{pc_left_of_right}")
     comparisonStatsPackage['length_left'] = len(clean_left_set)
+    comparisonStatsPackage['length_right'] = len(clean_right_set)
     comparisonStatsPackage['length_union'] = len(union)
-    comparisonStatsPackage['length_intersection'] = len(intersection)
+    comparisonStatsPackage['length_clean_intersection'] = len(clean_intersection)
+    comparisonStatsPackage['clean_intersection_set'] = clean_intersection
+    comparisonStatsPackage['left_diff_set'] = left_diff
+    comparisonStatsPackage['right_diff_set'] = right_diff
     return comparisonStatsPackage
 
 
 def compare2packages(comparison, left_package_name, right_package_name, left_obj, right_obj, comparisonStats):
+
+    def print_minimal_stats(comparisonStatsPackage):
+        print(f"Minimal_stats:\n\tlength_intersection={comparisonStatsPackage['length_clean_intersection']}", end="")
+        print(f"\n\tlength_union={comparisonStatsPackage['length_union']}", end="")
+        print(f"\n\tlength_left={comparisonStatsPackage['length_left']}", end = "")
+        print(f"\n\tlength_right={comparisonStatsPackage['length_right']}", end = "")
+        print(f"\n\tpc_left_of_right={comparisonStatsPackage['pc_left_of_right']*100}%")
+
+    def term_comparison_df(left_obj, right_obj, left_package_name, right_package_name):
+        print("=============================================================================")
+        ic()
+        print("====" + left_obj.type + "====")
+        print(', '.join(left_obj.get_term_list_for_package(left_package_name)))
+        print("====" + right_obj.type + "====")
+        print(', '.join(right_obj.get_term_list_for_package(right_package_name)))
+
+        comparisonStatsPackage = {}
+        package_comparisonStatsPackage = compare2termLists(left_obj.get_term_list_for_package(left_package_name),
+                                                   right_obj.get_term_list_for_package(right_package_name),
+                                                   comparisonStatsPackage)
+        core_comparisonStatsPackage = compare2termLists(left_obj.get_term_list_for_package(left_package_name),
+                                                           right_obj.get_term_list_for_package("Core"),
+                                                           comparisonStatsPackage)
+
+        my_dict = { }
+
+        left_list = sorted(left_obj.get_term_list_for_package(left_package_name))
+        left_clean_dict, left_raw_dict = generate_clean_dict(left_list)
+        right_term_list = right_obj.get_term_list_for_package(right_package_name)
+        right_clean_dict, right_raw_dict = generate_clean_dict(right_term_list)
+        core_term_list = right_obj.get_term_list_for_package("Core")
+        core_clean_dict, core_raw_dict = generate_clean_dict(core_term_list)
+        for left_term in left_list:
+            my_dict[left_term] = {"match_type": "none"}
+            left_clean = left_raw_dict[left_term]
+            #print(f"{left_term} - {left_clean}")
+            if left_clean in package_comparisonStatsPackage["clean_intersection_set"]:
+
+                if left_term in right_term_list:
+                    my_dict[left_term]["match_type"] = "exact"
+                    my_dict[left_term]["match"] = right_clean_dict[left_clean]
+                else:
+                    my_dict[left_term]["match_type"] = "harmonised"
+                    my_dict[left_term]["match"] =  right_clean_dict[left_clean]
+            elif left_term in core_comparisonStatsPackage["clean_intersection_set"]:
+                print(left_term)
+                if left_term in core_term_list:
+                    my_dict[left_term]["match_type"]= "exact"
+                    my_dict[left_term]["match"] = core_clean_dict[left_clean]
+                else:
+                    my_dict[left_term]["match_type"] = "harmonised"
+                    my_dict[left_term]["match"] = core_clean_dict[left_clean]
+
+        print(my_dict)
+        df = pd.DataFrame.from_dict(my_dict, orient='index')
+        df["left_term"] = df.index
+        df = df[["left_term","match_type", "match"]]
+        print(df)
+
+        sys.exit()
+
+
+
     # ic(comparison)
     com_package_names = left_package_name + "::" + right_package_name
     comparisonStats[comparison]['by_package'][com_package_names] = {}
     comparisonStatsPackage = comparisonStats[comparison]['by_package'][com_package_names]
-    compare2termLists(left_obj.get_term_list_for_package(left_package_name),
+    comparisonStatsPackage = compare2termLists(left_obj.get_term_list_for_package(left_package_name),
                       right_obj.get_term_list_for_package(right_package_name), comparisonStatsPackage)
-    # ic(ena_cl_obj.get_term_list_for_package(test_ena_cl_name))
-    # ic(mixs_v6_obj.get_term_list_for_package(test_mixs_v6_cl_name))
+    print("====" + left_obj.type + "====")
+    print(', '.join(left_obj.get_term_list_for_package(left_package_name)))
+    print("====" + right_obj.type + "====")
+    print(', '.join(right_obj.get_term_list_for_package(right_package_name)))
+    print_minimal_stats(comparisonStatsPackage)
+    print(f"Intersection = {comparisonStatsPackage['clean_intersection_set']}")
+    print("====" + right_obj.type + " Core"+ "====")
+    print(', '.join(right_obj.get_term_list_for_package("Core")))
+    comparisonStatsPackage = comparisonStats[comparison]['by_package'][com_package_names]
+    comparisonStatsPackage = compare2termLists(left_obj.get_term_list_for_package(left_package_name), right_obj.get_term_list_for_package("Core"), comparisonStatsPackage)
+    print(f"Intersection = {comparisonStatsPackage['clean_intersection_set']}")
 
+    term_comparison_df(left_obj, right_obj, left_package_name, right_package_name)
 
 def cleanList2set(term_list):
     clean_term_list = clean_list(term_list)
@@ -1027,36 +1139,36 @@ def compareChecklists(ena_cl_obj, mixs_v6_obj):
 
     return comparison_obj
 
-#
-# def compareSelectChecklists(ena_cl_obj, mixs_v6_obj):
-#     comparisonStats = {'ena::mixs_v6': {'by_package': {}}}
-#
-#     # ic(ena_cl_obj.get_all_package_list())
-#     # ic(mixs_v6_obj.get_all_package_list())
-#
-#     targets = ["AIR"]
-#     for target in targets:
-#         ic(target)
-#         target_lower = target.lower()
-#         # for target in ena_cl_obj.get_all_package_list():
-#         ena_res = [i for i in ena_cl_obj.get_all_package_list() if target_lower in i.lower()]
-#         ic(ena_res)
-#
-#         mixs_v6_res = [i for i in mixs_v6_obj.get_all_package_list() if target_lower in i.lower()]
-#         # ic(mixs_v6_res)
-#
-#         # get the first off the list
-#         if len(ena_res) > 0 and len(mixs_v6_res) > 0:
-#             test_ena_cl_name = ' '.join([ena_res[0]])
-#             test_mixs_v6_cl_name = ' '.join([mixs_v6_res[0]])
-#             print(f"test_ena_cl_name={test_ena_cl_name} test_mixs_v6_cl_name={test_mixs_v6_cl_name}")
-#         else:
-#             ic("ERROR: no matching checklists found in at least one of ENA or mixs_v6")
-#             continue
-#         ic("==================================================================")
-#
-#         compare2packages('ena::mixs_v6', test_ena_cl_name, test_mixs_v6_cl_name, ena_cl_obj, mixs_v6_obj,
-#                          comparisonStats)
+
+def compareSelectChecklists(ena_cl_obj, mixs_v6_obj):
+    comparisonStats = {'ena::mixs_v6': {'by_package': {}}}
+
+    # ic(ena_cl_obj.get_all_package_list())
+    # ic(mixs_v6_obj.get_all_package_list())
+
+    targets = ["AIR"]
+    for target in targets:
+        ic(target)
+        target_lower = target.lower()
+        # for target in ena_cl_obj.get_all_package_list():
+        ena_res = [i for i in ena_cl_obj.get_all_package_list() if target_lower in i.lower()]
+        ic(ena_res)
+
+        mixs_v6_res = [i for i in mixs_v6_obj.get_all_package_list() if target_lower in i.lower()]
+        # ic(mixs_v6_res)
+
+        # get the first off the list
+        if len(ena_res) > 0 and len(mixs_v6_res) > 0:
+            test_ena_cl_name = ' '.join([ena_res[0]])
+            test_mixs_v6_cl_name = ' '.join([mixs_v6_res[0]])
+            print(f"test_ena_cl_name={test_ena_cl_name} test_mixs_v6_cl_name={test_mixs_v6_cl_name}")
+        else:
+            ic("ERROR: no matching checklists found in at least one of ENA or mixs_v6")
+            continue
+        ic("==================================================================")
+
+        compare2packages('ena::mixs_v6', test_ena_cl_name, test_mixs_v6_cl_name, ena_cl_obj, mixs_v6_obj,
+                         comparisonStats)
 
 def clean_term(term):
     # ic(term)
@@ -1304,9 +1416,12 @@ def main():
     mixs_v6_dict = process_mixs_dict(my_dict_v6)
     mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6")
 
-    # compareSelectChecklists(ena_cl_obj, mixs_v6_obj)
+    compareSelectChecklists(ena_cl_obj, mixs_v6_obj)
+    sys.exit()
+
     comparison_obj = compareChecklists(ena_cl_obj, mixs_v6_obj)
     #print(comparison_obj.comparisonStats)
+
 
 
     analyse_term_matches(ena_cl_obj, mixs_v6_obj)
