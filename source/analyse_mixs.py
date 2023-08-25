@@ -1421,10 +1421,43 @@ def analyse_term_matches(ena_cl_obj, mixs_v6_obj):
     mixs_v6_df = get_df(mixs_v6_obj)
     #do_hist(mixs_v6_df, 'MIXS_v6')
 
+def parse_new_linkml():
+    """
+
+    :return:
+    mixs6_2_dict
+        ["slots"][short_term_name]['description'] = "description"
+        ["slots"][short_term_name]['title'] = "long_name_ena_uses"
+    """
+    json_file = "/Users/woollard/projects/GSC/code/mixs-6-2-release-candidate/schema-derivatives/mixs_6_2_rc.json"
+
+    if os.path.isfile(json_file):
+        ic(f"about to open {json_file}")
+        with open(json_file) as f:
+            r_json = json.load(f)
+
+    # for slot in r_json["slots"]:
+    #     print(slot)
+    #     #title  id
+    #     for tag in ('slot_uri', 'description', 'title'):
+    #         if tag in r_json['slots'][slot]:
+    #             print(f"\t{tag}=\t{r_json['slots'][slot][tag]}")
+    #
+    #     if slot == "alt":
+    #         print(r_json['slots'][slot])
+
+    return r_json
+
+
+
+
 
 
 
 def main():
+
+    parse_new_linkml()
+    sys.exit()
     report_file = "../docs/report.md"
 
     report = open(report_file, "w")
