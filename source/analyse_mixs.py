@@ -134,7 +134,7 @@ def print_MIXS_review_dict_stats(MIXS_review_dict):
         print(f"{checklist_name} field_count={MIXS_review_dict['by_package'][checklist_name]['count']}")
 
 
-def process_mixs_dict(my_dict):
+def process_mixs_dict(my_dict, linkml_dict):
     """
     /used for mixs5 at least
 
@@ -159,6 +159,12 @@ def process_mixs_dict(my_dict):
     MIXS_review_dict["by_package"] = {}
     MIXS_review_dict["by_term"] = {}
 
+    def get_long_name(short_term_name, linkml_dict):
+        if short_term_name in linkml_dict["slots"]:
+            return linkml_dict["slots"][short_term_name]['title']
+
+        return short_term_name
+
     for top_def in my_dict["$defs"]:
         # print(top_def)
         package_name = top_def
@@ -180,8 +186,10 @@ def process_mixs_dict(my_dict):
                 # print(f"\t\t{second_def} property_count={len(my_dict['$defs'][top_def][second_def])}", end = " properties: ")
                 for third_def in my_dict["$defs"][top_def][second_def]:
                     # print(f"{third_def}", end = ", ")
-                    MIXS_review_dict["by_package"][top_def]["field"][third_def] = {}
-                    term_name = third_def
+
+                    term_name = get_long_name(third_def, linkml_dict)
+                    MIXS_review_dict["by_package"][top_def]["field"][term_name] = {}
+
                     #ic(term_name)
                     # sys.exit()
                     # if term_name in MIXS_review_dict["by_term"]:
@@ -208,7 +216,7 @@ def url2file(url):
     r_json = r.text
 
 
-def process_ena_cl(my_dict):
+def process_ena_cl(my_dict, linkml_mixs_dict):
     """
     function to parse the ena_cl in a similar way to how the mixs versions have been parsed
 
@@ -221,6 +229,7 @@ def process_ena_cl(my_dict):
     MIXS_review_dict = {}
     MIXS_review_dict["by_package"] = {}
     MIXS_review_dict["by_term"] = {}
+
 
     # print("----------------------------------")
     for checklist in my_dict["CHECKLIST_SET"]["CHECKLIST"]:
@@ -243,12 +252,21 @@ def process_ena_cl(my_dict):
                              "UNITS"]:
                     continue
                 field_name = field['NAME']
-                # ic(field_name)
+
+                if field_name in linkml_mixs_dict['slots']:
+                    #ic(linkml_mixs_dict['slots'][field_name])
+                    long_field_name = linkml_mixs_dict['slots'][field_name]['title'] # ENA uses the long_field_name
+                    #ic(field_name)
+                    #ic(long_field_name)
+                    #sys.exit()
+                else:
+                    long_field_name = field_name
+
 
                 if field_name not in MIXS_review_dict["by_term"]:
-                    MIXS_review_dict["by_term"][field_name] = {}
+                    MIXS_review_dict["by_term"][long_field_name] = {}
                 if field_name not in MIXS_review_dict["by_package"][checklist_name]['field']:
-                    MIXS_review_dict["by_package"][checklist_name]['field'][field_name] = {}
+                    MIXS_review_dict["by_package"][checklist_name]['field'][long_field_name] = {}
                 # MIXS_review_dict["by_package"][checklist_name][field_name]['name'] = field_name
 
                 description = "no_description"
@@ -260,8 +278,8 @@ def process_ena_cl(my_dict):
                         description = field["LABEL"]
                         # print(f"no description so using label={description}")
 
-                MIXS_review_dict["by_term"][field_name]['DESCRIPTION'] = description
-                MIXS_review_dict["by_package"][checklist_name]['field'][field_name]["DESCRIPTION"] = description
+                MIXS_review_dict["by_term"][long_field_name]['DESCRIPTION'] = description
+                MIXS_review_dict["by_package"][checklist_name]['field'][long_field_name]["DESCRIPTION"] = description
                 # ic(MIXS_review_dict["by_package"][checklist_name]['field'][field_name])
 
             # end of for field_group
@@ -320,16 +338,18 @@ def get_ena_cl_details(ena_cl_dict):
 
 class mixs:
     def ingest_ena_cl(self):
-        self.my_dict = process_ena_cl(self.my_dict_raw)
+        self.my_dict = process_ena_cl(self.my_dict_raw, self.linkml_mixs_dict)
 
-    def __init__(self, my_dict, type):
+    def __init__(self, my_dict, type, linkml_mixs_dict):
         # type could be  "mixs_v5" or "mixs_v6"
         self.type = type
 
         if type == "ena_cl":
             print(f"type = {type}")
             self.my_dict_raw = my_dict
+            self.linkml_mixs_dict = linkml_mixs_dict
             self.ingest_ena_cl()
+
             # self.cl_details_dict = get_ena_cl_details(self.my_dict_raw)
         else:
             self.my_dict = my_dict
@@ -1456,19 +1476,19 @@ def parse_new_linkml():
 
 def main():
 
-    parse_new_linkml()
-    sys.exit()
+    linkml_mixs_dict = parse_new_linkml()
+
     report_file = "../docs/report.md"
 
     report = open(report_file, "w")
     print(report.write("# Review of the MIX-S checklists proposed by GSC\n"))
 
     ena_cl_dict = get_ena_dict()
-    ena_cl_obj = mixs(ena_cl_dict, "ena_cl")
+    ena_cl_obj = mixs(ena_cl_dict, "ena_cl", linkml_mixs_dict)
 
     my_dict_v6 = get_mixs_dict()
-    mixs_v6_dict = process_mixs_dict(my_dict_v6)
-    mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6")
+    mixs_v6_dict = process_mixs_dict(my_dict_v6, linkml_mixs_dict)
+    mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6", linkml_mixs_dict)
 
     compareSelectChecklists(ena_cl_obj, mixs_v6_obj)
     sys.exit()
