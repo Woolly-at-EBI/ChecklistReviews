@@ -1180,6 +1180,17 @@ def compareSelectChecklists(ena_cl_obj, mixs_v6_obj):
         compare2packages('ena::mixs_v6', test_ena_cl_name, test_mixs_v6_cl_name, ena_cl_obj, mixs_v6_obj,
                          comparisonStats)
 
+
+
+    compare2packages('ena::mixs_v6', 'GSC MIxS human skin', 'Human-skin', ena_cl_obj, mixs_v6_obj,
+                     comparisonStats)
+
+    compare2packages('ena::mixs_v6', 'GSC MIxS soil', 'Soil', ena_cl_obj, mixs_v6_obj,
+                     comparisonStats)
+
+    compare2packages('ena::mixs_v6', 'GSC MIxS soil', 'Core', ena_cl_obj, mixs_v6_obj,
+                     comparisonStats)
+
 def clean_term(term):
     # ic(term)
     clean = term.lower().replace(' ', '_').replace('-', '_').replace('/', '_').removesuffix("_")
