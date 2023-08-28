@@ -1000,7 +1000,7 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
         df = pd.DataFrame.from_dict(my_dict, orient='index')
         df["left_term"] = df.index
         df = df[["left_term", "match_type", "match", "fuzzy_score"]]
-        df["fuzzy_score"]
+        df["xc"] = df["fuzzy_score"].astype(int)
 
         return df
 
