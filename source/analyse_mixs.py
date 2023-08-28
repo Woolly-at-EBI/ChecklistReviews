@@ -32,7 +32,8 @@ import matplotlib.pyplot as plt
 import plotly.io as pio
 
 pio.renderers.default = "browser"
-from fuzzywuzzy import process
+#from fuzzywuzzy import process
+from rapidfuzz import process, fuzz
 
 import plotly.express as px
 # from wordcloud import WordCloud
@@ -999,6 +1000,7 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
         df = pd.DataFrame.from_dict(my_dict, orient='index')
         df["left_term"] = df.index
         df = df[["left_term", "match_type", "match", "fuzzy_score"]]
+        df["fuzzy_score"]
 
         return df
 
