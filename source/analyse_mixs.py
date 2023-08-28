@@ -32,6 +32,7 @@ import matplotlib.pyplot as plt
 import plotly.io as pio
 
 pio.renderers.default = "browser"
+from fuzzywuzzy import process
 
 import plotly.express as px
 # from wordcloud import WordCloud
@@ -162,7 +163,6 @@ def process_mixs_dict(my_dict, linkml_dict):
     def get_long_name(short_term_name, linkml_dict):
         if short_term_name in linkml_dict["slots"]:
             return linkml_dict["slots"][short_term_name]['title']
-
         return short_term_name
 
     for top_def in my_dict["$defs"]:
@@ -174,7 +174,6 @@ def process_mixs_dict(my_dict, linkml_dict):
                 MIXS_review_dict["by_package"][top_def] = {}
                 MIXS_review_dict["by_package"][top_def]["count"] = 0
                 MIXS_review_dict["by_package"][top_def]["field"] = {}
-
                 # print("") #
                 # print(top_def, end = ": ")
                 printed_top = True
@@ -190,21 +189,11 @@ def process_mixs_dict(my_dict, linkml_dict):
                     term_name = get_long_name(third_def, linkml_dict)
                     MIXS_review_dict["by_package"][top_def]["field"][term_name] = {}
 
-                    #ic(term_name)
-                    # sys.exit()
-                    # if term_name in MIXS_review_dict["by_term"]:
-                    #     MIXS_review_dict["by_term"][term_name]['packages'].append(package_name)
-                    #     MIXS_review_dict["by_term"][term_name]['count'] += 1
-                    # else:
-                    #     MIXS_review_dict["by_term"][term_name] = {'packages': [package_name], 'count': 1}
-
                 MIXS_review_dict["by_package"][package_name]["count"] = len(MIXS_review_dict["by_package"][package_name]["field"])
             else:
                 pass
     # ic(MIXS_review_dict)
-
     MIXS_review_dict = add_term_package_count(MIXS_review_dict)
-
     # print_MIXS_review_dict_stats(MIXS_review_dict)
     return MIXS_review_dict
 
@@ -655,6 +644,7 @@ def clean_list(my_list):
     return term_list_clean
 
 
+
 def generate_clean_dict(my_list):
     """
     re-uses the clean_list to keep it consistent
@@ -876,11 +866,15 @@ def compare2termLists(left_term_list, right_term_list, comparisonStatsPackage):
     comparisonStatsPackage['length_union']
     comparisonStatsPackage['length_intersection']
     comparisonStatsPackage['clean_intersection_set']
+    comparisonStatsPackage['intersection_set']
+    comparisonStatsPackage['clean_left_diff_set'] = clean_left_diff
+    comparisonStatsPackage['clean_right_diff_set'] = clean_right_diff
     comparisonStatsPackage['left_diff_set']
     comparisonStatsPackage['right_diff_set']
     comparisonStatsPackage['pc_left_of_right']
     comparisonStatsPackage['length_left']
     comparisonStatsPackage['length_right']
+
     """
     # ic("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
@@ -894,13 +888,16 @@ def compare2termLists(left_term_list, right_term_list, comparisonStatsPackage):
     union = clean_right_set.union(clean_left_set)
     # comparisonStatsPackage['union_term_list'] = union
 
+    left_set = set(left_term_list)
+    right_set = set(right_term_list)
+
     clean_intersection = clean_right_set.intersection(clean_left_set)
     # comparisonStatsPackage['intersection_term_list'] = intersection
-    left_diff = clean_left_set.difference(clean_right_set)
+    clean_left_diff = clean_left_set.difference(clean_right_set)
     # comparisonStatsPackage['left_diff_list'] = left_diff
 
     # ic(left_diff)
-    right_diff = clean_right_set.difference(clean_left_set)
+    clean_right_diff = clean_right_set.difference(clean_left_set)
     # ic(right_diff)
     pc_left_of_right = math.floor(
         (len(clean_intersection) * 100) / len(clean_right_set)) / 100  # get it as a 2 dp decimal fraction
@@ -911,8 +908,11 @@ def compare2termLists(left_term_list, right_term_list, comparisonStatsPackage):
     comparisonStatsPackage['length_union'] = len(union)
     comparisonStatsPackage['length_clean_intersection'] = len(clean_intersection)
     comparisonStatsPackage['clean_intersection_set'] = clean_intersection
-    comparisonStatsPackage['left_diff_set'] = left_diff
-    comparisonStatsPackage['right_diff_set'] = right_diff
+    comparisonStatsPackage['clean_left_diff_set'] = clean_left_diff
+    comparisonStatsPackage['clean_right_diff_set'] = clean_right_diff
+    comparisonStatsPackage['left_diff_set'] = left_set.difference(right_set)
+    comparisonStatsPackage['right_diff_set'] = right_set.difference(left_set)
+    comparisonStatsPackage['intersection_set'] = left_set.intersection(right_set)
     return comparisonStatsPackage
 
 
@@ -943,6 +943,9 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
         print("====" + right_obj.type + "====")
         print(', '.join(right_obj.get_term_list_for_package(right_package_name)))
 
+        print('------++++++++---------')
+        fuzzy = True
+
         comparisonStatsPackage = {}
         package_comparisonStatsPackage = compare2termLists(left_obj.get_term_list_for_package(left_package_name),
                                                    right_obj.get_term_list_for_package(right_package_name),
@@ -958,34 +961,46 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
         right_clean_dict, right_raw_dict = generate_clean_dict(right_term_list)
         core_term_list = right_obj.get_term_list_for_package("Core")
         core_clean_dict, core_raw_dict = generate_clean_dict(core_term_list)
+        ic(right_term_list)
+        combined_right_term_list = (right_term_list)
+        combined_right_term_list.extend(core_term_list)
+        fuzzy_threshold = 85
         for left_term in left_list:
-            my_dict[left_term] = {"match_type": "none"}
+            if 'amount' in left_term:
+                ic(left_term)
+            my_dict[left_term] = {"match_type": "none", "fuzzy_score": 100}
             left_clean = left_raw_dict[left_term]
             #print(f"{left_term} - {left_clean}")
-            if left_clean in package_comparisonStatsPackage["clean_intersection_set"]:
-
+            if left_clean in package_comparisonStatsPackage["intersection_set"] or left_clean in package_comparisonStatsPackage["clean_intersection_set"]:
                 if left_term in right_term_list:
                     my_dict[left_term]["match_type"] = "exact"
                     my_dict[left_term]["match"] = right_clean_dict[left_clean]
                 else:
                     my_dict[left_term]["match_type"] = "harmonised"
                     my_dict[left_term]["match"] = right_clean_dict[left_clean]
-            elif left_term in core_comparisonStatsPackage["clean_intersection_set"]:
+            elif left_term in core_comparisonStatsPackage["intersection_set"] or left_clean in core_comparisonStatsPackage["clean_intersection_set"]:
                 if left_term in core_term_list:
                     my_dict[left_term]["match_type"] = "exact"
                     my_dict[left_term]["match"] = core_clean_dict[left_clean]
                 else:
                     my_dict[left_term]["match_type"] = "harmonised"
                     my_dict[left_term]["match"] = core_clean_dict[left_clean]
+            if my_dict[left_term]["match_type"] == "none":
+                    #searches combined list as want the highest scoring!
+                    resp_match = process.extractOne(left_term, combined_right_term_list)
+                    if resp_match[1] > fuzzy_threshold:
+                        my_dict[left_term]["match_type"] = "fuzzy"
+                        my_dict[left_term]["fuzzy_score"] = resp_match[1]
+                        my_dict[left_term]["match"] = resp_match[0]
+                    else:
+                        my_dict[left_term]["fuzzy_score"] = 0
 
 
         df = pd.DataFrame.from_dict(my_dict, orient='index')
         df["left_term"] = df.index
-        df = df[["left_term", "match_type", "match"]]
-
+        df = df[["left_term", "match_type", "match", "fuzzy_score"]]
 
         return df
-
 
 
     # ic(comparison)
@@ -1008,6 +1023,8 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
 
     term_comparison_df = create_term_comparison_df(left_obj, right_obj, left_package_name, right_package_name)
     print(term_comparison_df.to_string(justify='left', index=False))
+    print(f"right_diff={', '.join(sorted(comparisonStatsPackage['right_diff_set']))}")
+    print("AAAAAAAAAAAAA")
 
 
 def cleanList2set(term_list):
