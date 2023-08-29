@@ -1,9 +1,8 @@
-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 """Script of 'analyse_mixs.py' is to analyse the mixs
 
 convert to JSON, not quite...
-cat o | sed -E "s/: \"/: '/g" | sed -E "s/([A-Za-z])'([A-Za-z])/\1\2/g" |  tr "'" '"'  | sed 's/: nan,/: "",/g'  | head -c 157625
+cat o| sed -E "s/: \"/: '/g"|sed -E "s/([A-Za-z])'([A-Za-z])/\1\2/g" | tr "'" '"'|sed 's/: nan,/: "",/g'|head -c 157625
 
 
 ___author___ = "woollard@ebi.ac.uk"
@@ -21,21 +20,20 @@ import os.path
 import pickle
 import pandas as pd
 
+import plotly.express as px
+# import numpy as np
+# import matplotlib.pyplot as plt
+# from wordcloud import WordCloud
+
+import plotly.io as pio
+from rapidfuzz import process
+
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
-import plotly.express as px
-import numpy as np
-import matplotlib.pyplot as plt
-
-import plotly.io as pio
-
 pio.renderers.default = "browser"
-#from fuzzywuzzy import process
-from rapidfuzz import process, fuzz
+# from fuzzywuzzy import process
 
-import plotly.express as px
-# from wordcloud import WordCloud
 
 image_dir = "../docs/images/"
 
@@ -56,11 +54,12 @@ def get_data():
             r_json = json.load(f)
             ic(r_json)
     else:
-        json_url = "https://raw.githubusercontent.com/GenomicsStandardsConsortium/mixs/main/mixs/jsonschema/mixs.schema.json"
+        json_url = ("https://raw.githubusercontent.com/GenomicsStandardsConsortium/mixs/main/mixs/jsonschema/mixs"
+                    ".schema.json")
         ic(json_url)
         r = requests.get(json_url)
         r_json = r.text
-        # r_text = '{ "test": "test_val"}'
+
         with open(json_file, 'w') as f:
             json.dump(r_json, f, indent = 4)
         ic(f"Created {json_file}")
@@ -88,6 +87,7 @@ def get_mixs_dict():
 
     return my_dict
 
+
 def add_term_package_count(my_dict):
     """
     for all the term_name's add the package_name and count.
@@ -97,17 +97,16 @@ def add_term_package_count(my_dict):
     :return: my_dict
     """
 
-
     for package_name in my_dict["by_package"]:
         for term_name in my_dict["by_package"][package_name]["field"]:
             if term_name in my_dict["by_term"] and 'packages' in my_dict["by_term"][term_name]:
                 my_dict["by_term"][term_name]['packages'].append(package_name)
                 my_dict["by_term"][term_name]['count'] += 1
             else:
-               if term_name not in my_dict["by_term"]:
-                   my_dict["by_term"][term_name] = {}
-               my_dict["by_term"][term_name]['packages'] = [package_name]
-               my_dict["by_term"][term_name]['count'] = 1
+                if term_name not in my_dict["by_term"]:
+                    my_dict["by_term"][term_name] = {}
+                my_dict["by_term"][term_name]['packages'] = [package_name]
+                my_dict["by_term"][term_name]['count'] = 1
     my_dict["by_term_count"] = {}
 
     # now to add by_term_count
@@ -118,21 +117,20 @@ def add_term_package_count(my_dict):
         my_dict["by_term_count"][my_total][term_name] = {}
         my_dict["by_term_count"][my_total][term_name]['packages'] = my_dict["by_term"][term_name]['packages']
 
-
-    #ic(my_dict["by_term_count"])
-    #sys.exit()
+    # ic(my_dict["by_term_count"])
+    # sys.exit()
     return my_dict
 
 
-def print_MIXS_review_dict_stats(MIXS_review_dict):
+def print_mixs_review_dict_stats(mixs_review_dict):
     """
 
-    :param MIXS_review_dict:
+    :param mixs_review_dict:
     :return:
     """
-    print(f"Count of top_level MIX-S checklists={len(MIXS_review_dict['by_package'])}")
-    for checklist_name in MIXS_review_dict['by_package']:
-        print(f"{checklist_name} field_count={MIXS_review_dict['by_package'][checklist_name]['count']}")
+    print(f"Count of top_level MIX-S checklists={len(mixs_review_dict['by_package'])}")
+    for checklist_name in mixs_review_dict['by_package']:
+        print(f"{checklist_name} field_count={mixs_review_dict['by_package'][checklist_name]['count']}")
 
 
 def process_mixs_dict(my_dict, linkml_dict):
@@ -140,6 +138,7 @@ def process_mixs_dict(my_dict, linkml_dict):
     /used for mixs5 at least
 
     :param my_dict:
+    :param linkml_dict:
     :return:
     """
     # for top in my_dict:
@@ -189,12 +188,13 @@ def process_mixs_dict(my_dict, linkml_dict):
                     term_name = get_long_name(third_def, linkml_dict)
                     MIXS_review_dict["by_package"][top_def]["field"][term_name] = {}
 
-                MIXS_review_dict["by_package"][package_name]["count"] = len(MIXS_review_dict["by_package"][package_name]["field"])
+                MIXS_review_dict["by_package"][package_name]["count"] = len(
+                    MIXS_review_dict["by_package"][package_name]["field"])
             else:
                 pass
     # ic(MIXS_review_dict)
     MIXS_review_dict = add_term_package_count(MIXS_review_dict)
-    # print_MIXS_review_dict_stats(MIXS_review_dict)
+    # print_mixs_review_dict_stats(MIXS_review_dict)
     return MIXS_review_dict
 
 
@@ -219,7 +219,6 @@ def process_ena_cl(my_dict, linkml_mixs_dict):
     MIXS_review_dict["by_package"] = {}
     MIXS_review_dict["by_term"] = {}
 
-
     # print("----------------------------------")
     for checklist in my_dict["CHECKLIST_SET"]["CHECKLIST"]:
         # print(checklist)
@@ -243,14 +242,13 @@ def process_ena_cl(my_dict, linkml_mixs_dict):
                 field_name = field['NAME']
 
                 if field_name in linkml_mixs_dict['slots']:
-                    #ic(linkml_mixs_dict['slots'][field_name])
-                    long_field_name = linkml_mixs_dict['slots'][field_name]['title'] # ENA uses the long_field_name
-                    #ic(field_name)
-                    #ic(long_field_name)
-                    #sys.exit()
+                    # ic(linkml_mixs_dict['slots'][field_name])
+                    long_field_name = linkml_mixs_dict['slots'][field_name]['title']  # ENA uses the long_field_name
+                    # ic(field_name)
+                    # ic(long_field_name)
+                    # sys.exit()
                 else:
                     long_field_name = field_name
-
 
                 if field_name not in MIXS_review_dict["by_term"]:
                     MIXS_review_dict["by_term"][long_field_name] = {}
@@ -289,7 +287,6 @@ def process_ena_cl(my_dict, linkml_mixs_dict):
         # sys.exit()
 
     MIXS_review_dict = add_term_package_count(MIXS_review_dict)
-
 
     return MIXS_review_dict
 
@@ -377,18 +374,17 @@ class mixs:
         self.term_with_freq = {}
 
         freq_keys = sorted(self.my_dict["by_term_count"].keys(), reverse = True)
-        #ic("KEYS=+++++++++++++++++++++++++")
-        #ic(freq_keys)
-        #ic(self.my_dict["by_term_count"][40].keys())
+        # ic("KEYS=+++++++++++++++++++++++++")
+        # ic(freq_keys)
+        # ic(self.my_dict["by_term_count"][40].keys())
         for freq_key in freq_keys:
             my_just_freq[freq_key] = {}
             my_just_freq[freq_key]["terms"] = list(self.my_dict["by_term_count"][freq_key].keys())
-            my_just_freq[freq_key]["term_count_with_freq"] = len(my_just_freq[freq_key]["terms"] )
+            my_just_freq[freq_key]["term_count_with_freq"] = len(my_just_freq[freq_key]["terms"])
             for term in my_just_freq[freq_key]["terms"]:
                 self.term_with_freq[term] = freq_key
-        #ic(my_just_freq)
-        #sys.exit()
-
+        # ic(my_just_freq)
+        # sys.exit()
 
         self.my_just_freq = my_just_freq
         return self.my_just_freq
@@ -402,7 +398,7 @@ class mixs:
         #
         # return (self.my_dict["by_term_count"])
 
-    def get_term_top(self,first_number):
+    def get_term_top(self, first_number):
         """
         get_term_top - get the first 10, or whatever in terms of frequency
         :param first_number:
@@ -415,7 +411,7 @@ class mixs:
             ic(my_just_freq[freq_key]["terms"])
             top_terms.extend(list(my_just_freq[freq_key]["terms"]))
             if len(top_terms) >= first_number:
-                return top_terms[0:first_number-1]
+                return top_terms[0:first_number - 1]
         return top_terms
 
     def get_all_term_count(self):
@@ -454,6 +450,8 @@ class mixs:
         # ic("inside get_term_list_for_package", package_cl_name)
         # ic(self.my_dict['by_package'][package_cl_name])
         return list(self.my_dict['by_package'][package_cl_name]['field'].keys())
+
+
 # **********************************************************************************
 
 class COMPARISONS:
@@ -461,19 +459,21 @@ class COMPARISONS:
         if more development, need to improve this.
         (still it served a purpose and broke up an excessively long routine)
     """
-    def __init__(self, comparisonStats,comparison_source):
+
+    def __init__(self, comparisonStats, comparison_source):
         ic()
         ic(comparison_source)
         self.source_list = []
         self.source_list = comparison_source.split('::')
         self.comparisonStats = comparisonStats
+        ic("---------------------------")
         self.ingest()
 
     def left_source(self):
         return self.source_list[0]
+
     def right_source(self):
         return self.source_list[1]
-
 
     def put_reorg_df(self, df):
         self.reorg_df = df
@@ -486,7 +486,7 @@ class COMPARISONS:
         :return:
         """
         # for each ENA checklist, get the maximum length of intersections
-        #sources = source_list  # ['ena', 'mixs_v6']
+        # sources = source_list  # ['ena', 'mixs_v6']
         for source in self.source_list:
             ic(source)
             if source == 'ena':
@@ -494,7 +494,7 @@ class COMPARISONS:
             else:
                 target_cols = [source, 'length_intersection', 'short_mixs_v6']
             new_df = self.reorg_df[target_cols].drop_duplicates()
-            # ic(new_df.head().to_string(index=False))
+            ic(new_df.head().to_string(index=False))
 
             # for each ENA or Mixs checklist, get the checklists with >= 20% overlap with at least one GSC MIx
             new_df = self.reorg_df
@@ -512,29 +512,47 @@ class COMPARISONS:
             print(f"each {source} checklist with >= 20% overlap with at least one GSC MIx")
             tmp_df = max_df.query('pc_left_of_right >= 0.2')
             # print(tmp_df.to_string(index = False))
-            #print(f"{tmp_df[source].unique()} \ntotal={len(tmp_df[source].unique())}")
+            # print(f"{tmp_df[source].unique()} \ntotal={len(tmp_df[source].unique())}")
             print("each {source} checklist with a maximum < 20% overlap with any GSC MIx")
             tmp_df = max_df.query('pc_left_of_right < 0.2')
             # print(tmp_df.to_string(index = False))
-            #print(f"{tmp_df[source].unique()} \ntotal={len(tmp_df[source].unique())}")
+            # print(f"{tmp_df[source].unique()} \ntotal={len(tmp_df[source].unique())}")
             # end of process_max_intersection_len
 
     def ingest(self):
-        reorg_dict = []
+        ic()
+        reorg_dict = { self.left_source(): [], self.right_source(): [], "left_source": [], "right_source": [], "pair": []}
         comparison_source = 'ena::mixs_v6'
         comparisonStats = self.comparisonStats
-
+        # ic(comparisonStats)
+        count =0
         for pair in comparisonStats[comparison_source]['by_package']:
-            # ic(pair)
-            sub_dict = comparisonStats[comparison_source]['by_package'][pair]
+            #ic(pair)
             pair_list = pair.split('::')
-            sub_dict[self.left_source()] = pair_list[0]
-            sub_dict[self.right_source()] = pair_list[1]
-            sub_dict['left_source'] = self.left_source()
-            sub_dict['right_source'] = self.right_source()
-            sub_dict['pair'] = pair
+            sub_dict = comparisonStats[comparison_source]['by_package'][pair]
+            ic(sub_dict)
+            #
+            # sub_dict[self.left_source()] = pair_list[0]
+            # sub_dict[self.right_source()] = pair_list[1]
+            # sub_dict['left_source'] = self.left_source()
+            # sub_dict['right_source'] = self.right_source()
+            # sub_dict['pair'] = pair
             # ic(sub_dict)
-            reorg_dict.append(sub_dict)
+            # reorg_dict.append(sub_dict)
+            # ic(self.left_source())
+            reorg_dict[self.left_source()].append(pair_list[0])
+            reorg_dict[self.right_source()].append(pair_list[1])
+            reorg_dict['left_source'].append(self.left_source())
+            reorg_dict['right_source'].append(self.right_source())
+            reorg_dict['pair'].append(pair)
+            if count > 3:
+                break
+            else:
+                count += 1
+
+        ic(reorg_dict)
+        # sys.exit()
+
         self.put_reorg_df(pd.DataFrame.from_dict(reorg_dict))
         df = self.reorg_df
         ic(df.head(5))
@@ -542,6 +560,9 @@ class COMPARISONS:
         ic(df['short_mixs_v6'].unique())
 
         self.process_max_intersection_len()
+        ic("-------end of ingest------")
+        sys.exit()
+
 
 # **********************************************************************************
 
@@ -627,8 +648,6 @@ def get_mixs_v5_dict():
     return mixs_v5_dict
 
 
-
-
 def clean_list(my_list):
     """
         function to do some simple cleaning on textual lists.
@@ -644,7 +663,6 @@ def clean_list(my_list):
     return term_list_clean
 
 
-
 def generate_clean_dict(my_list):
     """
     re-uses the clean_list to keep it consistent
@@ -655,7 +673,7 @@ def generate_clean_dict(my_list):
     my_clean_list = clean_list(my_list)
     clean_dict = {}
     raw_dict = {}
-    pos=0
+    pos = 0
     for clean_term in my_clean_list:
         clean_dict[clean_term] = my_list[pos]
         raw_dict[my_list[pos]] = clean_term
@@ -663,8 +681,6 @@ def generate_clean_dict(my_list):
     # print(clean_dict)
     # print(raw_dict)
     return clean_dict, raw_dict
-
-
 
 
 def unique_elements_left(left_list, term_matches):
@@ -792,7 +808,6 @@ def do_stats(ena_cl_obj, mixs_v5_obj, mixs_v6_obj):
     print(f" ena_cl term count={ena_cl_obj.get_all_term_count()}\n")
     various(mixs_v6_obj, ena_cl_obj, stats_dict)
 
-
     #
     print("\n======MIXS v5 verses v6=========")
     print(f"mixs_v5 term count={mixs_v5_obj.get_all_term_count()}")
@@ -834,10 +849,7 @@ def unpack(stats_dict):
                 # df = df.loc[~df.index.duplicated(keep = 'first')]
 
     print(stats_dict)
-    sys.exit()
-    print(df)
     return df
-
 
 def plot_df(df, image_dir):
     import plotly.io as pio
@@ -917,13 +929,12 @@ def compare2termLists(left_term_list, right_term_list, comparisonStatsPackage):
 
 
 def compare2packages(comparison, left_package_name, right_package_name, left_obj, right_obj, comparisonStats, report):
-
     def print_minimal_stats(comparisonStatsPackage, report):
         report.write(f"Minimal_stats:\n\tlength_intersection={comparisonStatsPackage['length_clean_intersection']}")
         report.write(f"\n\tlength_union={comparisonStatsPackage['length_union']}")
         report.write(f"\n\tlength_left={comparisonStatsPackage['length_left']}")
         report.write(f"\n\tlength_right={comparisonStatsPackage['length_right']}")
-        report.write(f"\n\tpc_left_of_right={comparisonStatsPackage['pc_left_of_right']*100}%" + "\n")
+        report.write(f"\n\tpc_left_of_right={comparisonStatsPackage['pc_left_of_right'] * 100}%" + "\n")
 
     def create_term_comparison_df(left_obj, right_obj, left_package_name, right_package_name, report):
         """
@@ -937,7 +948,7 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
         :return:  df[["left_term", "match_type", "match"]]
         """
         report.write("=============================================================================")
-        #ic()
+        # ic()
         report.write("====" + left_obj.type + "====")
         report.write(', '.join(left_obj.get_term_list_for_package(left_package_name)))
         report.write("====" + right_obj.type + "====")
@@ -948,13 +959,13 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
 
         comparisonStatsPackage = {}
         package_comparisonStatsPackage = compare2termLists(left_obj.get_term_list_for_package(left_package_name),
-                                                   right_obj.get_term_list_for_package(right_package_name),
-                                                   comparisonStatsPackage)
-        core_comparisonStatsPackage = compare2termLists(left_obj.get_term_list_for_package(left_package_name),
-                                                           right_obj.get_term_list_for_package("Core"),
+                                                           right_obj.get_term_list_for_package(right_package_name),
                                                            comparisonStatsPackage)
+        core_comparisonStatsPackage = compare2termLists(left_obj.get_term_list_for_package(left_package_name),
+                                                        right_obj.get_term_list_for_package("Core"),
+                                                        comparisonStatsPackage)
 
-        my_dict = { }
+        my_dict = {}
         left_list = sorted(left_obj.get_term_list_for_package(left_package_name))
         left_clean_dict, left_raw_dict = generate_clean_dict(left_list)
         right_term_list = right_obj.get_term_list_for_package(right_package_name)
@@ -968,15 +979,17 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
         for left_term in left_list:
             my_dict[left_term] = {"match_type": "none", "fuzzy_score": 100}
             left_clean = left_raw_dict[left_term]
-            #print(f"{left_term} - {left_clean}")
-            if left_clean in package_comparisonStatsPackage["intersection_set"] or left_clean in package_comparisonStatsPackage["clean_intersection_set"]:
+            # print(f"{left_term} - {left_clean}")
+            if left_clean in package_comparisonStatsPackage["intersection_set"] or left_clean in \
+                    package_comparisonStatsPackage["clean_intersection_set"]:
                 if left_term in right_term_list:
                     my_dict[left_term]["match_type"] = "exact"
                     my_dict[left_term]["match"] = right_clean_dict[left_clean]
                 else:
                     my_dict[left_term]["match_type"] = "harmonised"
                     my_dict[left_term]["match"] = right_clean_dict[left_clean]
-            elif left_term in core_comparisonStatsPackage["intersection_set"] or left_clean in core_comparisonStatsPackage["clean_intersection_set"]:
+            elif left_term in core_comparisonStatsPackage["intersection_set"] or left_clean in \
+                    core_comparisonStatsPackage["clean_intersection_set"]:
                 if left_term in core_term_list:
                     my_dict[left_term]["match_type"] = "exact"
                     my_dict[left_term]["match"] = core_clean_dict[left_clean]
@@ -984,44 +997,44 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
                     my_dict[left_term]["match_type"] = "harmonised"
                     my_dict[left_term]["match"] = core_clean_dict[left_clean]
             if my_dict[left_term]["match_type"] == "none":
-                    #searches combined list as want the highest scoring!
-                    resp_match = process.extractOne(left_term, combined_right_term_list)
-                    if resp_match[1] > fuzzy_threshold:
-                        my_dict[left_term]["match_type"] = "fuzzy"
-                        my_dict[left_term]["fuzzy_score"] = resp_match[1]
-                        my_dict[left_term]["match"] = resp_match[0]
-                    else:
-                        my_dict[left_term]["fuzzy_score"] = 0
+                # searches combined list as want the highest scoring!
+                resp_match = process.extractOne(left_term, combined_right_term_list)
+                if resp_match[1] > fuzzy_threshold:
+                    my_dict[left_term]["match_type"] = "fuzzy"
+                    my_dict[left_term]["fuzzy_score"] = resp_match[1]
+                    my_dict[left_term]["match"] = resp_match[0]
+                else:
+                    my_dict[left_term]["fuzzy_score"] = 0
 
-
-        df = pd.DataFrame.from_dict(my_dict, orient='index')
+        df = pd.DataFrame.from_dict(my_dict, orient = 'index')
         df["left_term"] = df.index
         df = df[["left_term", "match_type", "match", "fuzzy_score"]]
         df["xc"] = df["fuzzy_score"].astype(int)
 
         return df
 
-
     # ic(comparison)
     com_package_names = left_package_name + "::" + right_package_name
     comparisonStats[comparison]['by_package'][com_package_names] = {}
     comparisonStatsPackage = comparisonStats[comparison]['by_package'][com_package_names]
     comparisonStatsPackage = compare2termLists(left_obj.get_term_list_for_package(left_package_name),
-                      right_obj.get_term_list_for_package(right_package_name), comparisonStatsPackage)
+                                               right_obj.get_term_list_for_package(right_package_name),
+                                               comparisonStatsPackage)
     report.write("====" + left_obj.type + "====")
     report.write(', '.join(left_obj.get_term_list_for_package(left_package_name)))
     report.write("====" + right_obj.type + "====")
     report.write(', '.join(right_obj.get_term_list_for_package(right_package_name)))
     print_minimal_stats(comparisonStatsPackage, report)
     report.write(f"Intersection = {comparisonStatsPackage['clean_intersection_set']}")
-    report.write("====" + right_obj.type + " Core"+ "====")
+    report.write("====" + right_obj.type + " Core" + "====")
     report.write(', '.join(right_obj.get_term_list_for_package("Core")))
     comparisonStatsPackage = comparisonStats[comparison]['by_package'][com_package_names]
-    comparisonStatsPackage = compare2termLists(left_obj.get_term_list_for_package(left_package_name), right_obj.get_term_list_for_package("Core"), comparisonStatsPackage)
+    comparisonStatsPackage = compare2termLists(left_obj.get_term_list_for_package(left_package_name),
+                                               right_obj.get_term_list_for_package("Core"), comparisonStatsPackage)
     report.write(f"Intersection = {comparisonStatsPackage['clean_intersection_set']}")
 
     term_comparison_df = create_term_comparison_df(left_obj, right_obj, left_package_name, right_package_name, report)
-    report.write(term_comparison_df.to_string(justify='left', index=False))
+    report.write(term_comparison_df.to_string(justify = 'left', index = False))
     report.write(f"right_diff={', '.join(sorted(comparisonStatsPackage['right_diff_set']))}")
 
 
@@ -1038,7 +1051,7 @@ def plot_pair_df(df):
     """
     # import dash_bio
 
-    # fig = px.scatter(df, x = "pc_left_of_right", y = "length_intersection", color = "short_mixs_v6", size = 'length_left', hover_data = 'pair')
+    #fig = px.scatter(df, x = "pc_left_of_right", y = "length_intersection", color = "short_mixs_v6", size = 'length_left', hover_data = 'pair')
     # fig.show()
     cut_off = 0.2
     title = "Heatmap of Fraction of ENA Checklists Terms in Different MIXS v6 packages"
@@ -1058,7 +1071,7 @@ def plot_pair_df(df):
     fig.update_layout(title_text = title, title_x = 0.5)
     fig.update_xaxes(tickangle = 45)
     fig.update_yaxes(tickangle = 45)
-    fig.show()
+    # fig.show()
     fig.write_image("/Users/woollard/projects/ChecklistReviews/docs/ENAvsMIXSv6_heatmap.jpg")
 
     ic(len(df['ena'].unique()))
@@ -1077,13 +1090,15 @@ def plot_pair_df(df):
     #     line_width = 2
     # )
 
-    sys.exit()
 
-    # df_pc = df_pc.loc[(df_pc['pc_left_of_right'] < 0.3)]
-    # new_df = df_pc.pivot(index='ena', columns='mixs_v6')['pc_left_of_right']
+
+    df_pc = df_pc.loc[(df_pc['pc_left_of_right'] < 0.3)]
+    new_df = df_pc.pivot(index='ena', columns='mixs_v6')['pc_left_of_right']
     # ic(new_df)
-    # fig = px.imshow(new_df)
+    fig = px.imshow(new_df)
     # fig.show()
+
+    sys.exit()
 
 
 def mixs6_matches_plots(df, new_df):
@@ -1129,7 +1144,7 @@ def mixs6_matches_plots(df, new_df):
                      color = 'package_count', text = 'short_mixs_v6',
                      color_continuous_scale = px.colors.sequential.Viridis)
     fig.update_traces(textposition = 'top center')
-    #fig.show()
+    # fig.show()
     fig.write_image("/Users/woollard/projects/ChecklistReviews/docs/ENAvsMIXSv6_ScatterPlot.jpg")
 
 
@@ -1139,9 +1154,11 @@ def processComparisonStats(comparisonStats, pair):
     :param comparisonStats:
     :return: comparison_obj
     """
+    ic("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    ic()
+    ic(pair)
     comparison_obj = COMPARISONS(comparisonStats, pair)
     return comparison_obj
-
 
 
 def compareChecklists(ena_cl_obj, mixs_v6_obj, report):
@@ -1165,9 +1182,8 @@ def compareChecklists(ena_cl_obj, mixs_v6_obj, report):
     pair_string = 'ena::mixs_v6'
     comparisonStats = {pair_string: {'by_package': {}}}
 
-    # ic(ena_cl_obj.get_all_package_list())
-    # ic(mixs_v6_obj.get_all_package_list())
-
+    #ic(ena_cl_obj.get_all_package_list())
+    #ic(mixs_v6_obj.get_all_package_list())
     ic(len(ena_cl_obj.get_all_package_list()))
     left_package_count = 0
     count = 0
@@ -1175,18 +1191,19 @@ def compareChecklists(ena_cl_obj, mixs_v6_obj, report):
 
         ic(str(left_package_count) + "\t" + left_package_name)
         left_package_count += 1
+        # if left_package_count > 5:
+        #     continue
 
         for right_package_name in mixs_v6_obj.get_all_package_list():
-            # if count > 10:
-            #     break
-            # ic(right_package_name)
-
+            if count > 5:
+                #in testing let minimise
+                 break
+            ic(right_package_name)
             compare2packages(pair_string, left_package_name, right_package_name, ena_cl_obj, mixs_v6_obj,
                              comparisonStats, report)
             count += 1
     # ic(comparisonStats)
-    comparison_obj = processComparisonStats(comparisonStats, pair_string )
-
+    comparison_obj = processComparisonStats(comparisonStats, pair_string)
 
     return comparison_obj
 
@@ -1228,8 +1245,6 @@ def compareSelectChecklists(ena_cl_obj, mixs_v6_obj, report):
         compare2packages('ena::mixs_v6', test_ena_cl_name, test_mixs_v6_cl_name, ena_cl_obj, mixs_v6_obj,
                          comparisonStats, report)
 
-
-
     compare2packages('ena::mixs_v6', 'GSC MIxS human skin', 'Human-skin', ena_cl_obj, mixs_v6_obj,
                      comparisonStats, report)
 
@@ -1238,6 +1253,7 @@ def compareSelectChecklists(ena_cl_obj, mixs_v6_obj, report):
 
     compare2packages('ena::mixs_v6', 'GSC MIxS soil', 'Core', ena_cl_obj, mixs_v6_obj,
                      comparisonStats, report)
+
 
 def clean_term(term):
     # ic(term)
@@ -1249,7 +1265,8 @@ class pairwise_term_matches:
     """pairwise_term_matches object as simple object orientated to reduce complexity and saves passing a big hash.
 
     """
-    def process_names(self,pair_string):
+
+    def process_names(self, pair_string):
         self.pair_string = pair_string
         ic(pair_string)
         pair_source = pair_string.split('::')
@@ -1263,7 +1280,7 @@ class pairwise_term_matches:
         self.right_term_list = right_term_list
         clean_hash = self.get_clean_hash()
 
-        pairwise_matches = { 'left': {"exact": {}, "harmonised": {}, "no_matches": {}}, 'right': {"no_matches": {}}}
+        pairwise_matches = {'left': {"exact": {}, "harmonised": {}, "no_matches": {}}, 'right': {"no_matches": {}}}
         self.pairwise_matches = pairwise_matches
         left_pairwise_matches = pairwise_matches["left"]
         right_pairwise_matches = pairwise_matches["right"]
@@ -1299,7 +1316,7 @@ class pairwise_term_matches:
                 left_pairwise_matches["no_matches"][left] = ""
                 self.left_not_matched_set.add(left)
 
-        #some terms may be classified as harmonised as well as exact, so resolving that.
+        # some terms may be classified as harmonised as well as exact, so resolving that.
         self.left_harmonised_matched_set.difference_update(self.left_exact_matched_set)
         self.right_harmonised_matched_set.difference_update(self.right_exact_matched_set)
 
@@ -1307,10 +1324,9 @@ class pairwise_term_matches:
         self.right_not_matched_set.difference_update(self.right_exact_matched_set)
         self.right_not_matched_set.difference_update(self.right_harmonised_matched_set)
 
-        #left_pairwise_matches["exact"][left] = {}
-        #left_pairwise_matches["harmonised"][left] = {}
+        # left_pairwise_matches["exact"][left] = {}
+        # left_pairwise_matches["harmonised"][left] = {}
         self.set_harmonised_matches()
-
 
     def set_harmonised_matches(self):
         ic()
@@ -1367,6 +1383,7 @@ def do_textWordCloud(df, title):
     # plt.savefig(image_dir + "mixsv6_wordcloud.png")
     pass
 
+
 def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, mixs_v6_obj, report):
     """
     making use of sets as sets don't allow duplicates
@@ -1398,33 +1415,32 @@ def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, mixs_
     # ic(mixs_v6_obj.type)
 
     report.write("\nmixs_v6 Terms without matches, these are the most frequent")
-    #ic(mixs_v6_obj.get_terms_by_freq())
+    # ic(mixs_v6_obj.get_terms_by_freq())
     mixsv6_all_match_freq = mixs_v6_obj.get_terms_with_freq()
-    #df = pd.DataFrame(list(zip(self.left_harmonised_matching_list, self.right_harmonised_matching_list)),
+    # df = pd.DataFrame(list(zip(self.left_harmonised_matching_list, self.right_harmonised_matching_list)),
     #                  columns = [self.left_name, self.right_name]).sort_values(self.left_name)
 
-    mixsv6_no_match_freq = { "by_freq": {}, "by_term": {}}
+    mixsv6_no_match_freq = {"by_freq": {}, "by_term": {}}
     for right in pairwise_obj.right_not_matched_set:
         mixsv6_no_match_freq["by_term"][right] = mixsv6_all_match_freq[right]
         ic(right)
         freq = mixsv6_all_match_freq[right]
         if freq not in mixsv6_no_match_freq["by_freq"]:
             mixsv6_no_match_freq["by_freq"][freq] = []
-        #ic(type(mixsv6_no_match_freq["by_freq"][freq]))
-        #ic(type(right))
+        # ic(type(mixsv6_no_match_freq["by_freq"][freq]))
+        # ic(type(right))
         mixsv6_no_match_freq["by_freq"][freq].append(right)
 
     ic(mixsv6_no_match_freq["by_term"])
 
-    df = pd.DataFrame.from_dict(mixsv6_no_match_freq["by_term"], orient='index',columns=["frequency"])
+    df = pd.DataFrame.from_dict(mixsv6_no_match_freq["by_term"], orient = 'index', columns = ["frequency"])
     df["term"] = df.index
     df = df.sort_values("frequency", ascending = False)
     df = df[["term", "frequency"]]
-    report.write(df.head(100).to_string(justify='left', index=False))
+    report.write(df.head(100).to_string(justify = 'left', index = False))
 
     title = "Terms in MIXSv6 not matching ENA terms,\n( sized by the number of packages they occur in )"
     # do_textWordCloud(df, title)
-    sys.exit()
     report.write("Harmonised Matches")
     report.write(pairwise_obj.get_harmonised_match_df().to_string(index = False))
 
@@ -1445,15 +1461,15 @@ def analyse_term_matches(ena_cl_obj, mixs_v6_obj, report):
     def get_df(obj):
         df = pd.DataFrame.from_dict(obj.get_terms_by_freq(), orient = 'index')
         df["term_freq"] = df.index
-        df = df.sort_values(by=["term_freq"], ascending=False)
+        df = df.sort_values(by = ["term_freq"], ascending = False)
         df = df[["term_freq", "term_count_with_freq", "terms"]]
-        #print(df.head(10).to_string(index=False))
-        blankIndex=[''] * len(df)
-        df.index=blankIndex
+        # print(df.head(10).to_string(index=False))
+        blankIndex = [''] * len(df)
+        df.index = blankIndex
         print(df.head(10))
         return df
 
-    def do_hist(df,source):
+    def do_hist(df, source):
         df['term_frequency'] = df.index
         ic(df.head())
         title = "Frequency of terms in the " + source + " Checklist"
@@ -1462,13 +1478,15 @@ def analyse_term_matches(ena_cl_obj, mixs_v6_obj, report):
         fig.write_image(image_dir + 'term_frequency_hist_' + source + '.jpg')
 
     pair_string = ena_cl_obj.type + "::" + mixs_v6_obj.type
-    do_pairwise_term_matches(pair_string, ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list(), mixs_v6_obj, report)
+    do_pairwise_term_matches(pair_string, ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list(), mixs_v6_obj,
+                             report)
 
     ena_df = get_df(ena_cl_obj)
     do_hist(ena_df, 'ENA')
 
     mixs_v6_df = get_df(mixs_v6_obj)
     do_hist(mixs_v6_df, 'MIXS_v6')
+
 
 def parse_new_linkml():
     """
@@ -1498,22 +1516,14 @@ def parse_new_linkml():
     return r_json
 
 
-
-
-
-
-
 def main():
     linkml_mixs_dict = parse_new_linkml()
 
     report_file = "../docs/report.md"
-
     report = open(report_file, "w")
     print(report.write("# Review of the MIX-S checklists proposed by GSC\n"))
-
     ena_cl_dict = get_ena_dict()
     ena_cl_obj = mixs(ena_cl_dict, "ena_cl", linkml_mixs_dict)
-
     my_dict_v6 = get_mixs_dict()
     mixs_v6_dict = process_mixs_dict(my_dict_v6, linkml_mixs_dict)
     mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6", linkml_mixs_dict)
@@ -1521,7 +1531,7 @@ def main():
     compareSelectChecklists(ena_cl_obj, mixs_v6_obj, report)
 
     comparison_obj = compareChecklists(ena_cl_obj, mixs_v6_obj, report)
-    #print(comparison_obj.comparisonStats)
+    # print(comparison_obj.comparisonStats)
 
     analyse_term_matches(ena_cl_obj, mixs_v6_obj, report)
 
@@ -1529,7 +1539,7 @@ def main():
     sys.exit()
 
     mixs_v5_dict = get_mixs_v5_dict()
-    mixs_v5_obj = mixs(mixs_v5_dict, "mixs_v5")
+    mixs_v5_obj = mixs(mixs_v5_dict, "mixs_v5", linkml_mixs_dict)
     # mixs_v5_obj.print_summaries()
 
     # mixs_v6_obj.print_summaries()
