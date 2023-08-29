@@ -11,7 +11,6 @@ ___start_date___ = 2023-05-16
 __docformat___ = 'reStructuredText'
 
 """
-
 from icecream import ic
 import math
 import requests
@@ -1335,25 +1334,28 @@ class pairwise_term_matches:
         return df
 
 
-# def do_textWordCloud(df, title):
-#     # doing wordcloud for the text
-#     text_freq_dict = df.to_dict()
-#     ic()
-#     ic(text_freq_dict)
-#
-#     wordcloud = WordCloud(min_word_length = 3, width = 1200, height = 1000,
-#                           background_color = 'white')
-#     wordcloud.generate_from_frequencies(frequencies = text_freq_dict['frequency'])
-#     plt.imshow(wordcloud, interpolation = 'bilinear')
-#     plt.axis('off')
-#     plt.title(title)
-#     plt.rcParams['figure.figsize'] = [15, 15]  # for square canvas
-#     plt.rcParams['figure.subplot.left'] = 0
-#     plt.rcParams['figure.subplot.bottom'] = 0
-#     plt.rcParams['figure.subplot.right'] = 1
-#     plt.rcParams['figure.subplot.top'] = 1
-#     # plt.show()
-#     plt.savefig(image_dir + "mixsv6_wordcloud.png")
+def do_textWordCloud(df, title):
+    # in pycharm WordCloud not installing, although installed via pip3
+    # import WordCloud
+    # # doing wordcloud for the text
+    # text_freq_dict = df.to_dict()
+    # ic()
+    # ic(text_freq_dict)
+    #
+    # wordcloud = WordCloud(min_word_length = 3, width = 1200, height = 1000,
+    #                       background_color = 'white')
+    # wordcloud.generate_from_frequencies(frequencies = text_freq_dict['frequency'])
+    # plt.imshow(wordcloud, interpolation = 'bilinear')
+    # plt.axis('off')
+    # plt.title(title)
+    # plt.rcParams['figure.figsize'] = [15, 15]  # for square canvas
+    # plt.rcParams['figure.subplot.left'] = 0
+    # plt.rcParams['figure.subplot.bottom'] = 0
+    # plt.rcParams['figure.subplot.right'] = 1
+    # plt.rcParams['figure.subplot.top'] = 1
+    # # plt.show()
+    # plt.savefig(image_dir + "mixsv6_wordcloud.png")
+    pass
 
 def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, mixs_v6_obj):
     """
@@ -1455,10 +1457,10 @@ def analyse_term_matches(ena_cl_obj, mixs_v6_obj):
     do_pairwise_term_matches(pair_string, ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list(), mixs_v6_obj)
 
     ena_df = get_df(ena_cl_obj)
-    #do_hist(ena_df, 'ENA')
+    do_hist(ena_df, 'ENA')
 
     mixs_v6_df = get_df(mixs_v6_obj)
-    #do_hist(mixs_v6_df, 'MIXS_v6')
+    do_hist(mixs_v6_df, 'MIXS_v6')
 
 def parse_new_linkml():
     """
@@ -1510,7 +1512,7 @@ def main():
     mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6", linkml_mixs_dict)
 
     compareSelectChecklists(ena_cl_obj, mixs_v6_obj)
-    sys.exit()
+
 
     comparison_obj = compareChecklists(ena_cl_obj, mixs_v6_obj)
     #print(comparison_obj.comparisonStats)
