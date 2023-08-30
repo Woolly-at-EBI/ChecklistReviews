@@ -47,7 +47,7 @@ def get_data():
     json_file = "../data/v6_mixs.schema.json"
     # cat ../data/mixs.schema.json | sed 's/\\"/"/g;s/\\n/\n/g;s/^"//;s/"$//' | sed 's/\\\\"//g'  | jq
     ic(json_file)
-    r_text = '{ "test": "test_val"}'
+    # r_text = '{ "test": "test_val"}'
     if os.path.isfile(json_file):
         ic(f"about to open {json_file}")
         with open(json_file) as f:
@@ -155,9 +155,7 @@ def process_mixs_dict(my_dict, linkml_dict):
     # for agr_prop_defs in my_dict["$defs"]["Agriculture"]["properties"]:
     #     ic(agr_prop_defs)
 
-    MIXS_review_dict = {}
-    MIXS_review_dict["by_package"] = {}
-    MIXS_review_dict["by_term"] = {}
+    MIXS_review_dict = {"by_package": {}, "by_term": {}}
 
     def get_long_name(short_term_name, linkml_dict):
         if short_term_name in linkml_dict["slots"]:
@@ -199,7 +197,7 @@ def process_mixs_dict(my_dict, linkml_dict):
 
 
 def url2file(url):
-    url = "https://raw.githubusercontent.com/GenomicsStandardsConsortium/mixs/main/mixs/jsonschema/mixs.schema.json"
+    # url = "https://raw.githubusercontent.com/GenomicsStandardsConsortium/mixs/main/mixs/jsonschema/mixs.schema.json"
     ic(url)
     r = requests.get(url)
     r_json = r.text
@@ -215,9 +213,7 @@ def process_ena_cl(my_dict, linkml_mixs_dict):
     # print(my_dict)
     # print(my_dict.keys())
     # print(my_dict["CHECKLIST_SET"].keys())
-    MIXS_review_dict = {}
-    MIXS_review_dict["by_package"] = {}
-    MIXS_review_dict["by_term"] = {}
+    MIXS_review_dict = {"by_package": {}, "by_term": {}}
 
     # print("----------------------------------")
     for checklist in my_dict["CHECKLIST_SET"]["CHECKLIST"]:
@@ -490,9 +486,9 @@ class COMPARISONS:
         for source in self.source_list:
             ic(source)
             if source == 'ena':
-                target_cols = [source, 'length_intersection']
+                target_cols = [source, 'length_clean_intersection']
             else:
-                target_cols = [source, 'length_intersection', 'short_mixs_v6']
+                target_cols = [source, 'length_clean_intersection', 'short_mixs_v6']
             new_df = self.reorg_df[target_cols].drop_duplicates()
             ic(new_df.head().to_string(index=False))
 
@@ -520,48 +516,53 @@ class COMPARISONS:
             # end of process_max_intersection_len
 
     def ingest(self):
+        ic("start of ingest================================================")
         ic()
         reorg_dict = { self.left_source(): [], self.right_source(): [], "left_source": [], "right_source": [], "pair": []}
+        sub_dict_elements = ['length_clean_intersection', 'pc_left_of_right']
+        for element in sub_dict_elements:
+            reorg_dict[element] = []
         comparison_source = 'ena::mixs_v6'
         comparisonStats = self.comparisonStats
         # ic(comparisonStats)
         count =0
+
+        if comparison_source not in comparisonStats:
+            ic(f"ERROR {comparison_source} not in comparisonStats")
+            ic(comparisonStats)
+            sys.exit()
+        else:
+            ic(f"{comparison_source} is in comparisonStats")
+
         for pair in comparisonStats[comparison_source]['by_package']:
             #ic(pair)
             pair_list = pair.split('::')
+            ic(pair_list)
+
+            # ic(comparisonStats[comparison_source]['by_package'][pair])
             sub_dict = comparisonStats[comparison_source]['by_package'][pair]
-            ic(sub_dict)
-            #
-            # sub_dict[self.left_source()] = pair_list[0]
-            # sub_dict[self.right_source()] = pair_list[1]
-            # sub_dict['left_source'] = self.left_source()
-            # sub_dict['right_source'] = self.right_source()
-            # sub_dict['pair'] = pair
             # ic(sub_dict)
-            # reorg_dict.append(sub_dict)
-            # ic(self.left_source())
             reorg_dict[self.left_source()].append(pair_list[0])
             reorg_dict[self.right_source()].append(pair_list[1])
             reorg_dict['left_source'].append(self.left_source())
             reorg_dict['right_source'].append(self.right_source())
             reorg_dict['pair'].append(pair)
+            for element in sub_dict_elements:
+                # ic(sub_dict[element])
+                reorg_dict[element].append(sub_dict[element])
             if count > 3:
                 break
             else:
                 count += 1
-
-        ic(reorg_dict)
-        # sys.exit()
-
+        #ic(reorg_dict)
         self.put_reorg_df(pd.DataFrame.from_dict(reorg_dict))
         df = self.reorg_df
         ic(df.head(5))
         ic(df['short_ena'].unique())
         ic(df['short_mixs_v6'].unique())
-
         self.process_max_intersection_len()
         ic("-------end of ingest------")
-        sys.exit()
+        #sys.exit()
 
 
 # **********************************************************************************
@@ -1013,13 +1014,26 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
 
         return df
 
-    # ic(comparison)
+
+
+    #main stream compare2packages aspects
+    # building  comparisonStats[comparison]['by_package'][com_package_names]  = {}
+    ic(comparison)
     com_package_names = left_package_name + "::" + right_package_name
-    comparisonStats[comparison]['by_package'][com_package_names] = {}
+    ic(com_package_names)
+    if comparison not in comparisonStats:  # added on 30 Aug
+        comparisonStats[comparison] = {}
+        comparisonStats[comparison]['by_package'] = {}
+    if com_package_names not in comparisonStats[comparison]['by_package']:
+        comparisonStats[comparison]['by_package'][com_package_names] = {}
     comparisonStatsPackage = comparisonStats[comparison]['by_package'][com_package_names]
     comparisonStatsPackage = compare2termLists(left_obj.get_term_list_for_package(left_package_name),
                                                right_obj.get_term_list_for_package(right_package_name),
                                                comparisonStatsPackage)
+    comparisonStats[comparison]['by_package'][com_package_names] = comparisonStatsPackage
+    # ic(comparisonStatsPackage)
+    # ic(comparisonStats)
+    # sys.exit()
     report.write("====" + left_obj.type + "====")
     report.write(', '.join(left_obj.get_term_list_for_package(left_package_name)))
     report.write("====" + right_obj.type + "====")
@@ -1036,6 +1050,11 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
     term_comparison_df = create_term_comparison_df(left_obj, right_obj, left_package_name, right_package_name, report)
     report.write(term_comparison_df.to_string(justify = 'left', index = False))
     report.write(f"right_diff={', '.join(sorted(comparisonStatsPackage['right_diff_set']))}")
+
+    # ic(comparisonStatsPackage)
+
+    ic("about to exit compare2packages")
+    return comparisonStatsPackage
 
 
 def cleanList2set(term_list):
@@ -1119,9 +1138,9 @@ def mixs6_matches_plots(df, new_df):
         'short_mixs_v6').mean().reset_index().sort_values(by = 'pc_left_of_right')  # average().reset_index()
     mean_pc_df.rename(columns = {"pc_left_of_right": "MeanPC_intersection"}, inplace = True)
     # print(mean_pc_df.head(20).to_string(index = False))
-    mean_ints_df = df[['short_mixs_v6', 'length_intersection']].groupby(
-        'short_mixs_v6').mean().reset_index().sort_values(by = 'length_intersection')  # average().reset_index()
-    mean_ints_df.rename(columns = {"length_intersection": "MeanLen_intersection"}, inplace = True)
+    mean_ints_df = df[['short_mixs_v6', 'length_clean_intersection']].groupby(
+        'short_mixs_v6').mean().reset_index().sort_values(by = 'length_clean_intersection')  # average().reset_index()
+    mean_ints_df.rename(columns = {"length_clean_intersection": "MeanLen_intersection"}, inplace = True)
     # print(mean_ints_df.head(20).to_string(index = False))
     # print("Count of rows")
     tmp_df = df[['mixs_v6', 'short_mixs_v6']].drop_duplicates()
@@ -1169,6 +1188,8 @@ def compareChecklists(ena_cl_obj, mixs_v6_obj, report):
     :param report:
     :return:
 
+    comparisonStats[comparison]['by_package'][com_package_names]  = {} e.g.
+
     {'ena::mixs_v6':
        {'by_package':
          {'COMPARE-ECDC-EFSA pilot food-associated reporting standard::Agriculture':
@@ -1191,18 +1212,20 @@ def compareChecklists(ena_cl_obj, mixs_v6_obj, report):
 
         ic(str(left_package_count) + "\t" + left_package_name)
         left_package_count += 1
-        # if left_package_count > 5:
-        #     continue
+        if left_package_count > 1:
+            break
 
         for right_package_name in mixs_v6_obj.get_all_package_list():
-            if count > 5:
-                #in testing let minimise
-                 break
+            # PMW
+            com_package_names = '::'.join([left_package_name, right_package_name])
             ic(right_package_name)
-            compare2packages(pair_string, left_package_name, right_package_name, ena_cl_obj, mixs_v6_obj,
+            comparisonStats[pair_string]['by_package'][com_package_names] = compare2packages(pair_string, left_package_name, right_package_name, ena_cl_obj, mixs_v6_obj,
                              comparisonStats, report)
+
             count += 1
     # ic(comparisonStats)
+    # ic()
+    # sys.exit()
     comparison_obj = processComparisonStats(comparisonStats, pair_string)
 
     return comparison_obj
@@ -1244,7 +1267,7 @@ def compareSelectChecklists(ena_cl_obj, mixs_v6_obj, report):
 
         compare2packages('ena::mixs_v6', test_ena_cl_name, test_mixs_v6_cl_name, ena_cl_obj, mixs_v6_obj,
                          comparisonStats, report)
-
+    # other tests
     compare2packages('ena::mixs_v6', 'GSC MIxS human skin', 'Human-skin', ena_cl_obj, mixs_v6_obj,
                      comparisonStats, report)
 
@@ -1411,7 +1434,7 @@ def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, mixs_
     ic(len(pairwise_obj.right_not_matched_set))
 
     report.write("Exact Matches")
-    report.write(pairwise_obj.left_exact_matched_set)
+    report.write(', '.join(list(pairwise_obj.left_exact_matched_set)))
     # ic(mixs_v6_obj.type)
 
     report.write("\nmixs_v6 Terms without matches, these are the most frequent")
