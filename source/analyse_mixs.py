@@ -819,7 +819,7 @@ def do_stats(ena_cl_obj, mixs_v5_obj, mixs_v6_obj):
     return stats_dict
 
 
-def unpack(stats_dict):
+def unpack_dict(stats_dict):
     """
     left term is ENA and right term is MIXS
     :param stats_dict:
@@ -849,7 +849,7 @@ def unpack(stats_dict):
                 df = pd.concat([df, df_temp])
                 # df = df.loc[~df.index.duplicated(keep = 'first')]
 
-    print(stats_dict)
+    ic(stats_dict)
     return df
 
 def plot_pair_counts_df(df, image_dir):
@@ -986,17 +986,17 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
                 if left_term in right_term_list:
                     my_dict[left_term]["match_type"] = "exact"
                     my_dict[left_term]["match"] = right_clean_dict[left_clean]
-                # elif left_clean in package_comparisonStatsPackage["clean_intersection_set"]:
-                #     my_dict[left_term]["match_type"] = "harmonised"
-                #     my_dict[left_term]["match"] = right_clean_dict[left_clean]
+                elif left_clean in package_comparisonStatsPackage["clean_intersection_set"]:
+                    my_dict[left_term]["match_type"] = "harmonised"
+                    my_dict[left_term]["match"] = right_clean_dict[left_clean]
             elif left_term in core_comparisonStatsPackage["intersection_set"] or left_clean in \
                     core_comparisonStatsPackage["clean_intersection_set"]:
                 if left_term in core_term_list:
                     my_dict[left_term]["match_type"] = "exact"
                     my_dict[left_term]["match"] = core_clean_dict[left_clean]
-                # elif left_clean in core_comparisonStatsPackage["clean_intersection_set"]:
-                #     my_dict[left_term]["match_type"] = "harmonised"
-                #     my_dict[left_term]["match"] = core_clean_dict[left_clean]
+                elif left_clean in core_comparisonStatsPackage["clean_intersection_set"]:
+                    my_dict[left_term]["match_type"] = "harmonised"
+                    my_dict[left_term]["match"] = core_clean_dict[left_clean]
             if my_dict[left_term]["match_type"] == "none":
                 # searches combined list as want the highest scoring!
                 resp_match = process.extractOne(left_term, combined_right_term_list)
@@ -1013,8 +1013,6 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
         df["fuzzy_score"] = df["fuzzy_score"].astype(int)
 
         return df
-
-
 
     #main stream compare2packages aspects
     # building  comparisonStats[comparison]['by_package'][com_package_names]  = {}
@@ -1034,13 +1032,13 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
     # ic(comparisonStatsPackage)
     # ic(comparisonStats)
     # sys.exit()
-    report.write("====" + left_obj.type + "====")
+    report.write("### ====" + left_obj.type + "====")
     report.write(', '.join(left_obj.get_term_list_for_package(left_package_name)))
-    report.write("====" + right_obj.type + "====")
+    report.write("### ====" + right_obj.type + "====")
     report.write(', '.join(right_obj.get_term_list_for_package(right_package_name)))
     print_minimal_stats(comparisonStatsPackage, report)
     report.write(f"Intersection = {comparisonStatsPackage['clean_intersection_set']}")
-    report.write("====" + right_obj.type + " Core" + "====")
+    report.write("### ====" + right_obj.type + " Core" + "====")
     report.write(', '.join(right_obj.get_term_list_for_package("Core")))
     comparisonStatsPackage = comparisonStats[comparison]['by_package'][com_package_names]
     comparisonStatsPackage = compare2termLists(left_obj.get_term_list_for_package(left_package_name),
@@ -1050,7 +1048,6 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
     term_comparison_df = create_term_comparison_df(left_obj, right_obj, left_package_name, right_package_name, report)
     report.write(term_comparison_df.to_string(justify = 'left', index = False))
     report.write(f"right_diff={', '.join(sorted(comparisonStatsPackage['right_diff_set']))}")
-
     # ic(comparisonStatsPackage)
 
     ic("about to exit compare2packages")
@@ -1321,27 +1318,37 @@ class pairwise_term_matches:
             harmonised_matches_found = False
             left_pairwise_matches["exact"][left] = {}
             left_pairwise_matches["harmonised"][left] = {}
+            first_right_harmonised = ""
+            local_right_harmonised_list = []
+            right_count = 0
             for right in right_term_list:
                 right_match_found = False
+                right_count += 1
                 if left == right:
                     left_pairwise_matches["exact"][left][right] = ""
                     exact_matches_found = True
                     self.right_exact_matched_set.add(right)
                     self.left_exact_matched_set.add(left)
+                    break
                 elif clean_hash[left] == clean_hash[right]:
+                    # only add them if no exact matches, so have to do it later
                     left_pairwise_matches["harmonised"][left][right] = ""
                     harmonised_matches_found = True
-                    self.right_harmonised_matched_set.add(right)
-                    self.left_harmonised_matched_set.add(left)
-            if not exact_matches_found:
-                del left_pairwise_matches["exact"][left]
-            elif not harmonised_matches_found:
+                    local_right_harmonised_list.append(right)
+            if exact_matches_found:
                 del left_pairwise_matches["harmonised"][left]
-            if not exact_matches_found and not harmonised_matches_found:
+            elif harmonised_matches_found:
+                del left_pairwise_matches["exact"][left]
+                self.left_harmonised_matched_set.add(left)
+                self.right_harmonised_matched_set.add(local_right_harmonised_list[0])
+            else:
+                # if not exact_matches_found and not harmonised_matches_found:
                 left_pairwise_matches["no_matches"][left] = ""
                 self.left_not_matched_set.add(left)
+                del left_pairwise_matches["harmonised"][left]
+                del left_pairwise_matches["exact"][left]
 
-        # some terms may be classified as harmonised as well as exact, so resolving that.
+        # some terms may still possibly be classified as harmonised as well as exact, so resolving that.
         self.left_harmonised_matched_set.difference_update(self.left_exact_matched_set)
         self.right_harmonised_matched_set.difference_update(self.right_exact_matched_set)
 
@@ -1355,7 +1362,6 @@ class pairwise_term_matches:
 
     def set_harmonised_matches(self):
         ic()
-
         left_ordered_list = []
         right_ordered_list = []
         for left in self.left_harmonised_matched_set:
@@ -1364,9 +1370,13 @@ class pairwise_term_matches:
             right_ordered_list.append(right)
             self.left_harmonised_matching_list = left_ordered_list
             self.right_harmonised_matching_list = right_ordered_list
+        # ic(self.left_harmonised_matching_list)
+        # ic(self.right_harmonised_matching_list)
 
         self.right_all_matches_set = self.right_exact_matched_set
         self.right_all_matches_set.union(self.left_harmonised_matched_set)
+        return
+
 
     def get_clean_hash(self):
         clean_hash = {}
@@ -1399,8 +1409,8 @@ def do_textWordCloud(df, title):
     # plt.imshow(wordcloud, interpolation = 'bilinear')
     # plt.axis('off')
     # plt.title(title)
-    # plt.rcParams['figure.figsize'] = [15, 15]  # for square canvas
-    # plt.rcParams['figure.subplot.left'] = 0
+    # # plt.rcParams['figure.figsize'] = [15, 15]  # for square canvas
+    # # plt.rcParams['figure.subplot.left'] = 0
     # plt.rcParams['figure.subplot.bottom'] = 0
     # plt.rcParams['figure.subplot.right'] = 1
     # plt.rcParams['figure.subplot.top'] = 1
@@ -1571,9 +1581,8 @@ def main():
     # mixs_v6_obj.print_summaries()
 
     stats_dict = do_stats(ena_cl_obj, mixs_v5_obj, mixs_v6_obj)
-    df = unpack(stats_dict)
+    df = unpack_dict(stats_dict)
     ic(df)
-    sys.exit()
 
     outfilename = plot_pair_counts_df(df, image_dir)
     print(report.write('![Table comparisons](' + outfilename + ')\n\n'))
