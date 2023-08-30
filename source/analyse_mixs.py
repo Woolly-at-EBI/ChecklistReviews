@@ -852,7 +852,7 @@ def unpack(stats_dict):
     print(stats_dict)
     return df
 
-def plot_df(df, image_dir):
+def plot_pair_counts_df(df, image_dir):
     import plotly.io as pio
     pd.options.plotting.backend = "plotly"
     pio.renderers.default = "browser"
@@ -986,17 +986,17 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
                 if left_term in right_term_list:
                     my_dict[left_term]["match_type"] = "exact"
                     my_dict[left_term]["match"] = right_clean_dict[left_clean]
-                else:
-                    my_dict[left_term]["match_type"] = "harmonised"
-                    my_dict[left_term]["match"] = right_clean_dict[left_clean]
+                # elif left_clean in package_comparisonStatsPackage["clean_intersection_set"]:
+                #     my_dict[left_term]["match_type"] = "harmonised"
+                #     my_dict[left_term]["match"] = right_clean_dict[left_clean]
             elif left_term in core_comparisonStatsPackage["intersection_set"] or left_clean in \
                     core_comparisonStatsPackage["clean_intersection_set"]:
                 if left_term in core_term_list:
                     my_dict[left_term]["match_type"] = "exact"
                     my_dict[left_term]["match"] = core_clean_dict[left_clean]
-                else:
-                    my_dict[left_term]["match_type"] = "harmonised"
-                    my_dict[left_term]["match"] = core_clean_dict[left_clean]
+                # elif left_clean in core_comparisonStatsPackage["clean_intersection_set"]:
+                #     my_dict[left_term]["match_type"] = "harmonised"
+                #     my_dict[left_term]["match"] = core_clean_dict[left_clean]
             if my_dict[left_term]["match_type"] == "none":
                 # searches combined list as want the highest scoring!
                 resp_match = process.extractOne(left_term, combined_right_term_list)
@@ -1010,7 +1010,7 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
         df = pd.DataFrame.from_dict(my_dict, orient = 'index')
         df["left_term"] = df.index
         df = df[["left_term", "match_type", "match", "fuzzy_score"]]
-        df["xc"] = df["fuzzy_score"].astype(int)
+        df["fuzzy_score"] = df["fuzzy_score"].astype(int)
 
         return df
 
@@ -1090,8 +1090,10 @@ def plot_pair_df(df):
     fig.update_layout(title_text = title, title_x = 0.5)
     fig.update_xaxes(tickangle = 45)
     fig.update_yaxes(tickangle = 45)
-    # fig.show()
-    fig.write_image("/Users/woollard/projects/ChecklistReviews/docs/ENAvsMIXSv6_heatmap.jpg")
+    fig.show()
+    image_file = image_dir + "ENAvsMIXSv6_heatmap.jpg"
+    ic(f"creating: {image_file}")
+    fig.write_image(image_file)
 
     ic(len(df['ena'].unique()))
 
@@ -1496,9 +1498,10 @@ def analyse_term_matches(ena_cl_obj, mixs_v6_obj, report):
         df['term_frequency'] = df.index
         ic(df.head())
         title = "Frequency of terms in the " + source + " Checklist"
-        fig = px.histogram(df, x = 'term_frequency', y = 'term_count_with_freq', nbins = 50, title = title)
-        fig.show()
-        fig.write_image(image_dir + 'term_frequency_hist_' + source + '.jpg')
+        fig = px.histogram(df, x = 'term_freq', y = 'term_count_with_freq', nbins = 50, title = title)
+        image_file = image_dir + 'term_frequency_hist_' + source + '.jpg'
+        ic(f"writing to {image_file}")
+        fig.write_image(image_file)
 
     pair_string = ena_cl_obj.type + "::" + mixs_v6_obj.type
     do_pairwise_term_matches(pair_string, ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list(), mixs_v6_obj,
@@ -1558,8 +1561,8 @@ def main():
 
     analyse_term_matches(ena_cl_obj, mixs_v6_obj, report)
 
-    ic("early exit")
-    sys.exit()
+    # ic("early exit")
+    # sys.exit()
 
     mixs_v5_dict = get_mixs_v5_dict()
     mixs_v5_obj = mixs(mixs_v5_dict, "mixs_v5", linkml_mixs_dict)
@@ -1569,8 +1572,10 @@ def main():
 
     stats_dict = do_stats(ena_cl_obj, mixs_v5_obj, mixs_v6_obj)
     df = unpack(stats_dict)
+    ic(df)
+    sys.exit()
 
-    outfilename = plot_df(df, image_dir)
+    outfilename = plot_pair_counts_df(df, image_dir)
     print(report.write('![Table comparisons](' + outfilename + ')\n\n'))
     print(report.write(df.to_markdown()))
 
