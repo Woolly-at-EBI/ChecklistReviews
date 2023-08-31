@@ -34,7 +34,6 @@ pd.set_option('display.width', 1000)
 pio.renderers.default = "browser"
 # from fuzzywuzzy import process
 
-
 image_dir = "../docs/images/"
 
 
@@ -490,7 +489,7 @@ class COMPARISONS:
             else:
                 target_cols = [source, 'length_clean_intersection', 'short_mixs_v6']
             new_df = self.reorg_df[target_cols].drop_duplicates()
-            ic(new_df.head().to_string(index=False))
+            ic(new_df.head().to_string(index = False))
 
             # for each ENA or Mixs checklist, get the checklists with >= 20% overlap with at least one GSC MIx
             new_df = self.reorg_df
@@ -518,20 +517,21 @@ class COMPARISONS:
     def ingest(self):
         # ic("start of ingest================================================"+ "\n")
         # ic()
-        reorg_dict = { self.left_source(): [], self.right_source(): [], "left_source": [], "right_source": [], "pair": []}
+        reorg_dict = {self.left_source(): [], self.right_source(): [], "left_source": [], "right_source": [],
+                      "pair": []}
         sub_dict_elements = ['length_clean_intersection', 'pc_left_of_right']
         for element in sub_dict_elements:
             reorg_dict[element] = []
         comparison_source = 'ena::mixs_v6'
         comparisonStats = self.comparisonStats
         # ic(comparisonStats)
-        count =0
+        count = 0
 
         if comparison_source not in comparisonStats:
             ic(f"ERROR {comparison_source} not in comparisonStats")
             ic(comparisonStats)
             sys.exit()
-        #else:
+        # else:
         #    ic(f"{comparison_source} is in comparisonStats")
 
         for pair in comparisonStats[comparison_source]['by_package']:
@@ -554,7 +554,7 @@ class COMPARISONS:
                 break
             else:
                 count += 1
-        #ic(reorg_dict)
+        # ic(reorg_dict)
         self.put_reorg_df(pd.DataFrame.from_dict(reorg_dict))
         df = self.reorg_df
         ic(df.head(5))
@@ -562,7 +562,7 @@ class COMPARISONS:
         # ic(df['short_mixs_v6'].unique())
         self.process_max_intersection_len()
         # ic("-------end of ingest------")
-        #sys.exit()
+        # sys.exit()
 
 
 # **********************************************************************************
@@ -852,6 +852,7 @@ def unpack_dict(stats_dict):
     ic(stats_dict)
     return df
 
+
 def plot_pair_counts_df(df, image_dir):
     import plotly.io as pio
     pd.options.plotting.backend = "plotly"
@@ -859,11 +860,12 @@ def plot_pair_counts_df(df, image_dir):
     print(df)
 
     fig = df.plot.bar(x = "pair", y = "right_pc_matched", color = "match_type", text = "pair",
-                      title = "Comparisons of Different Versions of Checklist by Counts of Matching Terms", barmode="group")
+                      title = "Comparisons of Different Versions of Checklist by Counts of Matching Terms",
+                      barmode = "group")
     # fig.show()
     out_file = image_dir + "matches_table_plot.png"
     fig.write_image(out_file)
-    #sys.exit()
+    # sys.exit()
     return out_file
 
 
@@ -930,6 +932,20 @@ def compare2termLists(left_term_list, right_term_list, comparisonStatsPackage):
     return comparisonStatsPackage
 
 
+def term_alignment_dict2df(my_dict):
+    """
+
+    :param my_dict:
+    :return: df
+    df = df[["left_term", "match_type", "match", "fuzzy_score"]]
+    """
+    df = pd.DataFrame.from_dict(my_dict, orient = 'index')
+    df["left_term"] = df.index
+    df = df[["left_term", "match_type", "match", "fuzzy_score"]]
+    df["fuzzy_score"] = df["fuzzy_score"].astype(int)
+    return df
+
+
 def compare2packages(comparison, left_package_name, right_package_name, left_obj, right_obj, comparisonStats, report):
     def print_minimal_stats(comparisonStatsPackage, report):
         report.write(f"## Minimal_stats:\n\tlength_intersection={comparisonStatsPackage['length_clean_intersection']}")
@@ -968,7 +984,6 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
                                                         right_obj.get_term_list_for_package("Core"),
                                                         comparisonStatsPackage)
 
-        my_dict = {}
         left_list = sorted(left_obj.get_term_list_for_package(left_package_name))
         left_clean_dict, left_raw_dict = generate_clean_dict(left_list)
         right_term_list = right_obj.get_term_list_for_package(right_package_name)
@@ -978,6 +993,8 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
         # ic(right_term_list)
         combined_right_term_list = (right_term_list)
         combined_right_term_list.extend(core_term_list)
+
+        my_dict = {}
         fuzzy_threshold = 85
         for left_term in left_list:
             my_dict[left_term] = {"match_type": "none", "fuzzy_score": 100}
@@ -1009,16 +1026,12 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
                 else:
                     my_dict[left_term]["fuzzy_score"] = 0
 
-        df = pd.DataFrame.from_dict(my_dict, orient = 'index')
-        df["left_term"] = df.index
-        df = df[["left_term", "match_type", "match", "fuzzy_score"]]
-        df["fuzzy_score"] = df["fuzzy_score"].astype(int)
-
+        df = term_alignment_dict2df(my_dict)
         return df
 
-    #main stream compare2packages aspects
+    # main stream compare2packages aspects
     # building  comparisonStats[comparison]['by_package'][com_package_names]  = {}
-    #ic(comparison)
+    # ic(comparison)
     com_package_names = left_package_name + "::" + right_package_name
     # ic(com_package_names)
     if comparison not in comparisonStats:  # added on 30 Aug
@@ -1033,26 +1046,29 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
     comparisonStats[comparison]['by_package'][com_package_names] = comparisonStatsPackage
     # ic(comparisonStatsPackage)
     # ic(comparisonStats)
+    # report.write('## Comparison of ' + left_package_name + " and " + right_package_name + "\n")
     # sys.exit()
     # report.write("### ====" + left_obj.type + "====" + "\n")
     # report.write(', '.join(left_obj.get_term_list_for_package(left_package_name))+ "\n")
     # report.write("### ====" + right_obj.type + "====" + "\n")
     # report.write(', '.join(right_obj.get_term_list_for_package(right_package_name)) + "\n")
-    print_minimal_stats(comparisonStatsPackage, report)
+    # print_minimal_stats(comparisonStatsPackage, report)
     # report.write(f"Intersection = {comparisonStatsPackage['clean_intersection_set']}"+ "\n")
     # report.write("### ====" + right_obj.type + " Core" + "====" + "\n")
     # report.write(', '.join(right_obj.get_term_list_for_package("Core"))+ "\n")
     comparisonStatsPackage = comparisonStats[comparison]['by_package'][com_package_names]
     comparisonStatsPackage = compare2termLists(left_obj.get_term_list_for_package(left_package_name),
                                                right_obj.get_term_list_for_package("Core"), comparisonStatsPackage)
-    report.write(f"Intersection = {comparisonStatsPackage['clean_intersection_set']}" + "\n")
+    # report.write(f"Intersection = {comparisonStatsPackage['clean_intersection_set']}" + "\n")
 
     term_comparison_df = create_term_comparison_df(left_obj, right_obj, left_package_name, right_package_name, report)
     # report.write(term_comparison_df.to_string(justify = 'left', index = False))
     # report.write(f"right_diff={', '.join(sorted(comparisonStatsPackage['right_diff_set']))}" + "\n")
     # ic(comparisonStatsPackage)
 
-    #ic("about to exit compare2packages")
+    #  report.write("\n" + term_comparison_df.to_markdown(index=False) + "\n")
+
+    # ic("about to exit compare2packages")
     return comparisonStatsPackage
 
 
@@ -1069,7 +1085,7 @@ def plot_pair_df(df):
     """
     # import dash_bio
 
-    #fig = px.scatter(df, x = "pc_left_of_right", y = "length_intersection", color = "short_mixs_v6", size = 'length_left', hover_data = 'pair')
+    # fig = px.scatter(df, x = "pc_left_of_right", y = "length_intersection", color = "short_mixs_v6", size = 'length_left', hover_data = 'pair')
     # fig.show()
     cut_off = 0.2
     title = "Heatmap of Fraction of ENA Checklists Terms in Different MIXS v6 packages"
@@ -1110,17 +1126,15 @@ def plot_pair_df(df):
     #     line_width = 2
     # )
 
-
-
     df_pc = df_pc.loc[(df_pc['pc_left_of_right'] < 0.3)]
-    new_df = df_pc.pivot(index='ena', columns='mixs_v6')['pc_left_of_right']
+    new_df = df_pc.pivot(index = 'ena', columns = 'mixs_v6')['pc_left_of_right']
     # ic(new_df)
     image_file = image_dir + "ena_checklist_match_heatmap.jpg"
     fig = px.imshow(new_df)
     ic(image_file)
     fig.write_image(image_file)
     # fig.show()
-    #sys.exit()
+    # sys.exit()
 
 
 def mixs6_matches_plots(df, new_df):
@@ -1206,8 +1220,8 @@ def compareChecklists(ena_cl_obj, mixs_v6_obj, report):
     pair_string = 'ena::mixs_v6'
     comparisonStats = {pair_string: {'by_package': {}}}
 
-    #ic(ena_cl_obj.get_all_package_list())
-    #ic(mixs_v6_obj.get_all_package_list())
+    # ic(ena_cl_obj.get_all_package_list())
+    # ic(mixs_v6_obj.get_all_package_list())
     ic(len(ena_cl_obj.get_all_package_list()))
     left_package_count = 0
     count = 0
@@ -1222,8 +1236,11 @@ def compareChecklists(ena_cl_obj, mixs_v6_obj, report):
             # PMW
             com_package_names = '::'.join([left_package_name, right_package_name])
             # ic(right_package_name)
-            comparisonStats[pair_string]['by_package'][com_package_names] = compare2packages(pair_string, left_package_name, right_package_name, ena_cl_obj, mixs_v6_obj,
-                             comparisonStats, report)
+            comparisonStats[pair_string]['by_package'][com_package_names] = compare2packages(pair_string,
+                                                                                             left_package_name,
+                                                                                             right_package_name,
+                                                                                             ena_cl_obj, mixs_v6_obj,
+                                                                                             comparisonStats, report)
 
             count += 1
     # ic(comparisonStats)
@@ -1232,6 +1249,62 @@ def compareChecklists(ena_cl_obj, mixs_v6_obj, report):
     comparison_obj = processComparisonStats(comparisonStats, pair_string)
 
     return comparison_obj
+
+
+def compareAllTerms(left_list, right_list, report):
+    """
+
+    :param left_list:
+    :param right_list:
+    :param report:
+    :return:
+    """
+    ic(f"left len={len(left_list)} right len={len(right_list)}")
+
+    left_term_list = sorted(left_list)
+    right_term_list = sorted(right_list)
+    left_clean_dict, left_raw_dict = generate_clean_dict(left_term_list)
+    right_clean_dict, right_raw_dict = generate_clean_dict(right_term_list)
+    left_term_set = set(left_term_list)
+    right_term_set = set(right_term_list)
+    left_clean_set = set(left_clean_dict.keys())
+    right_clean_set = set(right_clean_dict.keys())
+    exact_intersection_set = left_term_set.intersection(right_term_set)
+    clean_intersection_set = left_clean_set.intersection(right_clean_set)
+
+    my_dict = {}
+    fuzzy_threshold = 85
+    for left_term in left_term_list:
+        my_dict[left_term] = {"match_type": "none", "fuzzy_score": 100}
+        left_clean = left_raw_dict[left_term]
+        # print(f"{left_term} - {left_clean}")
+        if left_term in exact_intersection_set:
+            my_dict[left_term]["match"] = left_term
+            my_dict[left_term]["match_type"] = "exact"
+        elif left_clean in clean_intersection_set:
+            my_dict[left_term]["match"] = left_clean
+            my_dict[left_term]["match_type"] = "harmonised"
+        else:
+            resp_match = process.extractOne(left_term, right_term_list)
+            if resp_match[1] > fuzzy_threshold:
+                my_dict[left_term]["match_type"] = "fuzzy"
+                my_dict[left_term]["fuzzy_score"] = resp_match[1]
+                my_dict[left_term]["match"] = resp_match[0]
+            else:
+                my_dict[left_term]["fuzzy_score"] = 0
+                my_dict[left_term]["match_type"] = "none"
+                my_dict[left_term]["match"] = ""
+
+    df = term_alignment_dict2df(my_dict)
+    print(df.to_markdown(index=False))
+    ic(df.match_type.value_counts())
+    tmp_df = df.match.value_counts().rename_axis('unique_values').to_frame('counts').reset_index().query('counts > 1')
+    dup_set = set(tmp_df.unique_values.tolist())
+    ic(dup_set)
+    return df
+
+
+pass
 
 
 def compareSelectChecklists(ena_cl_obj, mixs_v6_obj, report):
@@ -1290,9 +1363,15 @@ def clean_term(term):
 class pairwise_term_matches:
     """pairwise_term_matches object as simple object orientated to reduce complexity and saves passing a big hash.
 
+    pairwise_term_matches(pair_string, left_term_list, right_term_list)
     """
 
     def process_names(self, pair_string):
+        """
+
+        :param pair_string:
+        :return:
+        """
         self.pair_string = pair_string
         ic(pair_string)
         pair_source = pair_string.split('::')
@@ -1300,6 +1379,12 @@ class pairwise_term_matches:
         self.right_name = pair_source[1]
 
     def __init__(self, pair_string, left_term_list, right_term_list):
+        """
+
+        :param pair_string:
+        :param left_term_list:
+        :param right_term_list:
+        """
         self.process_names(pair_string)
 
         self.left_term_list = left_term_list
@@ -1381,7 +1466,6 @@ class pairwise_term_matches:
         self.right_all_matches_set.union(self.left_harmonised_matched_set)
         return
 
-
     def get_clean_hash(self):
         clean_hash = {}
         pairwise_matches = {}
@@ -1449,7 +1533,7 @@ def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, mixs_
     ic(len(pairwise_obj.right_harmonised_matched_set))
     ic(len(pairwise_obj.right_not_matched_set))
 
-    report.write("## Exact Matches")
+    report.write("## Exact Matches" + "\n")
     report.write(', '.join(list(pairwise_obj.left_exact_matched_set)))
     # ic(mixs_v6_obj.type)
 
@@ -1476,17 +1560,16 @@ def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, mixs_
     df["term"] = df.index
     df = df.sort_values("frequency", ascending = False)
     df = df[["term", "frequency"]]
-    #report.write(df.head(100).to_string(justify = 'left', index = False))
+    # report.write(df.head(100).to_string(justify = 'left', index = False))
     report.write("## Frequency" + "\n")
-    report.write(df.to_markdown() + "\n")
+    report.write(df.to_markdown(index = False) + "\n")
 
     title = "Terms in MIXSv6 not matching ENA terms,\n( sized by the number of packages they occur in )"
     # do_textWordCloud(df, title)
-    report.write("## Harmonised Matches"+ "\n")
+    report.write("## Harmonised Matches" + "\n")
     pairwise_df = pairwise_obj.get_harmonised_match_df()
-    report.write(pairwise_df.to_markdown() + "\n")
+    report.write(pairwise_df.to_markdown(index = False) + "\n")
     # report.write(pairwise_obj.get_harmonised_match_df().to_string(index = false)
-
 
     return pairwise_obj
 
@@ -1573,6 +1656,9 @@ def main():
     mixs_v6_dict = process_mixs_dict(my_dict_v6, linkml_mixs_dict)
     mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6", linkml_mixs_dict)
 
+    compareAllTerms(ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list(), report)
+    sys.exit()
+
     compareSelectChecklists(ena_cl_obj, mixs_v6_obj, report)
 
     comparison_obj = compareChecklists(ena_cl_obj, mixs_v6_obj, report)
@@ -1596,7 +1682,7 @@ def main():
     outfilename = plot_pair_counts_df(df, image_dir)
     print(report.write('## Table of pair_count comparisons'))
     print(report.write('![Table comparisons](' + outfilename + ')\n\n'))
-    print(report.write(df.to_markdown()))
+    print(report.write(df.to_markdown(index = False)))
 
     print(f"closing {report_file}")
     report.close()
