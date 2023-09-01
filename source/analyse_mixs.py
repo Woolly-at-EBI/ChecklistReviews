@@ -27,6 +27,11 @@ import plotly.express as px
 
 import plotly.io as pio
 from rapidfuzz import process
+from pairwise_term_matches import pairwise_term_matches
+from COMPARISONS import COMPARISONS
+import mixs
+from mixs import mixs
+
 
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
@@ -87,38 +92,6 @@ def get_mixs_dict():
     return my_dict
 
 
-def add_term_package_count(my_dict):
-    """
-    for all the term_name's add the package_name and count.
-    slightly verbose, being careful in case the dictionary has already been partially populated.
-
-    :param my_dict:
-    :return: my_dict
-    """
-
-    for package_name in my_dict["by_package"]:
-        for term_name in my_dict["by_package"][package_name]["field"]:
-            if term_name in my_dict["by_term"] and 'packages' in my_dict["by_term"][term_name]:
-                my_dict["by_term"][term_name]['packages'].append(package_name)
-                my_dict["by_term"][term_name]['count'] += 1
-            else:
-                if term_name not in my_dict["by_term"]:
-                    my_dict["by_term"][term_name] = {}
-                my_dict["by_term"][term_name]['packages'] = [package_name]
-                my_dict["by_term"][term_name]['count'] = 1
-    my_dict["by_term_count"] = {}
-
-    # now to add by_term_count
-    for term_name in my_dict["by_term"]:
-        my_total = my_dict["by_term"][term_name]['count']
-        if my_total not in my_dict["by_term_count"]:
-            my_dict["by_term_count"][my_total] = {}
-        my_dict["by_term_count"][my_total][term_name] = {}
-        my_dict["by_term_count"][my_total][term_name]['packages'] = my_dict["by_term"][term_name]['packages']
-
-    # ic(my_dict["by_term_count"])
-    # sys.exit()
-    return my_dict
 
 
 def print_mixs_review_dict_stats(mixs_review_dict):
@@ -194,96 +167,46 @@ def process_mixs_dict(my_dict, linkml_dict):
     # print_mixs_review_dict_stats(MIXS_review_dict)
     return MIXS_review_dict
 
+# this is the mixs.py too, need to work out how to only have one copy!
+def add_term_package_count(my_dict):
+    """
+    for all the term_name's add the package_name and count.
+    slightly verbose, being careful in case the dictionary has already been partially populated.
+
+    :param my_dict:
+    :return: my_dict
+    """
+
+    for package_name in my_dict["by_package"]:
+        for term_name in my_dict["by_package"][package_name]["field"]:
+            if term_name in my_dict["by_term"] and 'packages' in my_dict["by_term"][term_name]:
+                my_dict["by_term"][term_name]['packages'].append(package_name)
+                my_dict["by_term"][term_name]['count'] += 1
+            else:
+                if term_name not in my_dict["by_term"]:
+                    my_dict["by_term"][term_name] = {}
+                my_dict["by_term"][term_name]['packages'] = [package_name]
+                my_dict["by_term"][term_name]['count'] = 1
+    my_dict["by_term_count"] = {}
+
+    # now to add by_term_count
+    for term_name in my_dict["by_term"]:
+        my_total = my_dict["by_term"][term_name]['count']
+        if my_total not in my_dict["by_term_count"]:
+            my_dict["by_term_count"][my_total] = {}
+        my_dict["by_term_count"][my_total][term_name] = {}
+        my_dict["by_term_count"][my_total][term_name]['packages'] = my_dict["by_term"][term_name]['packages']
+
+    # ic(my_dict["by_term_count"])
+    # sys.exit()
+    return my_dict
+
 
 def url2file(url):
     # url = "https://raw.githubusercontent.com/GenomicsStandardsConsortium/mixs/main/mixs/jsonschema/mixs.schema.json"
     ic(url)
     r = requests.get(url)
     r_json = r.text
-
-
-def process_ena_cl(my_dict, linkml_mixs_dict):
-    """
-    function to parse the ena_cl in a similar way to how the mixs versions have been parsed
-
-    :param my_dict:
-    :return:
-    """
-    # print(my_dict)
-    # print(my_dict.keys())
-    # print(my_dict["CHECKLIST_SET"].keys())
-    MIXS_review_dict = {"by_package": {}, "by_term": {}}
-
-    # print("----------------------------------")
-    for checklist in my_dict["CHECKLIST_SET"]["CHECKLIST"]:
-        # print(checklist)
-        # print(checklist["@accession"])
-        # print(checklist["@checklistType"])
-        # print(f"name={checklist['DESCRIPTOR']['NAME']} DESCRIPTION={checklist['DESCRIPTOR']['DESCRIPTION']}")
-        checklist_name = checklist['DESCRIPTOR']['NAME']
-        # ic(checklist_name)
-        if not hasattr(MIXS_review_dict["by_package"], checklist_name):
-            MIXS_review_dict["by_package"][checklist_name] = {'field': {}}
-
-        for field_group in checklist['DESCRIPTOR']["FIELD_GROUP"]:
-            # print(field_group)
-            # print(f"\tname={field_group['NAME']} DESCRIPTION={field_group['DESCRIPTION']}")
-            for field in field_group["FIELD"]:
-                # print(f"\t\tfield={field}")
-                # ic(field)
-                if field in ["LABEL", "NAME", "DESCRIPTION", "FIELD_TYPE", "MANDATORY", "MULTIPLICITY", "SYNONYM",
-                             "UNITS"]:
-                    continue
-                field_name = field['NAME']
-
-                if field_name in linkml_mixs_dict['slots']:
-                    # ic(linkml_mixs_dict['slots'][field_name])
-                    long_field_name = linkml_mixs_dict['slots'][field_name]['title']  # ENA uses the long_field_name
-                    # ic(field_name)
-                    # ic(long_field_name)
-                    # sys.exit()
-                else:
-                    long_field_name = field_name
-
-                if field_name not in MIXS_review_dict["by_term"]:
-                    MIXS_review_dict["by_term"][long_field_name] = {}
-                if field_name not in MIXS_review_dict["by_package"][checklist_name]['field']:
-                    MIXS_review_dict["by_package"][checklist_name]['field'][long_field_name] = {}
-                # MIXS_review_dict["by_package"][checklist_name][field_name]['name'] = field_name
-
-                description = "no_description"
-                if "DESCRIPTION" in field:
-                    description = field["DESCRIPTION"]
-                else:
-                    # print(f"no DESCRIPTION, so using LABEL for {field_name}")
-                    if 'LABEL' in field:
-                        description = field["LABEL"]
-                        # print(f"no description so using label={description}")
-
-                MIXS_review_dict["by_term"][long_field_name]['DESCRIPTION'] = description
-                MIXS_review_dict["by_package"][checklist_name]['field'][long_field_name]["DESCRIPTION"] = description
-                # ic(MIXS_review_dict["by_package"][checklist_name]['field'][field_name])
-
-            # end of for field_group
-            # ic(MIXS_review_dict["by_package"])
-            # ic(MIXS_review_dict["by_term"])
-            # sys.exit()
-            for checklist_name in MIXS_review_dict["by_package"]:
-                # ic(checklist_name)
-                # ic(MIXS_review_dict["by_package"][checklist_name])
-                if 'field' in MIXS_review_dict["by_package"][checklist_name]:
-                    MIXS_review_dict["by_package"][checklist_name]['count'] = len(
-                        MIXS_review_dict["by_package"][checklist_name]['field'].keys())
-                # else:
-                # ic("WARNING: package seems to be missing any fields!", checklist_name)
-
-        # print()
-        # end of for each checklist
-        # sys.exit()
-
-    MIXS_review_dict = add_term_package_count(MIXS_review_dict)
-
-    return MIXS_review_dict
 
 
 def get_ena_cl_details(ena_cl_dict):
@@ -317,252 +240,6 @@ def get_ena_cl_details(ena_cl_dict):
     return ena_simplified_cl_dict
 
 
-class mixs:
-    def ingest_ena_cl(self):
-        self.my_dict = process_ena_cl(self.my_dict_raw, self.linkml_mixs_dict)
-
-    def __init__(self, my_dict, type, linkml_mixs_dict):
-        # type could be  "mixs_v5" or "mixs_v6"
-        self.type = type
-
-        if type == "ena_cl":
-            print(f"type = {type}")
-            self.my_dict_raw = my_dict
-            self.linkml_mixs_dict = linkml_mixs_dict
-            self.ingest_ena_cl()
-
-            # self.cl_details_dict = get_ena_cl_details(self.my_dict_raw)
-        else:
-            self.my_dict = my_dict
-
-    def get_type(self):
-        return self.type
-
-    def get_all_term_list(self):
-        my_list = list(self.my_dict['by_term'].keys())
-        my_list.sort()
-        return my_list
-
-    def get_terms_with_freq(self):
-        """
-                :return:  {'Food_Product_type': 12,
-                                        'Food_source': 12,
-                                        'HACCP_term': 36,
-        """
-        self.get_terms_by_freq()
-        return self.term_with_freq
-
-    def get_terms_by_freq(self):
-        """
-
-        :return:  40: {'term_count_with_freq': 2,
-                        'terms': dict_keys(['collection date', 'geographic location (country and/or sea)'])}}
-        """
-        ic()
-        if hasattr(self, 'my_just_freq'):
-            return self.my_just_freq
-
-        my_just_freq = {}
-        if "by_term_count" not in self.my_dict:
-            add_term_package_count(self.my_dict)
-
-        self.term_with_freq = {}
-
-        freq_keys = sorted(self.my_dict["by_term_count"].keys(), reverse = True)
-        # ic("KEYS=+++++++++++++++++++++++++")
-        # ic(freq_keys)
-        # ic(self.my_dict["by_term_count"][40].keys())
-        for freq_key in freq_keys:
-            my_just_freq[freq_key] = {}
-            my_just_freq[freq_key]["terms"] = list(self.my_dict["by_term_count"][freq_key].keys())
-            my_just_freq[freq_key]["term_count_with_freq"] = len(my_just_freq[freq_key]["terms"])
-            for term in my_just_freq[freq_key]["terms"]:
-                self.term_with_freq[term] = freq_key
-        # ic(my_just_freq)
-        # sys.exit()
-
-        self.my_just_freq = my_just_freq
-        return self.my_just_freq
-
-        #
-        #
-        # total_count =0
-        # # my_dict["by_term_count"]
-        # ic(self.my_dict["by_term_count"].keys())
-        # ic(self.my_dict["by_term_count"])
-        #
-        # return (self.my_dict["by_term_count"])
-
-    def get_term_top(self, first_number):
-        """
-        get_term_top - get the first 10, or whatever in terms of frequency
-        :param first_number:
-        :return:
-        """
-        my_just_freq = self.get_terms_by_freq()
-        total_found_so_far = 0
-        top_terms = []
-        for freq_key in my_just_freq:
-            ic(my_just_freq[freq_key]["terms"])
-            top_terms.extend(list(my_just_freq[freq_key]["terms"]))
-            if len(top_terms) >= first_number:
-                return top_terms[0:first_number - 1]
-        return top_terms
-
-    def get_all_term_count(self):
-        return (len(self.my_dict['by_term'].keys()))
-
-    def print_term_summary(self, top):
-        """
-
-        :param top: = top # number to print, if "", print all
-        :return:
-        """
-        if top == "":
-            print(f"term_count={self.get_all_term_count()}  terms={self.get_all_term_list()}")
-        else:
-            print(f"term_count={self.get_all_term_count()} first {top} terms={self.get_all_term_list()[0:top]}")
-
-    def get_all_package_list(self):
-        my_list = list(self.my_dict['by_package'].keys())
-        my_list.sort()
-        return my_list
-
-    def get_all_package_count(self):
-        return (len(self.my_dict['by_package'].keys()))
-
-    def print_package_summary(self):
-        print(f"package_count={self.get_all_package_count()} packages={self.get_all_package_list()}")
-
-    def print_summaries(self):
-        self.print_term_summary(10)
-        self.print_package_summary()
-
-    # def get_all_checklists(self):
-    #     self.cl_details_dict
-
-    def get_term_list_for_package(self, package_cl_name):
-        # ic("inside get_term_list_for_package", package_cl_name)
-        # ic(self.my_dict['by_package'][package_cl_name])
-        return list(self.my_dict['by_package'][package_cl_name]['field'].keys())
-
-
-# **********************************************************************************
-
-class COMPARISONS:
-    """ not yet a proper or even rich object...
-        if more development, need to improve this.
-        (still it served a purpose and broke up an excessively long routine)
-    """
-
-    def __init__(self, comparisonStats, comparison_source):
-        ic()
-        ic(comparison_source)
-        self.source_list = []
-        self.source_list = comparison_source.split('::')
-        self.comparisonStats = comparisonStats
-        ic("---------------------------")
-        self.ingest()
-
-    def left_source(self):
-        return self.source_list[0]
-
-    def right_source(self):
-        return self.source_list[1]
-
-    def put_reorg_df(self, df):
-        self.reorg_df = df
-        self.reorg_df['short_ena'] = df['ena'].str.extract(r"([A-Za-z]+ [A-Za-z]+ [A-Za-z]+)")
-        self.reorg_df['short_mixs_v6'] = df['mixs_v6'].str.extract(r"([A-Z][a-z]+)")
-
-    def process_max_intersection_len(self):
-        """
-
-        :return:
-        """
-        # for each ENA checklist, get the maximum length of intersections
-        # sources = source_list  # ['ena', 'mixs_v6']
-        for source in self.source_list:
-            ic(source)
-            if source == 'ena':
-                target_cols = [source, 'length_clean_intersection']
-            else:
-                target_cols = [source, 'length_clean_intersection', 'short_mixs_v6']
-            new_df = self.reorg_df[target_cols].drop_duplicates()
-            ic(new_df.head().to_string(index = False))
-
-            # for each ENA or Mixs checklist, get the checklists with >= 20% overlap with at least one GSC MIx
-            new_df = self.reorg_df
-            target_cols = [source]
-            if source == 'short_mixs_v6':
-                target_cols.append('short_mixs_v6')
-            alltarget_cols = target_cols
-            alltarget_cols.append('pc_left_of_right')
-
-            max_df = new_df[alltarget_cols].groupby(target_cols).max().reset_index()
-            # print(max_df.to_string(index = False))
-
-            if source == 'mixs_v6':
-                mixs6_matches_plots(self.reorg_df, new_df)
-            print(f"each {source} checklist with >= 20% overlap with at least one GSC MIx")
-            tmp_df = max_df.query('pc_left_of_right >= 0.2')
-            # print(tmp_df.to_string(index = False))
-            # print(f"{tmp_df[source].unique()} \ntotal={len(tmp_df[source].unique())}")
-            print("each {source} checklist with a maximum < 20% overlap with any GSC MIx")
-            tmp_df = max_df.query('pc_left_of_right < 0.2')
-            # print(tmp_df.to_string(index = False))
-            # print(f"{tmp_df[source].unique()} \ntotal={len(tmp_df[source].unique())}")
-            # end of process_max_intersection_len
-
-    def ingest(self):
-        # ic("start of ingest================================================"+ "\n")
-        # ic()
-        reorg_dict = {self.left_source(): [], self.right_source(): [], "left_source": [], "right_source": [],
-                      "pair": []}
-        sub_dict_elements = ['length_clean_intersection', 'pc_left_of_right']
-        for element in sub_dict_elements:
-            reorg_dict[element] = []
-        comparison_source = 'ena::mixs_v6'
-        comparisonStats = self.comparisonStats
-        # ic(comparisonStats)
-        count = 0
-
-        if comparison_source not in comparisonStats:
-            ic(f"ERROR {comparison_source} not in comparisonStats")
-            ic(comparisonStats)
-            sys.exit()
-        # else:
-        #    ic(f"{comparison_source} is in comparisonStats")
-
-        for pair in comparisonStats[comparison_source]['by_package']:
-            # ic(pair)
-            pair_list = pair.split('::')
-            # ic(pair_list)
-
-            # ic(comparisonStats[comparison_source]['by_package'][pair])
-            sub_dict = comparisonStats[comparison_source]['by_package'][pair]
-            # ic(sub_dict)
-            reorg_dict[self.left_source()].append(pair_list[0])
-            reorg_dict[self.right_source()].append(pair_list[1])
-            reorg_dict['left_source'].append(self.left_source())
-            reorg_dict['right_source'].append(self.right_source())
-            reorg_dict['pair'].append(pair)
-            for element in sub_dict_elements:
-                # ic(sub_dict[element])
-                reorg_dict[element].append(sub_dict[element])
-            if count > 3:
-                break
-            else:
-                count += 1
-        # ic(reorg_dict)
-        self.put_reorg_df(pd.DataFrame.from_dict(reorg_dict))
-        df = self.reorg_df
-        ic(df.head(5))
-        # ic(df['short_ena'].unique())
-        # ic(df['short_mixs_v6'].unique())
-        self.process_max_intersection_len()
-        # ic("-------end of ingest------")
-        # sys.exit()
 
 
 # **********************************************************************************
@@ -1251,13 +928,12 @@ def compareChecklists(ena_cl_obj, mixs_v6_obj, report):
     return comparison_obj
 
 
-def compareAllTerms(left_list, right_list, report):
+def compareAllTerms(left_list, right_list):
     """
 
     :param left_list:
     :param right_list:
-    :param report:
-    :return:
+    :return: df: #['left_term', 'match_type:exact|harmonised|fuzzy|none', 'match', 'fuzzy_score', 'match_term_duplicated:boolean']
     """
     ic(f"left len={len(left_list)} right len={len(right_list)}")
 
@@ -1282,7 +958,7 @@ def compareAllTerms(left_list, right_list, report):
             my_dict[left_term]["match"] = left_term
             my_dict[left_term]["match_type"] = "exact"
         elif left_clean in clean_intersection_set:
-            my_dict[left_term]["match"] = left_clean
+            my_dict[left_term]["match"] = right_clean_dict[left_clean]
             my_dict[left_term]["match_type"] = "harmonised"
         else:
             resp_match = process.extractOne(left_term, right_term_list)
@@ -1296,11 +972,16 @@ def compareAllTerms(left_list, right_list, report):
                 my_dict[left_term]["match"] = ""
 
     df = term_alignment_dict2df(my_dict)
-    print(df.to_markdown(index=False))
-    ic(df.match_type.value_counts())
+    # Indicate where  match_term is duplicated
+    # ic(df.match_type.value_counts())
     tmp_df = df.match.value_counts().rename_axis('unique_values').to_frame('counts').reset_index().query('counts > 1')
     dup_set = set(tmp_df.unique_values.tolist())
-    ic(dup_set)
+    # ic(dup_set)
+    df['match_term_duplicated'] = df['match'].apply(lambda x: True if x in dup_set and x != "" else False)
+    ic(df.head(20))
+    # print(df.to_markdown(index=False))
+    ic(df.columns)
+
     return df
 
 
@@ -1360,127 +1041,7 @@ def clean_term(term):
     return clean
 
 
-class pairwise_term_matches:
-    """pairwise_term_matches object as simple object orientated to reduce complexity and saves passing a big hash.
 
-    pairwise_term_matches(pair_string, left_term_list, right_term_list)
-    """
-
-    def process_names(self, pair_string):
-        """
-
-        :param pair_string:
-        :return:
-        """
-        self.pair_string = pair_string
-        ic(pair_string)
-        pair_source = pair_string.split('::')
-        self.left_name = pair_source[0]
-        self.right_name = pair_source[1]
-
-    def __init__(self, pair_string, left_term_list, right_term_list):
-        """
-
-        :param pair_string:
-        :param left_term_list:
-        :param right_term_list:
-        """
-        self.process_names(pair_string)
-
-        self.left_term_list = left_term_list
-        self.right_term_list = right_term_list
-        clean_hash = self.get_clean_hash()
-
-        pairwise_matches = {'left': {"exact": {}, "harmonised": {}, "no_matches": {}}, 'right': {"no_matches": {}}}
-        self.pairwise_matches = pairwise_matches
-        left_pairwise_matches = pairwise_matches["left"]
-        right_pairwise_matches = pairwise_matches["right"]
-        self.right_exact_matched_set = set()
-        self.left_exact_matched_set = set()
-        self.right_harmonised_matched_set = set()
-        self.left_harmonised_matched_set = set()
-        self.right_not_matched_set = set()
-        self.left_not_matched_set = set()
-
-        for left in left_term_list:
-            exact_matches_found = False
-            harmonised_matches_found = False
-            left_pairwise_matches["exact"][left] = {}
-            left_pairwise_matches["harmonised"][left] = {}
-            first_right_harmonised = ""
-            local_right_harmonised_list = []
-            right_count = 0
-            for right in right_term_list:
-                right_match_found = False
-                right_count += 1
-                if left == right:
-                    left_pairwise_matches["exact"][left][right] = ""
-                    exact_matches_found = True
-                    self.right_exact_matched_set.add(right)
-                    self.left_exact_matched_set.add(left)
-                    break
-                elif clean_hash[left] == clean_hash[right]:
-                    # only add them if no exact matches, so have to do it later
-                    left_pairwise_matches["harmonised"][left][right] = ""
-                    harmonised_matches_found = True
-                    local_right_harmonised_list.append(right)
-            if exact_matches_found:
-                del left_pairwise_matches["harmonised"][left]
-            elif harmonised_matches_found:
-                del left_pairwise_matches["exact"][left]
-                self.left_harmonised_matched_set.add(left)
-                self.right_harmonised_matched_set.add(local_right_harmonised_list[0])
-            else:
-                # if not exact_matches_found and not harmonised_matches_found:
-                left_pairwise_matches["no_matches"][left] = ""
-                self.left_not_matched_set.add(left)
-                del left_pairwise_matches["harmonised"][left]
-                del left_pairwise_matches["exact"][left]
-
-        # some terms may still possibly be classified as harmonised as well as exact, so resolving that.
-        self.left_harmonised_matched_set.difference_update(self.left_exact_matched_set)
-        self.right_harmonised_matched_set.difference_update(self.right_exact_matched_set)
-
-        self.right_not_matched_set = set(right_term_list)
-        self.right_not_matched_set.difference_update(self.right_exact_matched_set)
-        self.right_not_matched_set.difference_update(self.right_harmonised_matched_set)
-
-        # left_pairwise_matches["exact"][left] = {}
-        # left_pairwise_matches["harmonised"][left] = {}
-        self.set_harmonised_matches()
-
-    def set_harmonised_matches(self):
-        ic()
-        left_ordered_list = []
-        right_ordered_list = []
-        for left in self.left_harmonised_matched_set:
-            left_ordered_list.append(left)
-            right = ', '.join(list(self.pairwise_matches["left"]["harmonised"][left].keys()))
-            right_ordered_list.append(right)
-            self.left_harmonised_matching_list = left_ordered_list
-            self.right_harmonised_matching_list = right_ordered_list
-        # ic(self.left_harmonised_matching_list)
-        # ic(self.right_harmonised_matching_list)
-
-        self.right_all_matches_set = self.right_exact_matched_set
-        self.right_all_matches_set.union(self.left_harmonised_matched_set)
-        return
-
-    def get_clean_hash(self):
-        clean_hash = {}
-        pairwise_matches = {}
-        for left in self.left_term_list:
-            clean_hash[left] = clean_term(left)
-        for right in self.right_term_list:
-            clean_hash[right] = clean_term(right)
-        self.clean_hash = clean_hash
-        return self.clean_hash
-
-    def get_harmonised_match_df(self):
-        df = pd.DataFrame(list(zip(self.left_harmonised_matching_list, self.right_harmonised_matching_list)),
-                          columns = [self.left_name, self.right_name]).sort_values(self.left_name)
-
-        return df
 
 
 def do_textWordCloud(df, title):
@@ -1656,7 +1217,7 @@ def main():
     mixs_v6_dict = process_mixs_dict(my_dict_v6, linkml_mixs_dict)
     mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6", linkml_mixs_dict)
 
-    compareAllTerms(ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list(), report)
+    compareAllTerms(ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list())
     sys.exit()
 
     compareSelectChecklists(ena_cl_obj, mixs_v6_obj, report)
