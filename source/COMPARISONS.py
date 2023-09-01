@@ -1,3 +1,7 @@
+from icecream import ic
+import pandas as pd
+import plotly.express as px
+
 class COMPARISONS:
     """ not yet a proper or even rich object...
         if more development, need to improve this.
@@ -113,4 +117,49 @@ class COMPARISONS:
         # ic("-------end of ingest------")
         # sys.exit()
 
+def mixs6_matches_plots(df, new_df):
+    """
+    :param df:
+    :param new_df:
+    :return:
+    """
+
+    # print(max_df.head(20).to_string(index = False))
+    # print("max")
+    max_df = new_df[['short_mixs_v6', 'pc_left_of_right']].groupby('short_mixs_v6').max().reset_index().sort_values(
+        by = 'pc_left_of_right')
+    max_df.rename(columns = {"pc_left_of_right": "maxPC_intersection"}, inplace = True)
+    # print(max_df.head(20).to_string(index = False))
+    # print("average(mean)")
+    mean_pc_df = new_df[['short_mixs_v6', 'pc_left_of_right']].groupby(
+        'short_mixs_v6').mean().reset_index().sort_values(by = 'pc_left_of_right')  # average().reset_index()
+    mean_pc_df.rename(columns = {"pc_left_of_right": "MeanPC_intersection"}, inplace = True)
+    # print(mean_pc_df.head(20).to_string(index = False))
+    mean_ints_df = df[['short_mixs_v6', 'length_clean_intersection']].groupby(
+        'short_mixs_v6').mean().reset_index().sort_values(by = 'length_clean_intersection')  # average().reset_index()
+    mean_ints_df.rename(columns = {"length_clean_intersection": "MeanLen_intersection"}, inplace = True)
+    # print(mean_ints_df.head(20).to_string(index = False))
+    # print("Count of rows")
+    tmp_df = df[['mixs_v6', 'short_mixs_v6']].drop_duplicates()
+    package_count_df = tmp_df.groupby('short_mixs_v6').count().reset_index()
+    package_count_df.rename(columns = {"mixs_v6": "package_count"}, inplace = True)
+    # print(package_count_df.head(20).to_string(index = False))
+    stats_df = max_df.merge(mean_pc_df, on = 'short_mixs_v6').merge(package_count_df, on = 'short_mixs_v6')
+
+    title = "Statistics of the MIXS v6 packages with matches from the ENA checklists"
+    print(title)
+    title += "<BR><sub>size=packages count for each collection</sub>"
+
+    stats_df["maxPC_intersection"] = stats_df["maxPC_intersection"] * 100
+    stats_df = stats_df.astype({'maxPC_intersection': 'int'})
+
+    stats_df["MeanPC_intersection"] = stats_df["MeanPC_intersection"] * 100
+    print(stats_df.head(20).to_string(index = False))
+    fig = px.scatter(stats_df, title = title, x = 'maxPC_intersection', y = 'MeanPC_intersection',
+                     size = 'package_count',
+                     color = 'package_count', text = 'short_mixs_v6',
+                     color_continuous_scale = px.colors.sequential.Viridis)
+    fig.update_traces(textposition = 'top center')
+    # fig.show()
+    fig.write_image("/Users/woollard/projects/ChecklistReviews/docs/ENAvsMIXSv6_ScatterPlot.jpg")
 

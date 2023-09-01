@@ -27,11 +27,12 @@ import plotly.express as px
 
 import plotly.io as pio
 from rapidfuzz import process
+# project objects etc. being imported
 from pairwise_term_matches import pairwise_term_matches
 from COMPARISONS import COMPARISONS
 import mixs
 from mixs import mixs
-
+from clean_terms import *
 
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
@@ -326,41 +327,6 @@ def get_mixs_v5_dict():
     return mixs_v5_dict
 
 
-def clean_list(my_list):
-    """
-        function to do some simple cleaning on textual lists.
-        e.g. make lower case and use underscore as the main delimiter.
-        :param my_list:
-        :return: clean_list
-    """
-    term_list_clean = list(map(str.lower, my_list))
-    term_list_clean = [s.replace(' ', '_') for s in term_list_clean]
-    term_list_clean = [s.replace('-', '_') for s in term_list_clean]
-    term_list_clean = [s.replace('/', '_') for s in term_list_clean]
-    term_list_clean = [s.removesuffix("_") for s in term_list_clean]
-    return term_list_clean
-
-
-def generate_clean_dict(my_list):
-    """
-    re-uses the clean_list to keep it consistent
-    :param my_list:
-    :return: clean_dict, raw_dict
-    a hash of clean term as the index, and original term as the value and vice versa
-    """
-    my_clean_list = clean_list(my_list)
-    clean_dict = {}
-    raw_dict = {}
-    pos = 0
-    for clean_term in my_clean_list:
-        clean_dict[clean_term] = my_list[pos]
-        raw_dict[my_list[pos]] = clean_term
-        pos += 1
-    # print(clean_dict)
-    # print(raw_dict)
-    return clean_dict, raw_dict
-
-
 def unique_elements_left(left_list, term_matches):
     left_list_set = set(left_list)
     difference = left_list_set.difference(set(term_matches))
@@ -651,59 +617,14 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
         # report.write(', '.join(right_obj.get_term_list_for_package(right_package_name)) + "\n")
         #
         # report.write('------++++++++---------' + "\n")
-        fuzzy = True
 
-        comparisonStatsPackage = {}
-        package_comparisonStatsPackage = compare2termLists(left_obj.get_term_list_for_package(left_package_name),
-                                                           right_obj.get_term_list_for_package(right_package_name),
-                                                           comparisonStatsPackage)
-        core_comparisonStatsPackage = compare2termLists(left_obj.get_term_list_for_package(left_package_name),
-                                                        right_obj.get_term_list_for_package("Core"),
-                                                        comparisonStatsPackage)
-
-        left_list = sorted(left_obj.get_term_list_for_package(left_package_name))
-        left_clean_dict, left_raw_dict = generate_clean_dict(left_list)
+        # ic(left_package_name)
+        # ic(right_package_name)
+        left_term_list = left_obj.get_term_list_for_package(left_package_name)
         right_term_list = right_obj.get_term_list_for_package(right_package_name)
-        right_clean_dict, right_raw_dict = generate_clean_dict(right_term_list)
-        core_term_list = right_obj.get_term_list_for_package("Core")
-        core_clean_dict, core_raw_dict = generate_clean_dict(core_term_list)
-        # ic(right_term_list)
-        combined_right_term_list = (right_term_list)
-        combined_right_term_list.extend(core_term_list)
+        right_term_list.extend(right_obj.get_term_list_for_package("Core"))
+        df = compareAllTerms(left_term_list,right_term_list)
 
-        my_dict = {}
-        fuzzy_threshold = 85
-        for left_term in left_list:
-            my_dict[left_term] = {"match_type": "none", "fuzzy_score": 100}
-            left_clean = left_raw_dict[left_term]
-            # print(f"{left_term} - {left_clean}")
-            if left_clean in package_comparisonStatsPackage["intersection_set"] or left_clean in \
-                    package_comparisonStatsPackage["clean_intersection_set"]:
-                if left_term in right_term_list:
-                    my_dict[left_term]["match_type"] = "exact"
-                    my_dict[left_term]["match"] = right_clean_dict[left_clean]
-                elif left_clean in package_comparisonStatsPackage["clean_intersection_set"]:
-                    my_dict[left_term]["match_type"] = "harmonised"
-                    my_dict[left_term]["match"] = right_clean_dict[left_clean]
-            elif left_term in core_comparisonStatsPackage["intersection_set"] or left_clean in \
-                    core_comparisonStatsPackage["clean_intersection_set"]:
-                if left_term in core_term_list:
-                    my_dict[left_term]["match_type"] = "exact"
-                    my_dict[left_term]["match"] = core_clean_dict[left_clean]
-                elif left_clean in core_comparisonStatsPackage["clean_intersection_set"]:
-                    my_dict[left_term]["match_type"] = "harmonised"
-                    my_dict[left_term]["match"] = core_clean_dict[left_clean]
-            if my_dict[left_term]["match_type"] == "none":
-                # searches combined list as want the highest scoring!
-                resp_match = process.extractOne(left_term, combined_right_term_list)
-                if resp_match[1] > fuzzy_threshold:
-                    my_dict[left_term]["match_type"] = "fuzzy"
-                    my_dict[left_term]["fuzzy_score"] = resp_match[1]
-                    my_dict[left_term]["match"] = resp_match[0]
-                else:
-                    my_dict[left_term]["fuzzy_score"] = 0
-
-        df = term_alignment_dict2df(my_dict)
         return df
 
     # main stream compare2packages aspects
@@ -747,11 +668,6 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
 
     # ic("about to exit compare2packages")
     return comparisonStatsPackage
-
-
-def cleanList2set(term_list):
-    clean_term_list = clean_list(term_list)
-    return (set(clean_term_list))
 
 
 def plot_pair_df(df):
@@ -814,51 +730,6 @@ def plot_pair_df(df):
     # sys.exit()
 
 
-def mixs6_matches_plots(df, new_df):
-    """
-    :param df:
-    :param new_df:
-    :return:
-    """
-
-    # print(max_df.head(20).to_string(index = False))
-    # print("max")
-    max_df = new_df[['short_mixs_v6', 'pc_left_of_right']].groupby('short_mixs_v6').max().reset_index().sort_values(
-        by = 'pc_left_of_right')
-    max_df.rename(columns = {"pc_left_of_right": "maxPC_intersection"}, inplace = True)
-    # print(max_df.head(20).to_string(index = False))
-    # print("average(mean)")
-    mean_pc_df = new_df[['short_mixs_v6', 'pc_left_of_right']].groupby(
-        'short_mixs_v6').mean().reset_index().sort_values(by = 'pc_left_of_right')  # average().reset_index()
-    mean_pc_df.rename(columns = {"pc_left_of_right": "MeanPC_intersection"}, inplace = True)
-    # print(mean_pc_df.head(20).to_string(index = False))
-    mean_ints_df = df[['short_mixs_v6', 'length_clean_intersection']].groupby(
-        'short_mixs_v6').mean().reset_index().sort_values(by = 'length_clean_intersection')  # average().reset_index()
-    mean_ints_df.rename(columns = {"length_clean_intersection": "MeanLen_intersection"}, inplace = True)
-    # print(mean_ints_df.head(20).to_string(index = False))
-    # print("Count of rows")
-    tmp_df = df[['mixs_v6', 'short_mixs_v6']].drop_duplicates()
-    package_count_df = tmp_df.groupby('short_mixs_v6').count().reset_index()
-    package_count_df.rename(columns = {"mixs_v6": "package_count"}, inplace = True)
-    # print(package_count_df.head(20).to_string(index = False))
-    stats_df = max_df.merge(mean_pc_df, on = 'short_mixs_v6').merge(package_count_df, on = 'short_mixs_v6')
-
-    title = "Statistics of the MIXS v6 packages with matches from the ENA checklists"
-    print(title)
-    title += "<BR><sub>size=packages count for each collection</sub>"
-
-    stats_df["maxPC_intersection"] = stats_df["maxPC_intersection"] * 100
-    stats_df = stats_df.astype({'maxPC_intersection': 'int'})
-
-    stats_df["MeanPC_intersection"] = stats_df["MeanPC_intersection"] * 100
-    print(stats_df.head(20).to_string(index = False))
-    fig = px.scatter(stats_df, title = title, x = 'maxPC_intersection', y = 'MeanPC_intersection',
-                     size = 'package_count',
-                     color = 'package_count', text = 'short_mixs_v6',
-                     color_continuous_scale = px.colors.sequential.Viridis)
-    fig.update_traces(textposition = 'top center')
-    # fig.show()
-    fig.write_image("/Users/woollard/projects/ChecklistReviews/docs/ENAvsMIXSv6_ScatterPlot.jpg")
 
 
 def processComparisonStats(comparisonStats, pair):
@@ -935,14 +806,16 @@ def compareAllTerms(left_list, right_list):
     :param right_list:
     :return: df: #['left_term', 'match_type:exact|harmonised|fuzzy|none', 'match', 'fuzzy_score', 'match_term_duplicated:boolean']
     """
-    ic(f"left len={len(left_list)} right len={len(right_list)}")
+    #make sure that the lists are unique and sorted, note the slight name change, in case we need the original list again
+    left_term_set = set(left_list)
+    right_term_set = set(right_list)
+    left_term_list = sorted(left_term_set)
+    right_term_list = sorted(right_term_set)
+    # ic(f"left len={len(left_term_list)} right len={len(right_term_list)}")
 
-    left_term_list = sorted(left_list)
-    right_term_list = sorted(right_list)
     left_clean_dict, left_raw_dict = generate_clean_dict(left_term_list)
     right_clean_dict, right_raw_dict = generate_clean_dict(right_term_list)
-    left_term_set = set(left_term_list)
-    right_term_set = set(right_term_list)
+
     left_clean_set = set(left_clean_dict.keys())
     right_clean_set = set(right_clean_dict.keys())
     exact_intersection_set = left_term_set.intersection(right_term_set)
@@ -978,9 +851,8 @@ def compareAllTerms(left_list, right_list):
     dup_set = set(tmp_df.unique_values.tolist())
     # ic(dup_set)
     df['match_term_duplicated'] = df['match'].apply(lambda x: True if x in dup_set and x != "" else False)
-    ic(df.head(20))
+    # ic(df.head(20))
     # print(df.to_markdown(index=False))
-    ic(df.columns)
 
     return df
 
@@ -1035,10 +907,7 @@ def compareSelectChecklists(ena_cl_obj, mixs_v6_obj, report):
                      comparisonStats, report)
 
 
-def clean_term(term):
-    # ic(term)
-    clean = term.lower().replace(' ', '_').replace('-', '_').replace('/', '_').removesuffix("_")
-    return clean
+
 
 
 
@@ -1217,8 +1086,8 @@ def main():
     mixs_v6_dict = process_mixs_dict(my_dict_v6, linkml_mixs_dict)
     mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6", linkml_mixs_dict)
 
-    compareAllTerms(ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list())
-    sys.exit()
+    #compareAllTerms(ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list())
+    # sys.exit()
 
     compareSelectChecklists(ena_cl_obj, mixs_v6_obj, report)
 

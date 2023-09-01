@@ -1,3 +1,7 @@
+from icecream import ic
+import pandas as pd
+from clean_terms import *
+
 class pairwise_term_matches:
     """pairwise_term_matches object as simple object orientated to reduce complexity and saves passing a big hash.
 

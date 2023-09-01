@@ -1,3 +1,5 @@
+from icecream import ic
+
 class mixs:
     def ingest_ena_cl(self):
         self.my_dict = process_ena_cl(self.my_dict_raw, self.linkml_mixs_dict)
