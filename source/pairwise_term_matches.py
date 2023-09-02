@@ -141,7 +141,12 @@ def term_alignment_dict2df(my_dict):
 
 def compareAllTerms(left_list, right_list):
     """
-
+    The most important method of the lot as this compares all terms in one list with another.
+    Currently, it supports match_type:exact|harmonised|fuzzy|none
+      harmonised is where terms are simply cleaned: lower cased and punctuation changed to "_"
+      it could have all been doing with rapidfuzz, but thought a little flexibility/control wise
+      and allows some future flexibility of additional comparators.
+      Also, the run time will be slightly quicker not putting everything through rapidfuzz
     :param left_list:
     :param right_list:
     :return: df: #['left_term', 'match_type:exact|harmonised|fuzzy|none', 'match', 'fuzzy_score', 'match_term_duplicated:boolean']
