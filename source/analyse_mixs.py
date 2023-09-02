@@ -734,11 +734,11 @@ def processComparisonStats(comparisonStats, pair):
     return comparison_obj
 
 
-def compareChecklists(ena_cl_obj, mixs_v6_obj, report):
+def compareChecklists(left_obj, right_obj, report):
     """
     Comparing all possible pairs of checklists
-    :param ena_cl_obj:
-    :param mixs_v6_obj:
+    :param left_obj:
+    :param right_obj:
     :param report:
     :return:
 
@@ -754,29 +754,28 @@ def compareChecklists(ena_cl_obj, mixs_v6_obj, report):
             'pair': 'COMPARE-ECDC-EFSA pilot food-associated reporting standard::Agriculture'},
 
     """
-    pair_string = 'ena::mixs_v6'
+    pair_string = '::'.join([left_obj.type, right_obj.type])
     comparisonStats = {pair_string: {'by_package': {}}}
 
-    # ic(ena_cl_obj.get_all_package_list())
-    # ic(mixs_v6_obj.get_all_package_list())
-    ic(len(ena_cl_obj.get_all_package_list()))
+    # ic(left_obj.get_all_package_list())
+    # ic(right.get_all_package_list())
+    ic(len(left_obj.get_all_package_list()))
     left_package_count = 0
     count = 0
-    for left_package_name in ena_cl_obj.get_all_package_list():
+    for left_package_name in left_obj.get_all_package_list():
 
         ic(str(left_package_count) + "\t" + left_package_name)
         left_package_count += 1
-        if left_package_count > 10:
+        if left_package_count > 2:
             break
 
-        for right_package_name in mixs_v6_obj.get_all_package_list():
-            # PMW
+        for right_package_name in right_obj.get_all_package_list():
             com_package_names = '::'.join([left_package_name, right_package_name])
             # ic(right_package_name)
             comparisonStats[pair_string]['by_package'][com_package_names] = compare2packages(pair_string,
                                                                                              left_package_name,
                                                                                              right_package_name,
-                                                                                             ena_cl_obj, mixs_v6_obj,
+                                                                                             left_obj, right_obj,
                                                                                              comparisonStats, report)
 
             count += 1
@@ -1019,8 +1018,9 @@ def main():
     mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6", linkml_mixs_dict)
 
     df = compareAllTerms(ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list())
-    print(df.to_markdown(index = False))
-    sys.exit()
+    report.write("\n" + "## Table of all terms and their matches" + "\n")
+    report.write(df.to_markdown(index = False) + "\n")
+
 
     compareSelectChecklists(ena_cl_obj, mixs_v6_obj, report)
 
@@ -1029,8 +1029,8 @@ def main():
 
     analyse_term_matches(ena_cl_obj, mixs_v6_obj, report)
 
-    # ic("early exit")
-    # sys.exit()
+    ic("early exit")
+    sys.exit()
 
     mixs_v5_dict = get_mixs_v5_dict()
     mixs_v5_obj = mixs(mixs_v5_dict, "mixs_v5", linkml_mixs_dict)
