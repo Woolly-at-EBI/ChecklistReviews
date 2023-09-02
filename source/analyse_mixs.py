@@ -586,6 +586,9 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
         report.write(f"\n\tlength_right={comparisonStatsPackage['length_right']}")
         report.write(f"\n\tpc_left_of_right={comparisonStatsPackage['pc_left_of_right'] * 100}%" + "\n")
 
+    def names2pair_string(left_name, right_name):
+        return '::'.join([left_name, right_name])
+
     def create_term_comparison_df(left_obj, right_obj, left_package_name, right_package_name, report):
         """
         given the above objects, runs the comparison functions for the desired 2 packages
@@ -617,10 +620,11 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
         return df
 
     # main stream compare2packages aspects
+    ic()
     # building  comparisonStats[comparison]['by_package'][com_package_names]  = {}
     # ic(comparison)
-    com_package_names = left_package_name + "::" + right_package_name
-    # ic(com_package_names)
+    com_package_names = names2pair_string(left_package_name,right_package_name)
+    ic(com_package_names)
     if comparison not in comparisonStats:  # added on 30 Aug
         comparisonStats[comparison] = {}
         comparisonStats[comparison]['by_package'] = {}
@@ -633,7 +637,7 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
     comparisonStats[comparison]['by_package'][com_package_names] = comparisonStatsPackage
     # ic(comparisonStatsPackage)
     # ic(comparisonStats)
-    # report.write('## Comparison of ' + left_package_name + " and " + right_package_name + "\n")
+    report.write('## Comparison of ' + left_package_name + " and " + right_package_name + "\n")
     # sys.exit()
     # report.write("### ====" + left_obj.type + "====" + "\n")
     # report.write(', '.join(left_obj.get_term_list_for_package(left_package_name))+ "\n")
@@ -653,7 +657,7 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
     # report.write(f"right_diff={', '.join(sorted(comparisonStatsPackage['right_diff_set']))}" + "\n")
     # ic(comparisonStatsPackage)
 
-    #  report.write("\n" + term_comparison_df.to_markdown(index=False) + "\n")
+    report.write("\n" + term_comparison_df.to_markdown(index=False) + "\n")
 
     # ic("about to exit compare2packages")
     return comparisonStatsPackage
@@ -754,8 +758,9 @@ def compareChecklists(left_obj, right_obj, report):
             'pair': 'COMPARE-ECDC-EFSA pilot food-associated reporting standard::Agriculture'},
 
     """
-    pair_string = '::'.join([left_obj.type, right_obj.type])
+    pair_string = source_objs_to_pair_string(left_obj.type, right_obj.type)
     comparisonStats = {pair_string: {'by_package': {}}}
+    ic(comparisonStats)
 
     # ic(left_obj.get_all_package_list())
     # ic(right.get_all_package_list())
@@ -781,38 +786,42 @@ def compareChecklists(left_obj, right_obj, report):
             count += 1
     # ic(comparisonStats)
     # ic()
-    # sys.exit()
     comparison_obj = processComparisonStats(comparisonStats, pair_string)
-
     return comparison_obj
 
+def source_objs_to_pair_string(left_obj, right_obj):
+    """
+    trivial method, but wanted to ensure it was standard
+    :param left_obj:
+    :param right_obj:
+    :return: pair_string
+    """
+    return '::'.join([left_obj.type, right_obj.type])
 
-
-pass
-
-
-def compareSelectChecklists(ena_cl_obj, mixs_v6_obj, report):
+def compareSelectChecklists(left_obj, right_obj, report):
     """
 
-    :param ena_cl_obj:
-    :param mixs_v6_obj:
+    :param left_obj:
+    :param right_obj:
     :param report:
     :return:
     """
-    comparisonStats = {'ena::mixs_v6': {'by_package': {}}}
+    ic()
+    pair_string = source_objs_to_pair_string(left_obj, right_obj)
+    comparisonStats = {pair_string: {'by_package': {}}}
 
-    # ic(ena_cl_obj.get_all_package_list())
-    # ic(mixs_v6_obj.get_all_package_list())
+    # ic(left_obj.get_all_package_list())
+    # ic(right_obj.get_all_package_list())
 
     targets = ["AIR"]
     for target in targets:
         ic(target)
         target_lower = target.lower()
-        # for target in ena_cl_obj.get_all_package_list():
-        ena_res = [i for i in ena_cl_obj.get_all_package_list() if target_lower in i.lower()]
+        # for target in left_obj.get_all_package_list():
+        ena_res = [i for i in left_obj.get_all_package_list() if target_lower in i.lower()]
         ic(ena_res)
 
-        mixs_v6_res = [i for i in mixs_v6_obj.get_all_package_list() if target_lower in i.lower()]
+        mixs_v6_res = [i for i in right_obj.get_all_package_list() if target_lower in i.lower()]
         # ic(mixs_v6_res)
 
         # get the first off the list
@@ -825,16 +834,16 @@ def compareSelectChecklists(ena_cl_obj, mixs_v6_obj, report):
             continue
         ic("==================================================================" + "\n")
 
-        compare2packages('ena::mixs_v6', test_ena_cl_name, test_mixs_v6_cl_name, ena_cl_obj, mixs_v6_obj,
+        compare2packages('ena::mixs_v6', test_ena_cl_name, test_mixs_v6_cl_name, left_obj, right_obj,
                          comparisonStats, report)
     # other tests
-    compare2packages('ena::mixs_v6', 'GSC MIxS human skin', 'Human-skin', ena_cl_obj, mixs_v6_obj,
+    compare2packages('ena::mixs_v6', 'GSC MIxS human skin', 'Human-skin', left_obj, right_obj,
                      comparisonStats, report)
 
-    compare2packages('ena::mixs_v6', 'GSC MIxS soil', 'Soil', ena_cl_obj, mixs_v6_obj,
+    compare2packages('ena::mixs_v6', 'GSC MIxS soil', 'Soil', left_obj, right_obj,
                      comparisonStats, report)
 
-    compare2packages('ena::mixs_v6', 'GSC MIxS soil', 'Core', ena_cl_obj, mixs_v6_obj,
+    compare2packages('ena::mixs_v6', 'GSC MIxS soil', 'Core', left_obj, right_obj,
                      comparisonStats, report)
 
 
@@ -1023,6 +1032,7 @@ def main():
 
 
     compareSelectChecklists(ena_cl_obj, mixs_v6_obj, report)
+    sys.exit()
 
     comparison_obj = compareChecklists(ena_cl_obj, mixs_v6_obj, report)
     # print(comparison_obj.comparisonStats)

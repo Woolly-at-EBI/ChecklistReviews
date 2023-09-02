@@ -1,6 +1,7 @@
 from icecream import ic
 import pandas as pd
 import plotly.express as px
+import sys
 
 class COMPARISONS:
     """ not yet a proper or even rich object...
@@ -68,7 +69,7 @@ class COMPARISONS:
             # end of process_max_intersection_len
 
     def ingest(self):
-        # ic("start of ingest================================================"+ "\n")
+        ic("start of ingest================================================"+ "\n")
         # ic()
         reorg_dict = {self.left_source(): [], self.right_source(): [], "left_source": [], "right_source": [],
                       "pair": []}
@@ -82,16 +83,12 @@ class COMPARISONS:
 
         if comparison_source not in comparisonStats:
             ic(f"ERROR {comparison_source} not in comparisonStats")
-            ic(comparisonStats)
+            # ic(comparisonStats)
             sys.exit()
-        # else:
-        #    ic(f"{comparison_source} is in comparisonStats")
-
         for pair in comparisonStats[comparison_source]['by_package']:
             # ic(pair)
             pair_list = pair.split('::')
             # ic(pair_list)
-
             # ic(comparisonStats[comparison_source]['by_package'][pair])
             sub_dict = comparisonStats[comparison_source]['by_package'][pair]
             # ic(sub_dict)
@@ -115,7 +112,6 @@ class COMPARISONS:
         # ic(df['short_mixs_v6'].unique())
         self.process_max_intersection_len()
         # ic("-------end of ingest------")
-        # sys.exit()
 
 def mixs6_matches_plots(df, new_df):
     """
