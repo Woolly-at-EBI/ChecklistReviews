@@ -59,6 +59,7 @@ class pairwise_term_matches:
         ic(df.head(20))
         ic(df['match_type'].unique())
 
+
         for match_type in df['match_type'].unique():
             tmp_df = df.query('match_type == @match_type')
             #ic(match_type)
@@ -66,6 +67,8 @@ class pairwise_term_matches:
             if match_type == "exact":
                 self.left_exact_matched_set = set(tmp_df.left_term)
                 self.right_exact_matched_set = set(tmp_df.match)
+                ic(self.left_exact_matched_set.difference(self.right_exact_matched_set))
+
             elif match_type == "harmonised":
                 self.left_harmonised_matched_set = set(tmp_df.left_term)
                 self.right_harmonised_matched_set = set(tmp_df.match)
@@ -78,6 +81,10 @@ class pairwise_term_matches:
                 print(f"ERROR: match_type={match_type} is not yet being processed correctly")
                 sys.exit()
         #sys.exit()
+
+        self.left_confident_matched_set = set(self.left_exact_matched_set)
+        self.left_confident_matched_set.union(self.left_harmonised_matched_set )
+        self.set_right_sets()
     def get_left_exact_matched_list(self):
         return sorted(self.left_exact_matched_set)
 
@@ -86,6 +93,9 @@ class pairwise_term_matches:
 
     def get_left_fuzzy_matched_list(self):
         return sorted(self.left_fuzzy_matched_set)
+
+    def get_left_confident_matched_list(self):
+        return sorted(self.left_confident_matched_set)
 
     def get_left_not_matched_list(self):
         return sorted(self.left_not_matched_set)
@@ -99,18 +109,31 @@ class pairwise_term_matches:
     def get_right_fuzzy_matched_list(self):
         return sorted(self.right_fuzzy_matched_set)
 
-    def set_right_sets(self):
-        self.any_right_matched_set = self.right_exact_matched_set
-        self.any_right_matched_set.update(self.right_harmonised_matched_set)
-        self.confident_any_right_matched_set = self.any_right_matched_set
-        self.any_right_matched_set.update(self.right_fuzzy_matched_set)
-    def get_right_not_matched_list(self):
-        return(sorted(self.right_not_matched_set))
+    def get_right_confident_matched_list(self):
+        return sorted(self.right_confident_matched_set)
 
+    def set_right_sets(self):
+        # ic(len(self.right_term_list))
+        # ic(len(self.right_exact_matched_set))
+        # ic(len(self.right_harmonised_matched_set))
+        # ic(len(self.right_fuzzy_matched_set))
+        self.any_right_matched_set = set(self.right_exact_matched_set)
+        self.any_right_matched_set.update(self.right_harmonised_matched_set)
+        #ic(len(self.any_right_matched_set))
+
+        self.right_not_matched_set = set(self.right_term_list)
+        #ic(len(self.right_not_matched_set))
+        self.right_not_matched_set.difference_update(self.any_right_matched_set)
+        #ic(len(self.right_not_matched_set))
+        self.right_confident_matched_set = set(self.right_exact_matched_set)
+        self.right_confident_matched_set.union(self.right_harmonised_matched_set)
+
+
+    def get_right_not_matched_list(self):
+        return sorted(self.right_not_matched_set)
 
     def get_any_left_match_list(self):
-        return list(self.any_right_matched_set)
-
+        return sorted(self.any_right_matched_set)
 
 
     def get_clean_hash(self):
@@ -122,7 +145,6 @@ class pairwise_term_matches:
             clean_hash[right] = clean_term(right)
         self.clean_hash = clean_hash
         return self.clean_hash
-
 
 
 def term_alignment_dict2df(my_dict):
