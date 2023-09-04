@@ -834,7 +834,7 @@ def compareSelectChecklists(left_obj, right_obj, report):
             continue
         ic("==================================================================" + "\n")
 
-        compare2packages(pair_string, test_ena_cl_name, test_mixs_v6_cl_name, left_obj, right_obj,
+        compare2packages(pair_string, test_left_name, test_right_name, left_obj, right_obj,
                          comparisonStats, report)
     # other tests
     compare2packages(pair_string, 'GSC MIxS human skin', 'Human-skin', left_obj, right_obj,
@@ -1011,11 +1011,25 @@ def compareAndReport(left_obj, right_obj, report):
     pair_string = names2pair_string(left_obj.type, right_obj.type)
     pairwise_obj = pairwise_term_matches(pair_string, left_obj.get_all_term_list(), right_obj.get_all_term_list())
 
-    #df = compareAllTerms(left_obj.get_all_term_list(), right_obj.get_all_term_list())
-    #report.write("\n" + "## Table of all terms and their matches for " + left_obj.type\
-    #             + " and " + right_obj.type + "\n")
-    #report.write(df.to_markdown(index = False) + "\n")
+    df = pairwise_obj.comparison_df
 
+    report.write("\n" + "## Comparison of " + left_obj.type + " and " + right_obj.type + "\n")
+    report.write("\n" + "### Table of all terms and their matches for " + left_obj.type\
+                 + " and " + right_obj.type + "\n")
+    report.write(pairwise_obj.comparison_df.to_markdown(index = False) + "\n")
+
+    report.write("\n" + "### Basic stats of " + left_obj.type + " and " + right_obj.type + "\n")
+    print(pairwise_obj.print_stats())
+    report.write("\n" + pairwise_obj.print_stats())
+
+    report.write("\n" + "### Fuzzy matches of " + left_obj.type + " and " + right_obj.type + "\n")
+    fuzzy_df = df.query('match_type == "fuzzy"')
+    report.write(fuzzy_df.to_markdown(index = False) + "\n")
+
+    report.write("\n" + f"### {left_obj.type} without a match:\n " +\
+                  ", ".join(pairwise_obj.get_left_not_matched_list()) + "\n")
+    report.write("\n\n" + f"### {right_obj.type} without a match:\n " +\
+                  ", ".join(pairwise_obj.get_right_not_matched_list()) + "\n")
 
 def main():
     linkml_mixs_dict = parse_new_linkml()
@@ -1036,14 +1050,9 @@ def main():
     # do mix_v5 and mix_v6
     comparison_obj = compareAndReport(mixs_v5_obj, mixs_v6_obj, report)
 
-    sys.exit()
-
-    # do ena and mix_v6
-    compareSelectChecklists(ena_cl_obj, mixs_v6_obj, report)
-
-    sys.exit()
     comparison_obj = compareChecklists(ena_cl_obj, mixs_v6_obj, report)
-
+    # compareSelectChecklists(ena_cl_obj, mixs_v6_obj, report)
+    sys.exit()
     # print(comparison_obj.comparisonStats)
 
     analyse_term_matches(ena_cl_obj, mixs_v6_obj, report)
