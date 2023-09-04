@@ -43,13 +43,14 @@ pio.renderers.default = "browser"
 image_dir = "../docs/images/"
 
 
-def get_data():
+def get_data(source_name):
     """
 
     :return:
     """
     ic()
-    json_file = "../data/v6_mixs.schema.json"
+    if source_name == "mixs_v6":
+        json_file = "../data/v6_mixs.schema.json"
     # cat ../data/mixs.schema.json | sed 's/\\"/"/g;s/\\n/\n/g;s/^"//;s/"$//' | sed 's/\\\\"//g'  | jq
     ic(json_file)
     # r_text = '{ "test": "test_val"}'
@@ -78,6 +79,8 @@ def get_mixs_dict(dict_name):
     """
     if dict_name == "my_dict_v6":
         pickle_file = '../data/v6_mixs.schema.json.pickle'
+    elif dict_name == "my_dict_v5":
+        pickle_file = '../data/v5_mixs.schema.json.pickle'
     else:
         print(f"ERROR: {dict_name} is not recognised")
         sys.exit()
@@ -822,32 +825,32 @@ def compareSelectChecklists(left_obj, right_obj, report):
         ic(target)
         target_lower = target.lower()
         # for target in left_obj.get_all_package_list():
-        ena_res = [i for i in left_obj.get_all_package_list() if target_lower in i.lower()]
-        ic(ena_res)
+        left_res = [i for i in left_obj.get_all_package_list() if target_lower in i.lower()]
+        ic(left_res)
 
-        mixs_v6_res = [i for i in right_obj.get_all_package_list() if target_lower in i.lower()]
+        right_res = [i for i in right_obj.get_all_package_list() if target_lower in i.lower()]
         # ic(mixs_v6_res)
 
         # get the first off the list
-        if len(ena_res) > 0 and len(mixs_v6_res) > 0:
-            test_ena_cl_name = ' '.join([ena_res[0]])
-            test_mixs_v6_cl_name = ' '.join([mixs_v6_res[0]])
-            print(f"test_ena_cl_name={test_ena_cl_name} test_mixs_v6_cl_name={test_mixs_v6_cl_name}")
+        if len(left_res) > 0 and len(right_res) > 0:
+            test_left_name = ' '.join([left_res[0]])
+            test_right_name = ' '.join([right_res[0]])
+            print(f"test_left_name={test_left_name} test_right_name={test_right_name}")
         else:
-            ic("ERROR: no matching checklists found in at least one of ENA or mixs_v6")
+            ic(f"ERROR: no matching checklists found in at least one of {left_obj.type} or {right_obj.type}")
             continue
         ic("==================================================================" + "\n")
 
-        compare2packages('ena::mixs_v6', test_ena_cl_name, test_mixs_v6_cl_name, left_obj, right_obj,
+        compare2packages(pair_string, test_ena_cl_name, test_mixs_v6_cl_name, left_obj, right_obj,
                          comparisonStats, report)
     # other tests
-    compare2packages('ena::mixs_v6', 'GSC MIxS human skin', 'Human-skin', left_obj, right_obj,
+    compare2packages(pair_string, 'GSC MIxS human skin', 'Human-skin', left_obj, right_obj,
                      comparisonStats, report)
 
-    compare2packages('ena::mixs_v6', 'GSC MIxS soil', 'Soil', left_obj, right_obj,
+    compare2packages(pair_string, 'GSC MIxS soil', 'Soil', left_obj, right_obj,
                      comparisonStats, report)
 
-    compare2packages('ena::mixs_v6', 'GSC MIxS soil', 'Core', left_obj, right_obj,
+    compare2packages(pair_string, 'GSC MIxS soil', 'Core', left_obj, right_obj,
                      comparisonStats, report)
 
 
@@ -1017,6 +1020,12 @@ def parse_new_linkml():
 
     return r_json
 
+def compareAndReport(left_obj, right_obj, report):
+    df = compareAllTerms(left_obj.get_all_term_list(), right_obj.get_all_term_list())
+    report.write("\n" + "## Table of all terms and their matches for " + left_obj.type\
+                 + " and " + right_obj.type + "\n")
+    report.write(df.to_markdown(index = False) + "\n")
+
 
 def main():
     linkml_mixs_dict = parse_new_linkml()
@@ -1029,16 +1038,19 @@ def main():
     my_dict_v6 = get_mixs_dict("my_dict_v6")
     mixs_v6_dict = process_mixs_dict(my_dict_v6, linkml_mixs_dict)
     mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6", linkml_mixs_dict)
-    # mixs_v5_dict = process_mixs_dict(my_dict_v5, linkml_mixs_dict)
-    # mixs_v5_obj = mixs(mixs_v5_dict, "mixs_v5", linkml_mixs_dict)
 
+    mixs_v5_dict = get_mixs_v5_dict()
+    mixs_v5_obj = mixs(mixs_v5_dict, "mixs_v5", linkml_mixs_dict)
+    ic(mixs_v5_obj.type)
+
+    # do mix_v5 and mix_v6
+    comparison_obj = compareAndReport(mixs_v5_obj, mixs_v6_obj, report)
+
+    sys.exit()
 
     # do ena and mix_v6
-    df = compareAllTerms(ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list())
-    report.write("\n" + "## Table of all terms and their matches for " + ena_cl_obj.type\
-                 + " and " + mixs_v6_obj.type + "\n")
-    report.write(df.to_markdown(index = False) + "\n")
     compareSelectChecklists(ena_cl_obj, mixs_v6_obj, report)
+
     sys.exit()
     comparison_obj = compareChecklists(ena_cl_obj, mixs_v6_obj, report)
 
