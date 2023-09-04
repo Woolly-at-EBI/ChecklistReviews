@@ -581,8 +581,8 @@ def compare2termLists(left_term_list, right_term_list, comparisonStatsPackage):
     comparisonStatsPackage['intersection_set'] = left_set.intersection(right_set)
     return comparisonStatsPackage
 
-
-
+def names2pair_string(left_name, right_name):
+        return '::'.join([left_name, right_name])
 
 
 def compare2packages(comparison, left_package_name, right_package_name, left_obj, right_obj, comparisonStats, report):
@@ -593,8 +593,7 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
         report.write(f"\n\tlength_right={comparisonStatsPackage['length_right']}")
         report.write(f"\n\tpc_left_of_right={comparisonStatsPackage['pc_left_of_right'] * 100}%" + "\n")
 
-    def names2pair_string(left_name, right_name):
-        return '::'.join([left_name, right_name])
+
 
     def create_term_comparison_df(left_obj, right_obj, left_package_name, right_package_name, report):
         """
@@ -775,21 +774,15 @@ def compareChecklists(left_obj, right_obj, report):
     left_package_count = 0
     count = 0
     for left_package_name in left_obj.get_all_package_list():
-
         ic(str(left_package_count) + "\t" + left_package_name)
         left_package_count += 1
         if left_package_count > 2:
             break
-
         for right_package_name in right_obj.get_all_package_list():
             com_package_names = '::'.join([left_package_name, right_package_name])
             # ic(right_package_name)
-            comparisonStats[pair_string]['by_package'][com_package_names] = compare2packages(pair_string,
-                                                                                             left_package_name,
-                                                                                             right_package_name,
-                                                                                             left_obj, right_obj,
-                                                                                             comparisonStats, report)
-
+            comparisonStats[pair_string]['by_package'][com_package_names] = compare2packages(pair_string, \
+                 left_package_name, right_package_name, left_obj, right_obj)
             count += 1
     # ic(comparisonStats)
     # ic()
@@ -853,13 +846,6 @@ def compareSelectChecklists(left_obj, right_obj, report):
     compare2packages(pair_string, 'GSC MIxS soil', 'Core', left_obj, right_obj,
                      comparisonStats, report)
 
-
-
-
-
-
-
-
 def do_textWordCloud(df, title):
     # in pycharm WordCloud not installing, although installed via pip3
     # import WordCloud
@@ -884,13 +870,13 @@ def do_textWordCloud(df, title):
     pass
 
 
-def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, mixs_v6_obj, report):
+def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, right_obj, report):
     """
     making use of sets as sets don't allow duplicates
     :param pair_string:  # left_list_name '::' right_list_name
     :param left_term_list:
     :param right_term_list:
-    :param mixs_v6_obj:
+    :param right_obj:
     :param report:
     :return: pairwise_obj:
     """
@@ -912,28 +898,28 @@ def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, mixs_
 
     report.write("## Exact Matches" + "\n")
     report.write(', '.join(list(pairwise_obj.left_exact_matched_set)))
-    # ic(mixs_v6_obj.type)
+    # ic(right_obj.type)
 
-    report.write("\n## mixs_v6 Terms without matches, these are the most frequent")
+    report.write(f"\n## {pairwise_obj.right_name}Terms without matches, these are the most frequent")
     # ic(mixs_v6_obj.get_terms_by_freq())
-    mixsv6_all_match_freq = mixs_v6_obj.get_terms_with_freq()
+    right_all_match_freq = right_obj.get_terms_with_freq()
     # df = pd.DataFrame(list(zip(self.left_harmonised_matching_list, self.right_harmonised_matching_list)),
     #                  columns = [self.left_name, self.right_name]).sort_values(self.left_name)
 
-    mixsv6_no_match_freq = {"by_freq": {}, "by_term": {}}
+    right_no_match_freq = {"by_freq": {}, "by_term": {}}
     for right in pairwise_obj.right_not_matched_set:
-        mixsv6_no_match_freq["by_term"][right] = mixsv6_all_match_freq[right]
+        right_no_match_freq["by_term"][right] = right_all_match_freq[right]
         # ic(right)
-        freq = mixsv6_all_match_freq[right]
-        if freq not in mixsv6_no_match_freq["by_freq"]:
-            mixsv6_no_match_freq["by_freq"][freq] = []
-        # ic(type(mixsv6_no_match_freq["by_freq"][freq]))
+        freq = right_all_match_freq[right]
+        if freq not in right_no_match_freq["by_freq"]:
+            right_no_match_freq["by_freq"][freq] = []
+        # ic(type(right_no_match_freq["by_freq"][freq]))
         # ic(type(right))
-        mixsv6_no_match_freq["by_freq"][freq].append(right)
+        right_no_match_freq["by_freq"][freq].append(right)
 
-    ic(mixsv6_no_match_freq["by_term"])
+    ic(right_no_match_freq["by_term"])
 
-    df = pd.DataFrame.from_dict(mixsv6_no_match_freq["by_term"], orient = 'index', columns = ["frequency"])
+    df = pd.DataFrame.from_dict(right_no_match_freq["by_term"], orient = 'index', columns = ["frequency"])
     df["term"] = df.index
     df = df.sort_values("frequency", ascending = False)
     df = df[["term", "frequency"]]
@@ -941,7 +927,8 @@ def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, mixs_
     report.write("## Frequency" + "\n")
     report.write(df.to_markdown(index = False) + "\n")
 
-    title = "Terms in MIXSv6 not matching ENA terms,\n( sized by the number of packages they occur in )"
+    title = f"Terms in {pairwise_obj.right_name} not matching {pairwise_obj.left_name} \
+          terms,\n( sized by the number of packages they occur in )"
     # do_textWordCloud(df, title)
     report.write("## Harmonised Matches" + "\n")
     pairwise_df = pairwise_obj.get_harmonised_match_df()
@@ -1021,10 +1008,13 @@ def parse_new_linkml():
     return r_json
 
 def compareAndReport(left_obj, right_obj, report):
-    df = compareAllTerms(left_obj.get_all_term_list(), right_obj.get_all_term_list())
-    report.write("\n" + "## Table of all terms and their matches for " + left_obj.type\
-                 + " and " + right_obj.type + "\n")
-    report.write(df.to_markdown(index = False) + "\n")
+    pair_string = names2pair_string(left_obj.type, right_obj.type)
+    pairwise_obj = pairwise_term_matches(pair_string, left_obj.get_all_term_list(), right_obj.get_all_term_list())
+
+    #df = compareAllTerms(left_obj.get_all_term_list(), right_obj.get_all_term_list())
+    #report.write("\n" + "## Table of all terms and their matches for " + left_obj.type\
+    #             + " and " + right_obj.type + "\n")
+    #report.write(df.to_markdown(index = False) + "\n")
 
 
 def main():
@@ -1057,9 +1047,6 @@ def main():
     # print(comparison_obj.comparisonStats)
 
     analyse_term_matches(ena_cl_obj, mixs_v6_obj, report)
-
-
-
 
     ic("early exit")
     sys.exit()
