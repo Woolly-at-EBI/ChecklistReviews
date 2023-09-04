@@ -71,12 +71,16 @@ def get_data():
     return r_json
 
 
-def get_mixs_dict():
+def get_mixs_dict(dict_name):
     """
 
     :return:
     """
-    pickle_file = '../data/v6_mixs.schema.json.pickle'
+    if dict_name == "my_dict_v6":
+        pickle_file = '../data/v6_mixs.schema.json.pickle'
+    else:
+        print(f"ERROR: {dict_name} is not recognised")
+        sys.exit()
 
     if not os.path.isfile(pickle_file):
         my_dict = json.loads(get_data())
@@ -1022,22 +1026,28 @@ def main():
     print(report.write("# Review of the MIX-S checklists proposed by GSC\n"))
     ena_cl_dict = get_ena_dict()
     ena_cl_obj = mixs(ena_cl_dict, "ena_cl", linkml_mixs_dict)
-    my_dict_v6 = get_mixs_dict()
+    my_dict_v6 = get_mixs_dict("my_dict_v6")
     mixs_v6_dict = process_mixs_dict(my_dict_v6, linkml_mixs_dict)
     mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6", linkml_mixs_dict)
+    # mixs_v5_dict = process_mixs_dict(my_dict_v5, linkml_mixs_dict)
+    # mixs_v5_obj = mixs(mixs_v5_dict, "mixs_v5", linkml_mixs_dict)
 
+
+    # do ena and mix_v6
     df = compareAllTerms(ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list())
-    report.write("\n" + "## Table of all terms and their matches" + "\n")
+    report.write("\n" + "## Table of all terms and their matches for " + ena_cl_obj.type\
+                 + " and " + mixs_v6_obj.type + "\n")
     report.write(df.to_markdown(index = False) + "\n")
-
-
     compareSelectChecklists(ena_cl_obj, mixs_v6_obj, report)
     sys.exit()
-
     comparison_obj = compareChecklists(ena_cl_obj, mixs_v6_obj, report)
+
     # print(comparison_obj.comparisonStats)
 
     analyse_term_matches(ena_cl_obj, mixs_v6_obj, report)
+
+
+
 
     ic("early exit")
     sys.exit()
