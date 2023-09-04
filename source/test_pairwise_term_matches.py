@@ -167,8 +167,4 @@ class Testpairwise_term_matches(unittest.TestCase):
     #     self.fail()
 
 if __name__ == '__main__':
-
-
-
-
     unittest.main()

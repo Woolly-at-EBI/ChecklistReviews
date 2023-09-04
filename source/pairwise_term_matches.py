@@ -54,6 +54,15 @@ class pairwise_term_matches:
         df = self.comparison_df
         # ic(df.head(20))
         # ic(df['match_type'].unique())
+        self.left_exact_matched_set = set()
+        self.left_fuzzy_matched_set = set()
+        self.left_harmonised_matched_set = set()
+        self.left_not_matched_set = set()
+
+        self.right_exact_matched_set = set()
+        self.right_fuzzy_matched_set = set()
+        self.right_harmonised_matched_set = set()
+        self.right_not_matched_set = set()
 
         for match_type in df['match_type'].unique():
             tmp_df = df.query('match_type == @match_type')
@@ -142,6 +151,20 @@ class pairwise_term_matches:
             clean_hash[right] = clean_term(right)
         self.clean_hash = clean_hash
         return self.clean_hash
+
+    def print_stats(self):
+        stats = ""
+        stats += "left term count         : " + str(len(self.left_term_list)) + "\n"
+        stats += "exact matches total     : " + str(len(self.right_exact_matched_set)) + "\n"
+        stats += "harmonised matches total: " + str(len(self.right_harmonised_matched_set)) + "\n"
+        stats += "confident match total   : " + str(len(self.left_confident_matched_set)) + "\n"
+        stats += "fuzzy matches count     : " + str(len(self.left_fuzzy_matched_set)) + "\n"
+        stats += "\n"
+        stats += "left not matches count  : " + str(len(self.left_not_matched_set)) + "\n"
+        stats += "right term count        : " + str(len(self.right_term_list)) + "\n"
+        stats += "right confidence count  : " + str(len(self.right_confident_matched_set)) + "\n"
+        stats += "right not matches count : " + str(len(self.right_not_matched_set)) + "\n"
+        return stats
 
 
 def term_alignment_dict2df(my_dict):
