@@ -40,7 +40,7 @@ class pairwise_term_matches:
         """
         ic()
         self.process_names(pair_string)
-        ic(self.get_left_name())
+        # ic(self.get_left_name())
         self.left_term_list = self.unique_sorted_list(left_term_list)
         self.right_term_list = self.unique_sorted_list(right_term_list)
         clean_hash = self.get_clean_hash()
@@ -52,13 +52,8 @@ class pairwise_term_matches:
 
         self.comparison_df = compareAllTerms(self.left_term_list, self.right_term_list)
         df = self.comparison_df
-        # test_comparison_df_file = "../data/" + pair_string + "_comparison_df.tsv"
-        # df.to_csv(test_comparison_df_file, sep="\t")
-        # ic(f"created {test_comparison_df_file}")
-
-        ic(df.head(20))
-        ic(df['match_type'].unique())
-
+        # ic(df.head(20))
+        # ic(df['match_type'].unique())
 
         for match_type in df['match_type'].unique():
             tmp_df = df.query('match_type == @match_type')
@@ -67,8 +62,6 @@ class pairwise_term_matches:
             if match_type == "exact":
                 self.left_exact_matched_set = set(tmp_df.left_term)
                 self.right_exact_matched_set = set(tmp_df.match)
-                ic(self.left_exact_matched_set.difference(self.right_exact_matched_set))
-
             elif match_type == "harmonised":
                 self.left_harmonised_matched_set = set(tmp_df.left_term)
                 self.right_harmonised_matched_set = set(tmp_df.match)
@@ -85,6 +78,10 @@ class pairwise_term_matches:
         self.left_confident_matched_set = set(self.left_exact_matched_set)
         self.left_confident_matched_set.union(self.left_harmonised_matched_set )
         self.set_right_sets()
+
+    def get_comparison_df(self):
+        return self.comparison_df
+
     def get_left_exact_matched_list(self):
         return sorted(self.left_exact_matched_set)
 

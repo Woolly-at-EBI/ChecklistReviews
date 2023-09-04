@@ -27,8 +27,14 @@ class Testpairwise_term_matches(unittest.TestCase):
         test_in = ['c', 'a', 'b']
         self.assertListEqual(self.pairwise_obj.unique_sorted_list(test_in), ['a', 'b', 'c'])
 
+    def test_get_comparison_df(self):
+        df = self.pairwise_obj.get_comparison_df()
+        #ic(sorted(df.columns))
+        test_columns = ['fuzzy_score', 'left_term', 'match', 'match_term_duplicated', 'match_type']
+        self.assertListEqual(sorted(df.columns),test_columns)
+        self.assertEqual(len(df),625)
     def test_get_left_exact_matched_list(self):
-        ic()
+        #ic()
         test_out = sorted(
             ['HRT', 'IHMC medication code', 'MAG coverage software', 'OTU classification approach', 'OTU database',
              'OTU sequence comparison approach', 'WGA amplification approach', 'WGA amplification kit',
@@ -131,7 +137,7 @@ class Testpairwise_term_matches(unittest.TestCase):
         self.assertListEqual(self.pairwise_obj.get_left_fuzzy_matched_list(), test_out)
 
     def test_get_left_confident_matched_list(self):
-        self.assertEqual(len(self.pairwise_obj.get_left_confident_matched_list()), 109)
+        self.assertEqual(len(self.pairwise_obj.get_left_confident_matched_list()), 367)
 
     def test_get_left_not_matched_list(self):
 
