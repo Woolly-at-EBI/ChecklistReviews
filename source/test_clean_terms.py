@@ -4,6 +4,7 @@ from icecream import ic
 
 class Test(unittest.TestCase):
 
+
     def test_clean_term(self):
         test_in = 'Some-Term'
         test_out = 'some_term'
