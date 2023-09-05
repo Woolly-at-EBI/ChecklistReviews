@@ -1,4 +1,5 @@
 from icecream import ic
+import sys
 
 class mixs:
     def ingest_ena_cl(self):
@@ -10,15 +11,15 @@ class mixs:
         self.type = type
 
         if type == "ena_cl":
-            ic(f"type = {type}")
-            ic(f"self.type = {self.type}")
+            #ic(f"type = {type}")
+            #ic(f"self.type = {self.type}")
             self.my_dict_raw = my_dict
             self.linkml_mixs_dict = linkml_mixs_dict
             self.ingest_ena_cl()
             # self.cl_details_dict = get_ena_cl_details(self.my_dict_raw)
-            ic(f"self.type = {self.type}")
+            # ic(f"self.type = {self.type}")
         else:
-            ic(f"type = {type}")
+            # ic(f"type = {type}")
             self.my_dict = my_dict
 
     def get_type(self):
@@ -35,7 +36,6 @@ class mixs:
                                         'Food_source': 12,
                                         'HACCP_term': 36,
         """
-        self.get_terms_by_freq()
         return self.term_with_freq
 
     def get_terms_by_freq(self):
@@ -44,14 +44,13 @@ class mixs:
         :return:  40: {'term_count_with_freq': 2,
                         'terms': dict_keys(['collection date', 'geographic location (country and/or sea)'])}}
         """
-        ic()
+
         if hasattr(self, 'my_just_freq'):
             return self.my_just_freq
 
         my_just_freq = {}
         if "by_term_count" not in self.my_dict:
             add_term_package_count(self.my_dict)
-
         self.term_with_freq = {}
 
         freq_keys = sorted(self.my_dict["by_term_count"].keys(), reverse = True)
@@ -89,7 +88,7 @@ class mixs:
         total_found_so_far = 0
         top_terms = []
         for freq_key in my_just_freq:
-            ic(my_just_freq[freq_key]["terms"])
+            # ic(my_just_freq[freq_key]["terms"])
             top_terms.extend(list(my_just_freq[freq_key]["terms"]))
             if len(top_terms) >= first_number:
                 return top_terms[0:first_number]
@@ -111,15 +110,27 @@ class mixs:
         return return_str
 
     def get_all_package_list(self):
-        my_list = list(self.my_dict['by_package'].keys())
-        my_list.sort()
+        my_list = sorted(self.my_dict['by_package'].keys())
+        # ic(type(my_list))
         return my_list
 
     def get_all_package_count(self):
         return (len(self.my_dict['by_package'].keys()))
 
     def print_package_summary(self):
-        return f"package_count={self.get_all_package_count()} packages={self.get_all_package_list()}"
+        """
+        all kinds of wierdness happening with a simple list to string conversion...
+        f strings even misbehaved so had to break it down. no idea why. oh well.
+        :return:
+        """
+        package_list = self.get_all_package_list()
+        # ic(package_list)
+        package_list_string = ', '.join(package_list)
+        # print(package_list_string)
+        # print("++++++++++++++++++++++++++++++++++++++++")
+        return_str = "package_count=" + str(self.get_all_package_count()) + " packages=" + package_list_string
+        # print(return_str)
+        return return_str
 
     def print_summaries(self):
         print(self.print_term_summary(10))

@@ -9,12 +9,22 @@ class Testmixs(unittest.TestCase):
     ena_cl_dict = get_ena_dict()
     ena_cl_obj = mixs(ena_cl_dict, "ena_cl", linkml_mixs_dict)
 
+    my_dict_v6 = get_mixs_dict("my_dict_v6")
+    mixs_v6_dict = process_mixs_dict(my_dict_v6, linkml_mixs_dict)
+    mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6", linkml_mixs_dict)
+
+    mixs_v5_dict = get_mixs_v5_dict()
+    mixs_v5_obj = mixs(mixs_v5_dict, "mixs_v5", linkml_mixs_dict)
+
+
     def test_ingest_ena_cl(self):
-        ic(type(self.ena_cl_obj))
+        # ic(type(self.ena_cl_obj))
         self.assertIsInstance(self.ena_cl_obj, mixs)
 
     def test_get_type(self):
         self.assertEqual(self.ena_cl_obj.get_type(), 'ena_cl')
+        self.assertEqual(self.mixs_v5_obj.get_type(), 'mixs_v5')
+        self.assertEqual(self.mixs_v6_obj.get_type(), 'mixs_v6')
 
     def test_get_all_term_list(self):
         # ic(self.ena_cl_obj.get_all_term_list())
@@ -49,25 +59,29 @@ class Testmixs(unittest.TestCase):
         self.assertEqual(self.ena_cl_obj.get_all_term_count(), 625)
 
     def test_print_term_summary(self):
-        ic(self.ena_cl_obj.print_term_summary(2))
+        # ic(self.ena_cl_obj.print_term_summary(2))
         test_out = "term_count=625 first 2 terms=['16S recovered', '16S recovery software']"
         self.assertEqual(self.ena_cl_obj.print_term_summary(2), test_out)
 
     def test_get_all_package_list(self):
-        ic("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        # ic("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         self.assertEqual(len(self.ena_cl_obj.get_all_package_list()),40)
 
-    # def test_get_all_package_count(self):
-    #     self.fail()
-    #
-    # def test_print_package_summary(self):
-    #     self.fail()
+    def test_get_all_package_count(self):
+         self.assertEqual(self.ena_cl_obj.get_all_package_count(),40)
+
+    def test_print_package_summary(self):
+        # print(self.ena_cl_obj.print_package_summary())
+        test_out = "package_count=40 packages=COMPARE-ECDC-EFSA pilot food-associated reporting standard, COMPARE-ECDC-EFSA pilot human-associated reporting standard, ENA Crop Plant sample enhanced annotation checklist, ENA Global Microbial Identifier Proficiency Test (GMI PT) checklist, ENA Global Microbial Identifier reporting standard checklist GMI_MDM:1.1, ENA Influenza virus reporting standard checklist, ENA Marine Microalgae Checklist, ENA Micro B3, ENA Plant Sample Checklist, ENA Shellfish Checklist, ENA Tara Oceans, ENA UniEuk_EukBank Checklist, ENA binned metagenome, ENA default sample checklist, ENA mutagenesis by carcinogen treatment checklist, ENA parasite sample checklist, ENA prokaryotic pathogen minimal sample checklist, ENA sewage checklist, ENA virus pathogen reporting standard checklist, GSC MIMAGS, GSC MISAGS, GSC MIUVIGS, GSC MIxS air, GSC MIxS built environment, GSC MIxS host associated, GSC MIxS human associated, GSC MIxS human gut, GSC MIxS human oral, GSC MIxS human skin, GSC MIxS human vaginal, GSC MIxS microbial mat biolfilm, GSC MIxS miscellaneous natural or artificial environment, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, HoloFood Checklist, PDX Checklist, Tree of Life Checklist"
+        self.assertEqual(self.ena_cl_obj.print_package_summary(), test_out)
+
     #
     # def test_print_summaries(self):
     #     self.fail()
-    #
-    # def test_get_term_list_for_package(self):
-    #     self.fail()
+
+    def test_get_term_list_for_package(self):
+        #ic(self.ena_cl_obj.get_term_list_for_package('GSC MIxS human gut'))
+        self.assertIn('observed biotic relationship', self.ena_cl_obj.get_term_list_for_package('GSC MIxS human gut'))
 
 
 if __name__ == '__main__':
