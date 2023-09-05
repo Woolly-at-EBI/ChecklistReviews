@@ -5,17 +5,20 @@ class mixs:
         self.my_dict = process_ena_cl(self.my_dict_raw, self.linkml_mixs_dict)
 
     def __init__(self, my_dict, type, linkml_mixs_dict):
+        ic()
         # type could be  "mixs_v5" or "mixs_v6"
         self.type = type
 
         if type == "ena_cl":
-            print(f"type = {type}")
+            ic(f"type = {type}")
+            ic(f"self.type = {self.type}")
             self.my_dict_raw = my_dict
             self.linkml_mixs_dict = linkml_mixs_dict
             self.ingest_ena_cl()
-
             # self.cl_details_dict = get_ena_cl_details(self.my_dict_raw)
+            ic(f"self.type = {self.type}")
         else:
+            ic(f"type = {type}")
             self.my_dict = my_dict
 
     def get_type(self):
@@ -89,7 +92,7 @@ class mixs:
             ic(my_just_freq[freq_key]["terms"])
             top_terms.extend(list(my_just_freq[freq_key]["terms"]))
             if len(top_terms) >= first_number:
-                return top_terms[0:first_number - 1]
+                return top_terms[0:first_number]
         return top_terms
 
     def get_all_term_count(self):
@@ -98,13 +101,14 @@ class mixs:
     def print_term_summary(self, top):
         """
 
-        :param top: = top # number to print, if "", print all
+        :param top: = top # number to print, if "", print all, well string to print
         :return:
         """
         if top == "":
-            print(f"term_count={self.get_all_term_count()}  terms={self.get_all_term_list()}")
+            return_str = f"term_count={self.get_all_term_count()}  terms={self.get_all_term_list()}"
         else:
-            print(f"term_count={self.get_all_term_count()} first {top} terms={self.get_all_term_list()[0:top]}")
+            return_str = f"term_count={self.get_all_term_count()} first {top} terms={self.get_all_term_list()[0:top]}"
+        return return_str
 
     def get_all_package_list(self):
         my_list = list(self.my_dict['by_package'].keys())
@@ -115,11 +119,11 @@ class mixs:
         return (len(self.my_dict['by_package'].keys()))
 
     def print_package_summary(self):
-        print(f"package_count={self.get_all_package_count()} packages={self.get_all_package_list()}")
+        return f"package_count={self.get_all_package_count()} packages={self.get_all_package_list()}"
 
     def print_summaries(self):
-        self.print_term_summary(10)
-        self.print_package_summary()
+        print(self.print_term_summary(10))
+        print(self.print_package_summary())
 
     # def get_all_checklists(self):
     #     self.cl_details_dict

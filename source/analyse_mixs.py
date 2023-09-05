@@ -779,7 +779,7 @@ def compareChecklists(left_obj, right_obj, report):
         if left_package_count > 2:
             break
         for right_package_name in right_obj.get_all_package_list():
-            com_package_names = '::'.join([left_package_name, right_package_name])
+            com_package_names = names2pair_string(left_package_name, right_package_name)
             # ic(right_package_name)
             comparisonStats[pair_string]['by_package'][com_package_names] = compare2packages(pair_string, \
                  left_package_name, right_package_name, left_obj, right_obj)
