@@ -626,11 +626,10 @@ def compare2packages(comparison, left_package_name, right_package_name, left_obj
         return df
 
     # main stream compare2packages aspects
-    ic()
+    # ic()
     # building  comparisonStats[comparison]['by_package'][com_package_names]  = {}
     # ic(comparison)
     com_package_names = names2pair_string(left_package_name,right_package_name)
-    ic(com_package_names)
     if comparison not in comparisonStats:  # added on 30 Aug
         comparisonStats[comparison] = {}
         comparisonStats[comparison]['by_package'] = {}
@@ -740,6 +739,8 @@ def processComparisonStats(comparisonStats, pair):
     ic("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     ic()
     ic(pair)
+    print()
+    sys.exit(comparisonStats)
     comparison_obj = COMPARISONS(comparisonStats, pair)
     return comparison_obj
 
@@ -764,7 +765,10 @@ def compareChecklists(left_obj, right_obj, report):
             'pair': 'COMPARE-ECDC-EFSA pilot food-associated reporting standard::Agriculture'},
 
     """
-    pair_string = source_objs_to_pair_string(left_obj.type, right_obj.type)
+    ic()
+    ic(left_obj.type)
+    ic(right_obj.type)
+    pair_string = names2pair_string(left_obj.type, right_obj.type)
     comparisonStats = {pair_string: {'by_package': {}}}
     ic(comparisonStats)
 
@@ -780,12 +784,9 @@ def compareChecklists(left_obj, right_obj, report):
             break
         for right_package_name in right_obj.get_all_package_list():
             com_package_names = names2pair_string(left_package_name, right_package_name)
-            # ic(right_package_name)
-            comparisonStats[pair_string]['by_package'][com_package_names] = compare2packages(pair_string, \
-                 left_package_name, right_package_name, left_obj, right_obj)
+            comparisonStats[pair_string]['by_package'][com_package_names] = compare2packages(pair_string, left_package_name,\
+                     right_package_name, left_obj, right_obj, comparisonStats, report)
             count += 1
-    # ic(comparisonStats)
-    # ic()
     comparison_obj = processComparisonStats(comparisonStats, pair_string)
     return comparison_obj
 
@@ -1047,9 +1048,11 @@ def main():
     mixs_v5_obj = mixs(mixs_v5_dict, "mixs_v5", linkml_mixs_dict)
     ic(mixs_v5_obj.type)
 
-    # do mix_v5 and mix_v6
+    ic("do mix_v5 and mix_v6")
     comparison_obj = compareAndReport(mixs_v5_obj, mixs_v6_obj, report)
 
+    ic("do ena_cl and mix_v6")
+    ic(ena_cl_obj.type)
     comparison_obj = compareChecklists(ena_cl_obj, mixs_v6_obj, report)
     # compareSelectChecklists(ena_cl_obj, mixs_v6_obj, report)
     sys.exit()

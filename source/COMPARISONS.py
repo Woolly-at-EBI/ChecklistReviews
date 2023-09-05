@@ -2,9 +2,12 @@ from icecream import ic
 import pandas as pd
 import plotly.express as px
 import sys
+# from analyse_mixs import names2pair_string
 
 class COMPARISONS:
-    """ not yet a proper or even rich object...
+    """
+      Allows comparison of source checklist/packages.
+      not yet a proper or even rich object...
         if more development, need to improve this.
         (still it served a purpose and broke up an excessively long routine)
     """
@@ -26,8 +29,11 @@ class COMPARISONS:
 
     def put_reorg_df(self, df):
         self.reorg_df = df
-        self.reorg_df['short_ena'] = df['ena'].str.extract(r"([A-Za-z]+ [A-Za-z]+ [A-Za-z]+)")
-        self.reorg_df['short_mixs_v6'] = df['mixs_v6'].str.extract(r"([A-Z][a-z]+)")
+
+        if self.left_source() == 'ena_cl':
+            self.reorg_df['short_ena'] = df['ena_cl'].str.extract(r"([A-Za-z]+ [A-Za-z]+ [A-Za-z]+)")
+        if self.right_source() == 'mixs_v6':
+            self.reorg_df['short_mixs_v6'] = df['mixs_v6'].str.extract(r"([A-Z][a-z]+)")
 
     def process_max_intersection_len(self):
         """
@@ -54,6 +60,7 @@ class COMPARISONS:
             alltarget_cols.append('pc_left_of_right')
 
             max_df = new_df[alltarget_cols].groupby(target_cols).max().reset_index()
+            self.max_df = max_df
             # print(max_df.to_string(index = False))
 
             if source == 'mixs_v6':
@@ -66,6 +73,7 @@ class COMPARISONS:
             tmp_df = max_df.query('pc_left_of_right < 0.2')
             # print(tmp_df.to_string(index = False))
             # print(f"{tmp_df[source].unique()} \ntotal={len(tmp_df[source].unique())}")
+            #self.max_intersection_len
             # end of process_max_intersection_len
 
     def ingest(self):
@@ -76,7 +84,8 @@ class COMPARISONS:
         sub_dict_elements = ['length_clean_intersection', 'pc_left_of_right']
         for element in sub_dict_elements:
             reorg_dict[element] = []
-        comparison_source = 'ena::mixs_v6'
+        comparison_source = names2pair_string(self.left_source(), self.right_source())
+        ic(comparison_source)
         comparisonStats = self.comparisonStats
         # ic(comparisonStats)
         count = 0
@@ -107,6 +116,7 @@ class COMPARISONS:
         # ic(reorg_dict)
         self.put_reorg_df(pd.DataFrame.from_dict(reorg_dict))
         df = self.reorg_df
+        ic()
         ic(df.head(5))
         # ic(df['short_ena'].unique())
         # ic(df['short_mixs_v6'].unique())
@@ -158,4 +168,7 @@ def mixs6_matches_plots(df, new_df):
     fig.update_traces(textposition = 'top center')
     # fig.show()
     fig.write_image("/Users/woollard/projects/ChecklistReviews/docs/ENAvsMIXSv6_ScatterPlot.jpg")
+
+def names2pair_string(left_name, right_name):
+    return '::'.join([left_name, right_name])
 
