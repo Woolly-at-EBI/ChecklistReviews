@@ -117,11 +117,36 @@ class mixs:
     def get_gsc_packages(self):
         if hasattr(self, 'gsc_package_set'):
             return list(self.gsc_package_set)
+
         if self.type == 'ena_cl':
             self.gsc_package_set = set(filter(lambda x: x.startswith("GSC"), self.get_all_package_list()))
-        else:
+            self.not_gsc_package_set = [x for x in self.get_all_package_list() if x not in self.gsc_package_set]
+        else: #will be GSC MIXS
             self.gsc_package_set = set(self.get_all_package_list())
+            self.not_gsc_package_set = set()
         return list(self.gsc_package_set)
+
+    def get_not_gsc_packages(self):
+        if hasattr(self, 'not_gsc_package_set'):
+            self.get_gsc_packages()
+        return self.not_gsc_package_set
+
+    def get_gsc_packages_mixs_style_nomenclature_list(self):
+        """
+        remove things like GSC prefix
+        :return:
+        """
+        if hasattr(self, 'gsc_packages_mixs_style_nomenclature_set'):
+            return self.gsc_packages_mixs_style_nomenclature_set
+        self.gsc_packages_mixs_style_nomenclature_set = set()
+        self.gsc_package_name_dict = {}
+        for package_name in self.get_gsc_packages():
+            ic(package_name)
+            mixs_package_style_name = package_name.removeprefix('GSC ').removeprefix('MIxS ')
+            ic(mixs_package_style_name)
+            self.gsc_packages_mixs_style_nomenclature_set.add(mixs_package_style_name)
+            self.gsc_package_name_dict[package_name] = {'mix_style_name': mixs_package_style_name}
+        ic(self.gsc_package_name_dict)
 
     def get_all_package_list(self):
         if hasattr(self, 'all_package_list'):
