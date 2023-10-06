@@ -129,7 +129,7 @@ class mixs:
     def get_not_gsc_packages(self):
         if hasattr(self, 'not_gsc_package_set'):
             self.get_gsc_packages()
-        return self.not_gsc_package_set
+        return list(self.not_gsc_package_set)
 
     def get_gsc_packages_mixs_style_nomenclature_list(self):
         """
