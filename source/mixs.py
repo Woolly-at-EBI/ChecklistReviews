@@ -114,10 +114,21 @@ class mixs:
             return_str = f"term_count={self.get_all_term_count()} first {top} terms={self.get_all_term_list()[0:top]}"
         return return_str
 
+    def get_gsc_packages(self):
+        if hasattr(self, 'gsc_package_set'):
+            return list(self.gsc_package_set)
+        if self.type == 'ena_cl':
+            self.gsc_package_set = set(filter(lambda x: x.startswith("GSC"), self.get_all_package_list()))
+        else:
+            self.gsc_package_set = set(self.get_all_package_list())
+        return list(self.gsc_package_set)
+
     def get_all_package_list(self):
-        my_list = sorted(self.my_dict['by_package'].keys())
-        # ic(type(my_list))
-        return my_list
+        if hasattr(self, 'all_package_list'):
+            return self.all_package_list
+        self.all_package_list = sorted(self.my_dict['by_package'].keys())
+        #ic(type(self.all_package_list))
+        return self.all_package_list
 
     def get_all_package_count(self):
         return (len(self.my_dict['by_package'].keys()))
