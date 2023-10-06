@@ -52,6 +52,7 @@ class pairwise_term_matches:
 
         self.comparison_df = compareAllTerms(self.left_term_list, self.right_term_list)
         df = self.comparison_df
+
         # ic(df.head(20))
         # ic(df['match_type'].unique())
         self.left_exact_matched_set = set()
@@ -82,7 +83,6 @@ class pairwise_term_matches:
             else:
                 print(f"ERROR: match_type={match_type} is not yet being processed correctly")
                 sys.exit()
-        #sys.exit()
 
         self.left_confident_matched_set = set(self.left_exact_matched_set)
         self.left_confident_matched_set.union(self.left_harmonised_matched_set )
@@ -90,6 +90,19 @@ class pairwise_term_matches:
 
     def get_comparison_df(self):
         return self.comparison_df
+
+    def get_harmonised_match_df(self):
+        """
+        filters the df to just provide the confident match rows, N.B. may still have some errors
+        :return: harmonised_df
+        """
+        ic()
+        df = self.comparison_df
+        ic(len(df))
+        harmonised_df = df.query('fuzzy_score > 90')
+        ic(len(harmonised_df))
+
+        return harmonised_df
 
     def get_left_exact_matched_list(self):
         return sorted(self.left_exact_matched_set)
@@ -237,7 +250,7 @@ def compareAllTerms(left_list, right_list):
     dup_set = set(tmp_df.unique_values.tolist())
     # ic(dup_set)
     df['match_term_duplicated'] = df['match'].apply(lambda x: True if x in dup_set and x != "" else False)
-    # ic(df.head(20))
+    # ic(df.head(10))
     # print(df.to_markdown(index=False))
 
     return df

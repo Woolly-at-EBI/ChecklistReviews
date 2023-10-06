@@ -740,7 +740,6 @@ def processComparisonStats(comparisonStats, pair):
     ic()
     ic(pair)
     print()
-    sys.exit(comparisonStats)
     comparison_obj = COMPARISONS(comparisonStats, pair)
     return comparison_obj
 
@@ -918,7 +917,7 @@ def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, right
         # ic(type(right))
         right_no_match_freq["by_freq"][freq].append(right)
 
-    ic(right_no_match_freq["by_term"])
+    #ic(right_no_match_freq["by_term"])
 
     df = pd.DataFrame.from_dict(right_no_match_freq["by_term"], orient = 'index', columns = ["frequency"])
     df["term"] = df.index
@@ -1055,7 +1054,7 @@ def main():
     ic(ena_cl_obj.type)
     comparison_obj = compareChecklists(ena_cl_obj, mixs_v6_obj, report)
     # compareSelectChecklists(ena_cl_obj, mixs_v6_obj, report)
-    sys.exit()
+
     # print(comparison_obj.comparisonStats)
 
     analyse_term_matches(ena_cl_obj, mixs_v6_obj, report)

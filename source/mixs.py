@@ -36,7 +36,11 @@ class mixs:
                                         'Food_source': 12,
                                         'HACCP_term': 36,
         """
-        return self.term_with_freq
+        ic(self)
+        if not hasattr(self, 'terms_with_freq'):
+            self.get_terms_by_freq()
+
+        return self.terms_with_freq
 
     def get_terms_by_freq(self):
         """
@@ -51,7 +55,8 @@ class mixs:
         my_just_freq = {}
         if "by_term_count" not in self.my_dict:
             add_term_package_count(self.my_dict)
-        self.term_with_freq = {}
+        self.terms_with_freq = {}
+
 
         freq_keys = sorted(self.my_dict["by_term_count"].keys(), reverse = True)
         # ic("KEYS=+++++++++++++++++++++++++")
@@ -62,7 +67,7 @@ class mixs:
             my_just_freq[freq_key]["terms"] = list(self.my_dict["by_term_count"][freq_key].keys())
             my_just_freq[freq_key]["term_count_with_freq"] = len(my_just_freq[freq_key]["terms"])
             for term in my_just_freq[freq_key]["terms"]:
-                self.term_with_freq[term] = freq_key
+                self.terms_with_freq[term] = freq_key
         # ic(my_just_freq)
         # sys.exit()
 
