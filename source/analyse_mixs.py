@@ -1031,6 +1031,20 @@ def compareAndReport(left_obj, right_obj, report):
     report.write("\n\n" + f"### {right_obj.type} without a match:\n " +\
                   ", ".join(pairwise_obj.get_right_not_matched_list()) + "\n")
 
+def getPackageNameInfo(obj):
+    ic(obj.type)
+    ic(len(obj.get_all_package_list()))
+    #ic(obj.get_all_package_list())
+    ic(obj.get_gsc_packages())
+    ic(obj.get_gsc_packages_mixs_style_nomenclature_list())
+
+def compareChecklistsByName(ena_obj, mixs_obj):
+
+    getPackageNameInfo(ena_obj)
+
+    #getInfo(mixs_obj)
+
+
 def main():
     linkml_mixs_dict = parse_new_linkml()
 
@@ -1042,6 +1056,9 @@ def main():
     my_dict_v6 = get_mixs_dict("my_dict_v6")
     mixs_v6_dict = process_mixs_dict(my_dict_v6, linkml_mixs_dict)
     mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6", linkml_mixs_dict)
+
+    compareChecklistsByName(ena_cl_obj, mixs_v6_obj)
+    sys.exit()
 
     mixs_v5_dict = get_mixs_v5_dict()
     mixs_v5_obj = mixs(mixs_v5_dict, "mixs_v5", linkml_mixs_dict)
