@@ -126,8 +126,15 @@ class mixs:
             self.not_gsc_package_set = set()
         return list(self.gsc_package_set)
 
+    def get_gsc_package_name_dict(self):
+        if hasattr(self, 'gsc_package_name_dict'):
+            return self.gsc_package_name_dict
+        self.get_gsc_packages()
+        return self.gsc_package_name_dict
+
+
     def get_not_gsc_packages(self):
-        if hasattr(self, 'not_gsc_package_set'):
+        if not hasattr(self, 'not_gsc_package_set'):
             self.get_gsc_packages()
         return list(self.not_gsc_package_set)
 
@@ -139,14 +146,27 @@ class mixs:
         if hasattr(self, 'gsc_packages_mixs_style_nomenclature_set'):
             return self.gsc_packages_mixs_style_nomenclature_set
         self.gsc_packages_mixs_style_nomenclature_set = set()
-        self.gsc_package_name_dict = {}
-        for package_name in self.get_gsc_packages():
-            ic(package_name)
-            mixs_package_style_name = package_name.removeprefix('GSC ').removeprefix('MIxS ')
-            ic(mixs_package_style_name)
-            self.gsc_packages_mixs_style_nomenclature_set.add(mixs_package_style_name)
-            self.gsc_package_name_dict[package_name] = {'mix_style_name': mixs_package_style_name}
-        ic(self.gsc_package_name_dict)
+        if self.type == 'ena_cl':
+            self.gsc_package_name_dict = {}
+            for package_name in self.get_gsc_packages():
+                mixs_package_style_name = package_name.removeprefix('GSC ').removeprefix('MIxS ').replace(' ', '-', 1) \
+                    .replace(' ', '', 1)
+                # saving first and rest using split()
+                init, *temp = mixs_package_style_name .split(' ')
+
+                # using map() to get all words other than 1st
+                # and titlecasing them
+                ic(init)
+                ic(temp)
+                mixs_package_style_name = ''.join([init.capitalize(), *map(str.title, temp)])
+                mixs_package_style_name = mixs_package_style_name.replace('Misags', 'MISAGS').replace('Mimags', 'MIMAGS')\
+                    .replace('Miuvigs','MIUVIGS')
+                self.gsc_packages_mixs_style_nomenclature_set.add(mixs_package_style_name)
+                self.gsc_package_name_dict[package_name] = {'mix_style_name': mixs_package_style_name}
+        else:
+            self.gsc_packages_mixs_style_nomenclature_set = set(self.get_gsc_packages())
+        #ic(self.gsc_package_name_dict)
+        return self.gsc_packages_mixs_style_nomenclature_set
 
     def get_all_package_list(self):
         if hasattr(self, 'all_package_list'):
