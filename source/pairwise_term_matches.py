@@ -3,6 +3,7 @@ import pandas as pd
 from clean_terms import *
 from rapidfuzz import process
 import sys
+import re
 
 class pairwise_term_matches:
     """pairwise_term_matches object as simple object orientated to reduce complexity and saves passing a big hash.
@@ -91,7 +92,7 @@ class pairwise_term_matches:
     def get_comparison_df(self):
         return self.comparison_df
 
-    def get_harmonised_match_df(self):
+    def get_harmonised_and_exact_match_df(self):
         """
         filters the df to just provide the confident match rows, N.B. may still have some errors
         :return: harmonised_df
@@ -103,6 +104,66 @@ class pairwise_term_matches:
         ic(len(harmonised_df))
 
         return harmonised_df
+
+    def get_just_harmonised_df(self):
+        """
+        filters the df to just provide the confident, but not exact match rows, N.B. may still have some errors
+        :return: harmonised_df
+        """
+        ic()
+        df = self.comparison_df
+        ic(len(df))
+        harmonised_df = df.query('fuzzy_score > 90 and match_type != "exact"')
+        ic(len(harmonised_df))
+        harmonised_df = self.assess_likely_map_accuracy(harmonised_df)
+        return harmonised_df
+
+    def assess_likely_map_accuracy(self, df):
+        def assess_mapping(row):
+
+
+            if row['match_type'] == 'exact':
+                return 1 #, "exact"
+            elif row['fuzzy_score'] == 100:
+                return 1 #, "very_close"
+            elif re.search("[0-9]$", row['left_term']) and not re.search("[0-9]$", row['match']):
+                return 0.5 #, "left_has_numerical_suffix"
+            elif not row['match_term_duplicated'] and (row['match'] in row['left_term']):
+                return 0.7 #right is a substring of left
+            elif row['match_term_duplicated'] and (row['match'] in row['left_term']):
+                return 0.3 #right is a substring of left
+
+            # now need to do some more in depth checking
+            clean_left = clean_term(row['left_term'])
+            clean_right = clean_term(row['match'])
+            clean_left_set = set(clean_left.split('_'))
+            clean_right_set = set(clean_right.split('_'))
+            #print(f"cleft={clean_left} cright={clean_right}")
+            if clean_left == clean_right:
+                return 1
+            elif not row['match_term_duplicated'] and (clean_right in clean_left):
+                return 0.7 #right is a substring of left
+            elif not row['match_term_duplicated'] and (clean_left in clean_right):
+                return 0.7 #left is a substring of right
+            elif row['match_term_duplicated'] and (clean_right in clean_left):
+                return 0.3 #right is a substring of left
+            elif row['match_term_duplicated'] and (clean_left in clean_right):
+                return 0.7 #left is a substring of right
+            elif not row['match_term_duplicated'] and len(clean_right_set.intersection(clean_left_set)) >= (len(clean_left_set) -1):
+                return 0.7  # left is a substring of right
+            elif row['match_term_duplicated'] and len(clean_right_set.intersection(clean_left_set)) >= (len(clean_left_set) -1):
+                return 0.7  # left is a substring of right
+            elif len(clean_right_set.intersection(clean_left_set)) >= (len(clean_left_set) -2):
+                return 0.3  # left is a substring of right
+            else:
+                return 0 #, "nowt"
+
+        assessed_df = df.copy()
+        assessed_df['likely_map_accuracy']= assessed_df.apply(assess_mapping, axis = 1)
+        #assessed_df = assessed_df.query('likely_map_accuracy < 1')
+        print(assessed_df.to_markdown(index = False))
+        sys.exit()
+        return assessed_df
 
     def get_left_exact_matched_list(self):
         return sorted(self.left_exact_matched_set)
@@ -164,6 +225,30 @@ class pairwise_term_matches:
             clean_hash[right] = clean_term(right)
         self.clean_hash = clean_hash
         return self.clean_hash
+
+    def put_right_obj(self, right_obj):
+        self.right_obj = right_obj
+
+    def put_left_obj(self, left_obj):
+        self.left_obj = left_obj
+
+
+    def get_right_no_match_freq_dict(self):
+        """
+        yes suboptimal as need to have a right obj!
+        :param :
+        :return:
+        """
+        right_obj = self.right_obj
+        right_all_match_freq = right_obj.get_terms_with_freq()
+        right_no_match_freq = {"by_freq": {}, "by_term": {}}
+        for right in self.right_not_matched_set:
+            right_no_match_freq["by_term"][right] = right_all_match_freq[right]
+            freq = right_all_match_freq[right]
+            if freq not in right_no_match_freq["by_freq"]:
+                right_no_match_freq["by_freq"][freq] = []
+            right_no_match_freq["by_freq"][freq].append(right)
+        return(right_no_match_freq)
 
     def print_stats(self):
         stats = ""
