@@ -156,11 +156,11 @@ class mixs:
 
                 # using map() to get all words other than 1st
                 # and titlecasing them
-                ic(init)
-                ic(temp)
                 mixs_package_style_name = ''.join([init.capitalize(), *map(str.title, temp)])
-                mixs_package_style_name = mixs_package_style_name.replace('Misags', 'MISAGS').replace('Mimags', 'MIMAGS')\
-                    .replace('Miuvigs','MIUVIGS')
+                mixs_package_style_name = mixs_package_style_name.replace('Misags', 'MISAG').replace('Mimags', 'MIMAG')\
+                    .replace('Miuvigs','MIUVIG').replace('Built-environment','BuiltEnvironment')\
+                    .replace('Miscellaneous-naturalorArtificialEnvironment','MiscellaneousNaturalOrArtificialEnvironment') \
+                    .replace('Wastewater-sludge','WastewaterSludge').replace('Microbial-matbiolfilm','MicrobialMatBiofilm')
                 self.gsc_packages_mixs_style_nomenclature_set.add(mixs_package_style_name)
                 self.gsc_package_name_dict[package_name] = {'mix_style_name': mixs_package_style_name}
         else:

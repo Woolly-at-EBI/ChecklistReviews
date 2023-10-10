@@ -30,6 +30,7 @@ import plotly.io as pio
 # project objects etc. being imported
 from pairwise_term_matches import pairwise_term_matches, compareAllTerms
 from COMPARISONS import COMPARISONS
+from source_package_name_comparisons import source_package_name_comparisons
 import mixs
 from mixs import mixs
 from clean_terms import *
@@ -40,7 +41,8 @@ pd.set_option('display.width', 1000)
 pio.renderers.default = "browser"
 # from fuzzywuzzy import process
 
-image_dir = "../docs/images/"
+docs_dir = "../docs/"
+image_dir = docs_dir + "images/"
 
 
 def get_data(source_name):
@@ -882,9 +884,12 @@ def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, right
     """
     ic()
     ic(pair_string)
+
     # ic(left_term_list)
     # ic(right_term_list)
     pairwise_obj = pairwise_term_matches(pair_string, left_term_list, right_term_list)
+    pairwise_obj.put_right_obj(right_obj)
+    # pairwise_obj.put_left_obj(left_obj)
     # ic(pairwise_matches)
     ic(len(left_term_list))
     ic(len(pairwise_obj.left_exact_matched_set))
@@ -903,21 +908,11 @@ def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, right
     report.write(f"\n## {pairwise_obj.right_name}Terms without matches, these are the most frequent")
     # ic(mixs_v6_obj.get_terms_by_freq())
     right_all_match_freq = right_obj.get_terms_with_freq()
-    # df = pd.DataFrame(list(zip(self.left_harmonised_matching_list, self.right_harmonised_matching_list)),
-    #                  columns = [self.left_name, self.right_name]).sort_values(self.left_name)
 
-    right_no_match_freq = {"by_freq": {}, "by_term": {}}
-    for right in pairwise_obj.right_not_matched_set:
-        right_no_match_freq["by_term"][right] = right_all_match_freq[right]
-        # ic(right)
-        freq = right_all_match_freq[right]
-        if freq not in right_no_match_freq["by_freq"]:
-            right_no_match_freq["by_freq"][freq] = []
-        # ic(type(right_no_match_freq["by_freq"][freq]))
-        # ic(type(right))
-        right_no_match_freq["by_freq"][freq].append(right)
+    right_no_match_freq = pairwise_obj.get_right_no_match_freq_dict()
 
     #ic(right_no_match_freq["by_term"])
+
 
     df = pd.DataFrame.from_dict(right_no_match_freq["by_term"], orient = 'index', columns = ["frequency"])
     df["term"] = df.index
@@ -931,9 +926,18 @@ def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, right
           terms,\n( sized by the number of packages they occur in )"
     # do_textWordCloud(df, title)
     report.write("## Harmonised Matches" + "\n")
-    pairwise_df = pairwise_obj.get_harmonised_match_df()
+    pairwise_df = pairwise_obj.get_harmonised_and_exact_match_df()
     report.write(pairwise_df.to_markdown(index = False) + "\n")
     # report.write(pairwise_obj.get_harmonised_match_df().to_string(index = false)
+
+    print(pairwise_df.head(20).to_markdown(index = False))
+    outfile = docs_dir + "all_terms_matches.tsv"
+    pairwise_df.to_csv(outfile, sep="\t")
+    ic(outfile)
+
+    pairwise_df = pairwise_obj.get_just_harmonised_df()
+    print(pairwise_df.to_markdown(index = False))
+    sys.exit()
 
     return pairwise_obj
 
@@ -970,8 +974,14 @@ def analyse_term_matches(ena_cl_obj, mixs_v6_obj, report):
         fig.write_image(image_file)
 
     pair_string = ena_cl_obj.type + "::" + mixs_v6_obj.type
-    do_pairwise_term_matches(pair_string, ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list(), mixs_v6_obj,
+    pairwise_obj = do_pairwise_term_matches(pair_string, ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list(), mixs_v6_obj,
                              report)
+    ic("just ran do_pairwise_term_matches")
+    sys.exit()
+    print(f"left_not_matched_set={pairwise_obj.left_not_matched_set}")
+    ic(f"right_not_matched_set={pairwise_obj.right_not_matched_set}")
+    ic()
+    sys.exit()
 
     ena_df = get_df(ena_cl_obj)
     do_hist(ena_df, 'ENA')
@@ -1032,17 +1042,33 @@ def compareAndReport(left_obj, right_obj, report):
                   ", ".join(pairwise_obj.get_right_not_matched_list()) + "\n")
 
 def getPackageNameInfo(obj):
-    ic(obj.type)
-    ic(len(obj.get_all_package_list()))
-    #ic(obj.get_all_package_list())
-    ic(obj.get_gsc_packages())
-    ic(obj.get_gsc_packages_mixs_style_nomenclature_list())
+    # ic(obj.type)
+    # ic(len(obj.get_all_package_list()))
+    # #ic(obj.get_all_package_list())
+    # ic(obj.get_gsc_packages())
+    # ic(obj.get_gsc_packages_mixs_style_nomenclature_list())
+    # #ic(obj.get_gsc_package_name_dict())
+    # ic(obj.get_not_gsc_packages())
+    pass
+
 
 def compareChecklistsByName(ena_obj, mixs_obj):
 
-    getPackageNameInfo(ena_obj)
+    ic("For ena_obj")
+    ic(len(ena_obj.get_not_gsc_packages()))
+    ic(sorted(ena_obj.get_not_gsc_packages()))
 
-    #getInfo(mixs_obj)
+    source_p_n_comp_obj = source_package_name_comparisons(ena_obj.get_gsc_packages_mixs_style_nomenclature_list(), mixs_obj.get_gsc_packages_mixs_style_nomenclature_list())
+
+    ic(f"matching source1 packages seen in source2: {sorted(source_p_n_comp_obj.get_matching_s1_set())}")
+    ic(f"Not matching source1 packages not seen in source2: {sorted(source_p_n_comp_obj.get_non_matching_s1_set())}")
+
+    ic(f"source2 matched total {len(source_p_n_comp_obj.get_source2_matched_set())}")
+    ic(f"source2 matched {sorted(source_p_n_comp_obj.get_source2_matched_set())}")
+    ic(f"source2 not matched total {len(source_p_n_comp_obj.get_source2_not_matched_set())}")
+    ic(f"source2 not matched {sorted(source_p_n_comp_obj.get_source2_not_matched_set())}")
+
+    sys.exit()
 
 
 def main():
@@ -1057,19 +1083,12 @@ def main():
     mixs_v6_dict = process_mixs_dict(my_dict_v6, linkml_mixs_dict)
     mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6", linkml_mixs_dict)
 
-    compareChecklistsByName(ena_cl_obj, mixs_v6_obj)
-    sys.exit()
-
-    mixs_v5_dict = get_mixs_v5_dict()
-    mixs_v5_obj = mixs(mixs_v5_dict, "mixs_v5", linkml_mixs_dict)
-    ic(mixs_v5_obj.type)
-
-    ic("do mix_v5 and mix_v6")
-    comparison_obj = compareAndReport(mixs_v5_obj, mixs_v6_obj, report)
+    # compareChecklistsByName(ena_cl_obj, mixs_v6_obj)
+    # sys.exit()
 
     ic("do ena_cl and mix_v6")
     ic(ena_cl_obj.type)
-    comparison_obj = compareChecklists(ena_cl_obj, mixs_v6_obj, report)
+    # comparison_obj = compareChecklists(ena_cl_obj, mixs_v6_obj, report)
     # compareSelectChecklists(ena_cl_obj, mixs_v6_obj, report)
 
     # print(comparison_obj.comparisonStats)
@@ -1078,6 +1097,13 @@ def main():
 
     ic("early exit")
     sys.exit()
+
+    mixs_v5_dict = get_mixs_v5_dict()
+    mixs_v5_obj = mixs(mixs_v5_dict, "mixs_v5", linkml_mixs_dict)
+    ic(mixs_v5_obj.type)
+
+    ic("do mix_v5 and mix_v6")
+    comparison_obj = compareAndReport(mixs_v5_obj, mixs_v6_obj, report)
 
     mixs_v5_dict = get_mixs_v5_dict()
     mixs_v5_obj = mixs(mixs_v5_dict, "mixs_v5", linkml_mixs_dict)
