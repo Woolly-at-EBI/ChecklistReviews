@@ -32,6 +32,7 @@ class source_package_name_comparisons:
             return True
         return False
 
+
     def get_matching_s1_set(self):
         if hasattr(self, 'source1_matching_set'):
             return self.source1_matching_set
@@ -49,28 +50,42 @@ class source_package_name_comparisons:
             return self.matching_package_name_dict
         self.compareChecklistsByName()
         return self.matching_package_name_dict
-    #
+
+    def get_source2_matched_set(self):
+        if hasattr(self, 'source1_matching_set'):
+            return self.source2_matched_set
+        self.compareChecklistsByName()
+        return self.source2_matched_set
+
+    def get_source2_not_matched_set(self):
+        # ic(len(self.source2_set))
+        # ic(len(self.source2_matched_set))
+        # ic()
+        return self.source2_set.difference(self.source2_matched_set)
+
     def compareChecklistsByName(self):
         self.source1_matching_set = set()
         self.source1_not_matching_set = set()
         def source1_mix_match(source1_package_name, source2_package_list):
             matching = [s for s in source2_package_list if source1_package_name in s]
             if len(matching) > 0:
-                ic(f"match for {source1_package_name} is {matching}")
+                #ic(f"match for {source1_package_name} is {matching}")
                 self.matching_package_name_dict['src1_to_src2'][source1_package_name] = matching
-                #mixs_matched_set.update(matching)
+                self.source2_matched_set.update(matching)
                 return True
             return False
 
         for source1_package_name in self.source1_set:
-            ic(source1_package_name)
+            #ic(source1_package_name)
             if source1_mix_match(source1_package_name, list(self.source2_set), ):
                 self.source1_matching_set.add(source1_package_name)
             else:
                 self.source1_not_matching_set.add(source1_package_name)
 
-        ic(f"matching source1 packages seen in source2: {self.source1_matching_set}")
-        ic(f"Not matching source1 packages seen in source2: {self.source1_not_matching_set}")
+        ic(f"matching source1 packages seen in source2 total: {len(self.source1_matching_set)}")
+        ic(f"Not matching source1 packages seen in source2 total: {len(self.source1_not_matching_set)}")
+        ic(f"matching source1 packages seen in source2: {sorted(self.source1_matching_set)}")
+        ic(f"Not matching source1 packages seen in source2: {sorted(self.source1_not_matching_set)}")
 
 
         #ic(matching_package_name_dict)

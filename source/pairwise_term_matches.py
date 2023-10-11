@@ -56,15 +56,24 @@ class pairwise_term_matches:
 
         # ic(df.head(20))
         # ic(df['match_type'].unique())
+        self.left_all_set = set(self.left_term_list)
         self.left_exact_matched_set = set()
         self.left_fuzzy_matched_set = set()
         self.left_harmonised_matched_set = set()
         self.left_not_matched_set = set()
 
+        self.left_high_confident_matched_list = []
+        self.left_medium_confident_matched_list = []
+        self.left_low_confident_matched_list = []
+        self.right_high_confident_matched_list = []
+        self.right_medium_confident_matched_list = []
+        self.right_low_confident_matched_list = []
+
         self.right_exact_matched_set = set()
         self.right_fuzzy_matched_set = set()
         self.right_harmonised_matched_set = set()
         self.right_not_matched_set = set()
+
 
         for match_type in df['match_type'].unique():
             tmp_df = df.query('match_type == @match_type')
@@ -89,8 +98,9 @@ class pairwise_term_matches:
         self.left_confident_matched_set.union(self.left_harmonised_matched_set )
         self.set_right_sets()
 
-    def get_comparison_df(self):
-        return self.comparison_df
+    def get_complete_matches_df(self):
+        return (self.comparison_df)
+
 
     def get_harmonised_and_exact_match_df(self):
         """
@@ -98,13 +108,35 @@ class pairwise_term_matches:
         :return: harmonised_df
         """
         ic()
+
+        if hasattr(self,'harmonised_df'):
+            return self.harmonised_df
+
         df = self.comparison_df
         ic(len(df))
-        harmonised_df = df.query('fuzzy_score > 90')
-        harmonised_df = self.assess_likely_map_accuracy(harmonised_df)
-        ic(len(harmonised_df))
+        fuzzy_cut_off = 90
+        harmonised_df = df.query('fuzzy_score > @fuzzy_cut_off')
+        self.harmonised_df = self.assess_likely_map_accuracy(harmonised_df)
 
-        return harmonised_df
+        self.vlow_confidence_mapping_df = df.query('fuzzy_score <= @fuzzy_cut_off & match_type != "none"')
+        #print(self.vlow_confidence_mapping_df.head(30).to_markdown())
+        ic(len(self.harmonised_df))
+        return self.harmonised_df
+
+    def get_vlow_confidence_mapping_match_df(self):
+        def do_counts():
+            self.left_vlow_confident_matched_list = self.vlow_confidence_mapping_df['left_term'].to_list()
+            self.right_vlow_confident_matched_list = self.vlow_confidence_mapping_df['match'].to_list()
+
+        if hasattr(self,'vlow_confidence_mapping_df'):
+            do_counts()
+            return self.vlow_confidence_mapping_df
+
+        self.get_harmonised_and_exact_match_df()   #runs this, it populates the df needed to.
+        #means don;t have the fizzy cut off in 2 places
+        do_counts()
+
+        return self.vlow_confidence_mapping_df
 
     def get_just_harmonised_df(self):
         """
@@ -118,6 +150,35 @@ class pairwise_term_matches:
         ic(len(harmonised_df))
         harmonised_df = self.assess_likely_map_accuracy(harmonised_df)
         return harmonised_df
+
+    def process_assessments(self, assessed_df):
+        ic(assessed_df.head(2))
+        filtered_df = assessed_df.query('likely_map_accuracy > 0.7 & match_type != "exact"')
+        self.left_high_confident_matched_list = filtered_df['left_term'].to_list()
+        self.right_high_confident_matched_list = filtered_df['match'].to_list()
+
+
+        filtered_df = assessed_df.query('likely_map_accuracy <= 0.7 & likely_map_accuracy > 0.5')
+        ic(filtered_df)
+        self.left_medium_confident_matched_list = filtered_df['left_term'].to_list()
+        self.right_medium_confident_matched_list = filtered_df['match'].to_list()
+
+        filtered_df = assessed_df.query('likely_map_accuracy <= 0.5 & likely_map_accuracy >= 0')
+        self.left_low_confident_matched_list = filtered_df['left_term'].to_list()
+        ic(self.left_low_confident_matched_list)
+        self.right_low_confident_matched_list = filtered_df['match'].to_list()
+
+        ic(self.left_high_confident_matched_list)
+        # ic(self.right_high_confident_matched_list)
+        ic(self.left_medium_confident_matched_list)
+        # ic(self.right_medium_confident_matched_list)
+        ic(self.left_low_confident_matched_list)
+        # ic(self.right_low_confident_matched_list)
+
+        ic(assessed_df.query('left_term == "total nitrogen method"'))
+        #sys.exit()
+
+
 
     def assess_likely_map_accuracy(self, df):
         """
@@ -172,6 +233,10 @@ class pairwise_term_matches:
         assessed_df[['likely_map_accuracy', 'map_accuracy_des']] = assessed_df.apply(assess_mapping, axis = 1)
         #assessed_df = assessed_df.query('likely_map_accuracy < 1')
         #print(assessed_df.to_markdown(index = False))
+
+
+        self.process_assessments(assessed_df)
+
         return assessed_df
 
     def get_left_exact_matched_list(self):

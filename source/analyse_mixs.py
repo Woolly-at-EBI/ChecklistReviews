@@ -872,7 +872,7 @@ def do_textWordCloud(df, title):
     pass
 
 
-def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, right_obj, report):
+def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, left_obj, right_obj, report):
     """
     making use of sets as sets don't allow duplicates
     :param pair_string:  # left_list_name '::' right_list_name
@@ -884,6 +884,18 @@ def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, right
     """
     ic()
     ic(pair_string)
+    # grep '#' report.md | sed 's/[#]* //'  | awk -F"," '{print "["$1"](#"$1")" }' | cat -n | tr '\t' ' ' | sed 's/^[ ]*//'
+    report.write("## Table of Contents\n")
+    toc = """
+1 Review of the MIX-S checklists proposed by GSC  
+2 Summary of Matches  
+3 Exact Matches  
+4 mixs_v6Terms without exact matches  
+5 Frequency  
+6 Harmonised Matches  
+           """
+    toc.replace("\n","\n")
+    report.write(f"\n{toc}\n\n")
 
     # ic(left_term_list)
     # ic(right_term_list)
@@ -900,12 +912,91 @@ def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, right
     ic(len(pairwise_obj.right_exact_matched_set))
     ic(len(pairwise_obj.right_harmonised_matched_set))
     ic(len(pairwise_obj.right_not_matched_set))
+    complete_matches_df = pairwise_obj.get_complete_matches_df()
+    ic(len(complete_matches_df))
+    pairwise_obj.get_harmonised_and_exact_match_df()
+    pairwise_obj.get_vlow_confidence_mapping_match_df()
+    summary_dict = {}
+    cumulative_left_total = len(pairwise_obj.left_exact_matched_set)
+    summary_dict['exact'] = [left_obj.type, right_obj.type, len(pairwise_obj.left_exact_matched_set),\
+        len(pairwise_obj.left_term_list), len(pairwise_obj.right_exact_matched_set),\
+                             len(pairwise_obj.right_term_list), cumulative_left_total, ""]
+    cumulative_left_total += len(pairwise_obj.left_high_confident_matched_list)
+    summary_dict['high_confident_matched'] = [left_obj.type, right_obj.type, len(pairwise_obj.left_high_confident_matched_list),\
+                             len(pairwise_obj.left_term_list), len(set(pairwise_obj.right_high_confident_matched_list)),\
+                             len(pairwise_obj.right_term_list), cumulative_left_total, ""]
+    cumulative_left_total += len(pairwise_obj.left_medium_confident_matched_list)
+    summary_dict['medium_confident_matched'] = [left_obj.type, right_obj.type, len(pairwise_obj.left_medium_confident_matched_list ), \
+                             len(pairwise_obj.left_term_list), len(set(pairwise_obj.right_medium_confident_matched_list)),\
+                             len(pairwise_obj.right_term_list), cumulative_left_total, ""]
+    cumulative_left_total += len(pairwise_obj.left_low_confident_matched_list)
+    summary_dict['low_confident_matched'] = [left_obj.type, right_obj.type, len(set(pairwise_obj.left_low_confident_matched_list)), \
+                             len(pairwise_obj.left_term_list),  len(set(pairwise_obj.right_low_confident_matched_list)),\
+                             len(pairwise_obj.right_term_list), cumulative_left_total, ""]
+    cumulative_left_total += len(pairwise_obj.left_vlow_confident_matched_list)
+    summary_dict['vlow_confident_matched'] = [left_obj.type, right_obj.type, len(set(pairwise_obj.left_vlow_confident_matched_list)), \
+                             len(pairwise_obj.left_term_list), len(set(pairwise_obj.right_vlow_confident_matched_list)),\
+                             len(pairwise_obj.right_term_list), cumulative_left_total, ""]
+    cumulative_left_total += len(pairwise_obj.left_not_matched_set)
+    summary_dict['not_matched'] = [left_obj.type, right_obj.type, len(pairwise_obj.left_not_matched_set),\
+                             len(pairwise_obj.left_term_list), len(pairwise_obj.right_not_matched_set),\
+                             len(pairwise_obj.right_term_list), cumulative_left_total, ""]
 
-    report.write("## Exact Matches" + "\n")
+    summary_df = pd.DataFrame.from_dict(summary_dict, orient = 'index',
+                           columns = ['left_source', 'right_source','left_count','left_total', 'right_count','right_total','cumulative_left','comment'])
+
+    #ic(summary_dict)
+    ic(summary_df)
+    report.write(f'\n\n## Summary of Matches <a name="ReviewoftheMIX-SchecklistsproposedbyGSC"></a>\n')
+    report.write(summary_df.to_markdown(index = True))
+    left_total = len(pairwise_obj.left_exact_matched_set) + len(pairwise_obj.left_not_matched_set) + \
+                  len(pairwise_obj.left_high_confident_matched_list) + len(pairwise_obj.left_medium_confident_matched_list) + \
+                  len(pairwise_obj.left_low_confident_matched_list) + len(set(pairwise_obj.left_vlow_confident_matched_list))
+    ic(f"left sum: {left_total} out of { len(set(pairwise_obj.left_term_list))} terms are being captured")
+    report.write(f"\nleft sum: {left_total} out of { len(set(pairwise_obj.left_term_list))}  \n")
+    left_total_to_map = len(set(pairwise_obj.left_term_list)) - len(pairwise_obj.left_exact_matched_set)
+    report.write(f"\nMaximal total of mappings(changes to make) without adding new terms to ENA: {left_total_to_map}  out of { len(set(pairwise_obj.left_term_list))}\n")
+    left_cum_set = pairwise_obj.left_exact_matched_set
+    # ic(len(left_cum_set))
+    # left_cum_set = left_cum_set.union(pairwise_obj.left_not_matched_set)\
+    #     .union(set(pairwise_obj.left_high_confident_matched_list)).union(set(pairwise_obj.left_medium_confident_matched_list))
+    # ic(len(left_cum_set))
+    # left_cum_set = left_cum_set.union(set(pairwise_obj.left_low_confident_matched_list)).union(set(pairwise_obj.left_vlow_confident_matched_list))
+    # ic(len(left_cum_set))
+    #
+    # ic(pairwise_obj.left_all_set.difference(left_cum_set))
+
+    right_total = len(pairwise_obj.right_exact_matched_set) + len(pairwise_obj.right_not_matched_set) + \
+                 len(set(pairwise_obj.right_high_confident_matched_list)) + len(
+        set(pairwise_obj.right_medium_confident_matched_list)) + \
+                 len(set(pairwise_obj.right_low_confident_matched_list)) + len(
+        set(pairwise_obj.right_vlow_confident_matched_list))
+    ic(f"right sum: {right_total} out of {len(pairwise_obj.right_term_list)}, expecting a higher than total score as often an many to 1 match of terms in MIXS match")
+    report.write(f"right sum: {right_total} out of {len(pairwise_obj.right_term_list)} terms are being captured, expecting a higher than total score as often an many to 1 match of terms in MIXS match\n")
+
+    right_total_to_map = len(set(pairwise_obj.right_term_list)) - len(pairwise_obj.left_exact_matched_set)
+    report.write(
+        f"\nMaximal total of mappings(changes to make) without adding new terms to ENA: {right_total_to_map}  out of {len(set(pairwise_obj.right_term_list))}\n")
+
+    report.write(f"\n\n## Different types of Non-exact matches\n <BR>")
+    report.write(f"\n\n### High confidence matches\n<BR> This is mainly simple format differences, a no brainer to change?\n <BR>")
+    report.write(f"ENA count={len(pairwise_obj.left_high_confident_matched_list)}\n <BR>")
+    report.write(f"ENA: {pairwise_obj.left_high_confident_matched_list}\n <BR>")
+    report.write(f"MIXS: {pairwise_obj.right_high_confident_matched_list}\n <BR>")
+    report.write( f"\n\n### Medium confidence matches\n These are probably minor differences, a no brainer to change?\n <BR>")
+    report.write(f"ENA count={len(pairwise_obj.left_medium_confident_matched_list)}\n <BR>")
+    report.write(f"ENA: {pairwise_obj.left_medium_confident_matched_list}\n <BR>")
+    report.write(f"MIXS: {pairwise_obj.right_medium_confident_matched_list}\n <BR>")
+    report.write(f"\n\n### Low confidence matches\n These are higher risk, will need checking to change\n <BR>")
+    report.write(f"ENA count= {len(pairwise_obj.left_low_confident_matched_list)}\n <BR>")
+    report.write(f"ENA: {pairwise_obj.left_low_confident_matched_list}\n <BR>")
+    report.write(f"MIXS: {pairwise_obj.right_low_confident_matched_list}\n <BR>")
+
+    report.write('\n\n## Exact Matches of ENA <a name="ExactMatches"></a>\n')
     report.write(', '.join(list(pairwise_obj.left_exact_matched_set)))
     # ic(right_obj.type)
 
-    report.write(f"\n## {pairwise_obj.right_name}Terms without matches, these are the most frequent")
+    report.write(f'\n\n## {pairwise_obj.right_name}Terms without exact matches, these are the most frequent <a name="mixs_v6Termswithoutexactmatches"></a>\n')
     # ic(mixs_v6_obj.get_terms_by_freq())
     right_all_match_freq = right_obj.get_terms_with_freq()
 
@@ -919,24 +1010,22 @@ def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, right
     df = df.sort_values("frequency", ascending = False)
     df = df[["term", "frequency"]]
     # report.write(df.head(100).to_string(justify = 'left', index = False))
-    report.write("## Frequency" + "\n")
+    report.write('\n\n### Table of Frequency on unexact GSC MIXS terms<a name="Frequency"></a>\n')
     report.write(df.to_markdown(index = False) + "\n")
 
     title = f"Terms in {pairwise_obj.right_name} not matching {pairwise_obj.left_name} \
           terms,\n( sized by the number of packages they occur in )"
     # do_textWordCloud(df, title)
-    report.write("## Harmonised Matches" + "\n")
+    report.write('\n\n## Harmonised Matches <a name="HarmonisedMatches"></a>\n')
     pairwise_df = pairwise_obj.get_harmonised_and_exact_match_df()
     report.write(pairwise_df.to_markdown(index = False) + "\n")
-    # report.write(pairwise_obj.get_harmonised_match_df().to_string(index = false)
-
-    print(pairwise_df.head(20).to_markdown(index = False))
     outfile = docs_dir + "all_terms_matches.tsv"
     pairwise_df.to_csv(outfile, sep="\t")
     ic(outfile)
 
-    pairwise_df = pairwise_obj.get_just_harmonised_df()
-    print(pairwise_df.to_markdown(index = False))
+    #pairwise_df = pairwise_obj.get_just_harmonised_df()
+    print(pairwise_df.head(10).to_markdown(index = False))
+    ic(len(pairwise_df))
     sys.exit()
 
     return pairwise_obj
@@ -974,8 +1063,8 @@ def analyse_term_matches(ena_cl_obj, mixs_v6_obj, report):
         fig.write_image(image_file)
 
     pair_string = ena_cl_obj.type + "::" + mixs_v6_obj.type
-    pairwise_obj = do_pairwise_term_matches(pair_string, ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list(), mixs_v6_obj,
-                             report)
+    pairwise_obj = do_pairwise_term_matches(pair_string, ena_cl_obj.get_all_term_list(), mixs_v6_obj.get_all_term_list(), \
+                                            ena_cl_obj, mixs_v6_obj, report)
     ic("just ran do_pairwise_term_matches")
     sys.exit()
     print(f"left_not_matched_set={pairwise_obj.left_not_matched_set}")
