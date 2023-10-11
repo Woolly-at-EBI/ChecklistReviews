@@ -12,7 +12,9 @@ def clean_term(term):
 def clean_list(my_list):
     """
         function to do some simple cleaning on textual lists.
-        e.g. make lower case and use underscore as the main delimiter.
+        make lower case
+        use underscore as the main delimiter.
+        also zaps and's and or's
         :param my_list:
         :return: clean_list
     """
@@ -20,6 +22,9 @@ def clean_list(my_list):
     term_list_clean = [s.replace(' ', '_') for s in term_list_clean]
     term_list_clean = [s.replace('-', '_') for s in term_list_clean]
     term_list_clean = [s.replace('/', '_') for s in term_list_clean]
+    term_list_clean = [s.replace('_and_', '_') for s in term_list_clean]
+    term_list_clean = [s.replace('_or_', '_') for s in term_list_clean]
+    term_list_clean = [s.replace('__', '_') for s in term_list_clean]
     term_list_clean = [s.removesuffix("_") for s in term_list_clean]
     return term_list_clean
 
