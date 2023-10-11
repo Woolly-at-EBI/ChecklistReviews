@@ -101,6 +101,7 @@ class pairwise_term_matches:
         df = self.comparison_df
         ic(len(df))
         harmonised_df = df.query('fuzzy_score > 90')
+        harmonised_df = self.assess_likely_map_accuracy(harmonised_df)
         ic(len(harmonised_df))
 
         return harmonised_df
@@ -119,19 +120,27 @@ class pairwise_term_matches:
         return harmonised_df
 
     def assess_likely_map_accuracy(self, df):
+        """
+        adding an assessment of mapping accuracy, with 2 columns
+         likely_map_accuracy  = 0-1 where 1 is exact and 0 ignore.
+         map_accuracy_des = textual description of why the accuracy was called.
+         There is already the fuzzy mapping score, but after the use as a rough cutoff is not that useful
+        :param df:
+        :return:
+        """
         def assess_mapping(row):
 
 
             if row['match_type'] == 'exact':
-                return 1 #, "exact"
+                return pd.Series([1, "exact"])
             elif row['fuzzy_score'] == 100:
-                return 1 #, "very_close"
+                return pd.Series([1, "very_close"])
             elif re.search("[0-9]$", row['left_term']) and not re.search("[0-9]$", row['match']):
-                return 0.5 #, "left_has_numerical_suffix"
+                return pd.Series([0.5, "left has numerical suffix"])
             elif not row['match_term_duplicated'] and (row['match'] in row['left_term']):
-                return 0.7 #right is a substring of left
+                return pd.Series([0.7, "right is a substring of left"])
             elif row['match_term_duplicated'] and (row['match'] in row['left_term']):
-                return 0.3 #right is a substring of left
+                return pd.Series([0.3, "right is a substring of left, but also matched elsewhere"])
 
             # now need to do some more in depth checking
             clean_left = clean_term(row['left_term'])
@@ -140,29 +149,29 @@ class pairwise_term_matches:
             clean_right_set = set(clean_right.split('_'))
             #print(f"cleft={clean_left} cright={clean_right}")
             if clean_left == clean_right:
-                return 1
+                return pd.Series([1, "exact after simple harmonisation"])
             elif not row['match_term_duplicated'] and (clean_right in clean_left):
-                return 0.7 #right is a substring of left
+                return pd.Series([0.7, "right is a substring of left"])
             elif not row['match_term_duplicated'] and (clean_left in clean_right):
-                return 0.7 #left is a substring of right
+                return pd.Series([0.7, "left is a substring of right"])
             elif row['match_term_duplicated'] and (clean_right in clean_left):
-                return 0.3 #right is a substring of left
+                return pd.Series([0.3, "right is a substring of left, but also matched elsewhere"])
             elif row['match_term_duplicated'] and (clean_left in clean_right):
-                return 0.7 #left is a substring of right
+                return pd.Series([0.7, "left is a substring of right, but also matched elsewhere"])
             elif not row['match_term_duplicated'] and len(clean_right_set.intersection(clean_left_set)) >= (len(clean_left_set) -1):
-                return 0.7  # left is a substring of right
+                return pd.Series([0.7, "left and right one word apart"])
             elif row['match_term_duplicated'] and len(clean_right_set.intersection(clean_left_set)) >= (len(clean_left_set) -1):
-                return 0.7  # left is a substring of right
+                return pd.Series([0.5, "left and right one word apart, but also matched elsewhere"])
             elif len(clean_right_set.intersection(clean_left_set)) >= (len(clean_left_set) -2):
-                return 0.3  # left is a substring of right
+                return pd.Series([0.3, "left and right two words apart"])
             else:
-                return 0 #, "nowt"
+                return pd.Series([0, "doubtful"])
 
         assessed_df = df.copy()
-        assessed_df['likely_map_accuracy']= assessed_df.apply(assess_mapping, axis = 1)
+
+        assessed_df[['likely_map_accuracy', 'map_accuracy_des']] = assessed_df.apply(assess_mapping, axis = 1)
         #assessed_df = assessed_df.query('likely_map_accuracy < 1')
-        print(assessed_df.to_markdown(index = False))
-        sys.exit()
+        #print(assessed_df.to_markdown(index = False))
         return assessed_df
 
     def get_left_exact_matched_list(self):
