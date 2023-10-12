@@ -177,5 +177,6 @@ def pair_string2names(pair_string):
     :param pair_string:
     :return: left_string, right_string
     """
-    return pair_string.split(":")
+    [left, mid, right] = pair_string.split(":")
+    return left, right
 

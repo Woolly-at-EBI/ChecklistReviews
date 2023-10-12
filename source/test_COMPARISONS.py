@@ -1,7 +1,7 @@
 import unittest
 import sys
 from icecream import ic
-from COMPARISONS import COMPARISONS
+from COMPARISONS import COMPARISONS, pair_string2names, names2pair_string
 
 
 
@@ -316,6 +316,14 @@ class TestCOMPARISONS(unittest.TestCase):
 
     def test_ingest(self):
         self.assertEqual(self.comparison_obj.left_source(), "ena_cl")
+
+    def test_pair_string2names(self):
+        left, right = pair_string2names("fred::charlie")
+        self.assertEqual("fred", left)
+
+    def test_names2pair_string(self):
+        pair_string = names2pair_string("fred", "charlie")
+        self.assertEqual(pair_string,"fred::charlie")
 
 
 
