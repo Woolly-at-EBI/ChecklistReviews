@@ -99,6 +99,10 @@ class pairwise_term_matches:
         self.set_right_sets()
 
     def get_complete_matches_df(self):
+        """
+
+        :return: the dataframe of all the matches (and none matches)
+        """
         return (self.comparison_df)
 
 
