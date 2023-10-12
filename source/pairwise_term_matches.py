@@ -196,7 +196,9 @@ class pairwise_term_matches:
         def assess_mapping(row):
 
 
-            if row['match_type'] == 'exact':
+            if row['match_type'] == 'none':
+                return pd.Series([0, "no match"])
+            elif row['match_type'] == 'exact':
                 return pd.Series([1, "exact"])
             elif row['fuzzy_score'] == 100:
                 return pd.Series([1, "very_close"])

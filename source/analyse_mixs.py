@@ -29,7 +29,7 @@ import plotly.io as pio
 
 # project objects etc. being imported
 from pairwise_term_matches import pairwise_term_matches, compareAllTerms
-from COMPARISONS import COMPARISONS
+from COMPARISONS import COMPARISONS, pair_string2names
 from source_package_name_comparisons import source_package_name_comparisons
 import mixs
 from mixs import mixs
@@ -871,6 +871,82 @@ def do_textWordCloud(df, title):
     # plt.savefig(image_dir + "mixsv6_wordcloud.png")
     pass
 
+def create_pairwise_confidence_summary(pairwise_obj):
+        """
+        called from do_pairwise_term_matches
+        :param pairwise_obj:
+        :return:
+        """
+
+        left_obj = pairwise_obj.left_obj
+        right_obj = pairwise_obj.right_obj
+        # ic(pairwise_matches)
+        ic(len(pairwise_obj.left_term_list))
+        ic(len(pairwise_obj.left_exact_matched_set))
+        ic(len(pairwise_obj.left_harmonised_matched_set))
+        ic(len(pairwise_obj.left_not_matched_set))
+
+        ic(len(pairwise_obj.right_term_list))
+        ic(len(pairwise_obj.right_exact_matched_set))
+        ic(len(pairwise_obj.right_harmonised_matched_set))
+        ic(len(pairwise_obj.right_not_matched_set))
+        complete_matches_df = pairwise_obj.get_complete_matches_df()
+        ic(len(complete_matches_df))
+        pairwise_obj.get_harmonised_and_exact_match_df()
+        pairwise_obj.get_vlow_confidence_mapping_match_df()
+
+        summary_dict = {}
+        cumulative_left_total = len(pairwise_obj.left_exact_matched_set)
+        summary_dict['exact'] = [left_obj.type, right_obj.type, len(pairwise_obj.left_exact_matched_set),\
+            len(pairwise_obj.left_term_list), len(pairwise_obj.right_exact_matched_set),\
+                                 len(pairwise_obj.right_term_list), cumulative_left_total, ""]
+        cumulative_left_total += len(pairwise_obj.left_high_confident_matched_list)
+        summary_dict['high_confident_matched'] = [left_obj.type, right_obj.type, len(pairwise_obj.left_high_confident_matched_list),\
+                                 len(pairwise_obj.left_term_list), len(set(pairwise_obj.right_high_confident_matched_list)),\
+                                 len(pairwise_obj.right_term_list), cumulative_left_total, ""]
+        cumulative_left_total += len(pairwise_obj.left_medium_confident_matched_list)
+        summary_dict['medium_confident_matched'] = [left_obj.type, right_obj.type, len(pairwise_obj.left_medium_confident_matched_list ), \
+                                 len(pairwise_obj.left_term_list), len(set(pairwise_obj.right_medium_confident_matched_list)),\
+                                 len(pairwise_obj.right_term_list), cumulative_left_total, ""]
+        cumulative_left_total += len(pairwise_obj.left_low_confident_matched_list)
+        summary_dict['low_confident_matched'] = [left_obj.type, right_obj.type, len(set(pairwise_obj.left_low_confident_matched_list)), \
+                                 len(pairwise_obj.left_term_list),  len(set(pairwise_obj.right_low_confident_matched_list)),\
+                                 len(pairwise_obj.right_term_list), cumulative_left_total, ""]
+        cumulative_left_total += len(pairwise_obj.left_vlow_confident_matched_list)
+        summary_dict['vlow_confident_matched'] = [left_obj.type, right_obj.type, len(set(pairwise_obj.left_vlow_confident_matched_list)), \
+                                 len(pairwise_obj.left_term_list), len(set(pairwise_obj.right_vlow_confident_matched_list)),\
+                                 len(pairwise_obj.right_term_list), cumulative_left_total, ""]
+        cumulative_left_total += len(pairwise_obj.left_not_matched_set)
+        summary_dict['not_matched'] = [left_obj.type, right_obj.type, len(pairwise_obj.left_not_matched_set),\
+                                 len(pairwise_obj.left_term_list), len(pairwise_obj.right_not_matched_set),\
+                                 len(pairwise_obj.right_term_list), cumulative_left_total, ""]
+        summary_df = pd.DataFrame.from_dict(summary_dict, orient = 'index',
+                                            columns = ['left_source', 'right_source', 'left_count', 'left_total',
+                                                       'right_count', 'right_total', 'cumulative_left', 'comment'])
+        # ic(summary_dict)
+        ic(summary_df)
+        return summary_df
+
+def do_matching_and_summarisation(pair_string, left_term_list, right_term_list, left_obj, right_obj):
+    """
+
+    :param pair_string:
+    :param left_term_list:
+    :param right_term_list:
+    :param left_obj:
+    :param right_obj:
+    :return: summary_df, pairwise_obj
+    """
+    pairwise_obj = pairwise_term_matches(pair_string, left_term_list, right_term_list)
+    pairwise_obj.put_right_obj(right_obj)
+    pairwise_obj.put_left_obj(left_obj)
+    summary_df = create_pairwise_confidence_summary(pairwise_obj)
+    all_pairwise_df = pairwise_obj.get_complete_matches_df()
+    all_pairwise_df = pairwise_obj.assess_likely_map_accuracy(all_pairwise_df)
+    outfile = docs_dir + "all_terms_matches_" + pair_string + ".tsv"
+    all_pairwise_df.to_csv(outfile, sep="\t", index = False)
+    ic(outfile)
+    return summary_df, pairwise_obj
 
 def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, left_obj, right_obj, report):
     """
@@ -899,54 +975,8 @@ def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, left_
 
     # ic(left_term_list)
     # ic(right_term_list)
-    pairwise_obj = pairwise_term_matches(pair_string, left_term_list, right_term_list)
-    pairwise_obj.put_right_obj(right_obj)
-    # pairwise_obj.put_left_obj(left_obj)
-    # ic(pairwise_matches)
-    ic(len(left_term_list))
-    ic(len(pairwise_obj.left_exact_matched_set))
-    ic(len(pairwise_obj.left_harmonised_matched_set))
-    ic(len(pairwise_obj.left_not_matched_set))
+    summary_df, pairwise_obj = do_matching_and_summarisation(pair_string, left_term_list, right_term_list, left_obj, right_obj)
 
-    ic(len(right_term_list))
-    ic(len(pairwise_obj.right_exact_matched_set))
-    ic(len(pairwise_obj.right_harmonised_matched_set))
-    ic(len(pairwise_obj.right_not_matched_set))
-    complete_matches_df = pairwise_obj.get_complete_matches_df()
-    ic(len(complete_matches_df))
-    pairwise_obj.get_harmonised_and_exact_match_df()
-    pairwise_obj.get_vlow_confidence_mapping_match_df()
-    summary_dict = {}
-    cumulative_left_total = len(pairwise_obj.left_exact_matched_set)
-    summary_dict['exact'] = [left_obj.type, right_obj.type, len(pairwise_obj.left_exact_matched_set),\
-        len(pairwise_obj.left_term_list), len(pairwise_obj.right_exact_matched_set),\
-                             len(pairwise_obj.right_term_list), cumulative_left_total, ""]
-    cumulative_left_total += len(pairwise_obj.left_high_confident_matched_list)
-    summary_dict['high_confident_matched'] = [left_obj.type, right_obj.type, len(pairwise_obj.left_high_confident_matched_list),\
-                             len(pairwise_obj.left_term_list), len(set(pairwise_obj.right_high_confident_matched_list)),\
-                             len(pairwise_obj.right_term_list), cumulative_left_total, ""]
-    cumulative_left_total += len(pairwise_obj.left_medium_confident_matched_list)
-    summary_dict['medium_confident_matched'] = [left_obj.type, right_obj.type, len(pairwise_obj.left_medium_confident_matched_list ), \
-                             len(pairwise_obj.left_term_list), len(set(pairwise_obj.right_medium_confident_matched_list)),\
-                             len(pairwise_obj.right_term_list), cumulative_left_total, ""]
-    cumulative_left_total += len(pairwise_obj.left_low_confident_matched_list)
-    summary_dict['low_confident_matched'] = [left_obj.type, right_obj.type, len(set(pairwise_obj.left_low_confident_matched_list)), \
-                             len(pairwise_obj.left_term_list),  len(set(pairwise_obj.right_low_confident_matched_list)),\
-                             len(pairwise_obj.right_term_list), cumulative_left_total, ""]
-    cumulative_left_total += len(pairwise_obj.left_vlow_confident_matched_list)
-    summary_dict['vlow_confident_matched'] = [left_obj.type, right_obj.type, len(set(pairwise_obj.left_vlow_confident_matched_list)), \
-                             len(pairwise_obj.left_term_list), len(set(pairwise_obj.right_vlow_confident_matched_list)),\
-                             len(pairwise_obj.right_term_list), cumulative_left_total, ""]
-    cumulative_left_total += len(pairwise_obj.left_not_matched_set)
-    summary_dict['not_matched'] = [left_obj.type, right_obj.type, len(pairwise_obj.left_not_matched_set),\
-                             len(pairwise_obj.left_term_list), len(pairwise_obj.right_not_matched_set),\
-                             len(pairwise_obj.right_term_list), cumulative_left_total, ""]
-
-    summary_df = pd.DataFrame.from_dict(summary_dict, orient = 'index',
-                           columns = ['left_source', 'right_source','left_count','left_total', 'right_count','right_total','cumulative_left','comment'])
-
-    #ic(summary_dict)
-    ic(summary_df)
     report.write(f'\n\n## Summary of Matches <a name="ReviewoftheMIX-SchecklistsproposedbyGSC"></a>\n')
     report.write(summary_df.to_markdown(index = True))
     left_total = len(pairwise_obj.left_exact_matched_set) + len(pairwise_obj.left_not_matched_set) + \
@@ -956,15 +986,6 @@ def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, left_
     report.write(f"\nleft sum: {left_total} out of { len(set(pairwise_obj.left_term_list))}  \n")
     left_total_to_map = len(set(pairwise_obj.left_term_list)) - len(pairwise_obj.left_exact_matched_set)
     report.write(f"\nMaximal total of mappings(changes to make) without adding new terms to ENA: {left_total_to_map}  out of { len(set(pairwise_obj.left_term_list))}\n")
-    left_cum_set = pairwise_obj.left_exact_matched_set
-    # ic(len(left_cum_set))
-    # left_cum_set = left_cum_set.union(pairwise_obj.left_not_matched_set)\
-    #     .union(set(pairwise_obj.left_high_confident_matched_list)).union(set(pairwise_obj.left_medium_confident_matched_list))
-    # ic(len(left_cum_set))
-    # left_cum_set = left_cum_set.union(set(pairwise_obj.left_low_confident_matched_list)).union(set(pairwise_obj.left_vlow_confident_matched_list))
-    # ic(len(left_cum_set))
-    #
-    # ic(pairwise_obj.left_all_set.difference(left_cum_set))
 
     right_total = len(pairwise_obj.right_exact_matched_set) + len(pairwise_obj.right_not_matched_set) + \
                  len(set(pairwise_obj.right_high_confident_matched_list)) + len(
@@ -996,6 +1017,8 @@ def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, left_
     report.write(', '.join(list(pairwise_obj.left_exact_matched_set)))
     # ic(right_obj.type)
 
+    report.write('\n\n[Spreadsheets for having all matches and none ENA vs MIXS5 and vice versa](https://docs.google.com/spreadsheets/d/1fYgle5VqF36F2AZXaCfAklzEs_vLPPyLWkcroymaojU/edit?usp=sharing)\n\n')
+
     report.write(f'\n\n## {pairwise_obj.right_name}Terms without exact matches, these are the most frequent <a name="mixs_v6Termswithoutexactmatches"></a>\n')
     # ic(mixs_v6_obj.get_terms_by_freq())
     right_all_match_freq = right_obj.get_terms_with_freq()
@@ -1019,14 +1042,15 @@ def do_pairwise_term_matches(pair_string, left_term_list, right_term_list, left_
     report.write('\n\n## Harmonised Matches <a name="HarmonisedMatches"></a>\n')
     pairwise_df = pairwise_obj.get_harmonised_and_exact_match_df()
     report.write(pairwise_df.to_markdown(index = False) + "\n")
-    outfile = docs_dir + "all_terms_matches.tsv"
-    pairwise_df.to_csv(outfile, sep="\t")
-    ic(outfile)
 
     #pairwise_df = pairwise_obj.get_just_harmonised_df()
     print(pairwise_df.head(10).to_markdown(index = False))
     ic(len(pairwise_df))
-    sys.exit()
+    ic("do the mapping the other way around")
+    left_name, right_name = pair_string2names(pair_string)
+    pair_string = names2pair_string(right_name, left_name)
+    other_summary_df, other_pairwise_obj = do_matching_and_summarisation(pair_string,  right_term_list, left_term_list,
+                                                             right_obj, left_obj)
 
     return pairwise_obj
 
