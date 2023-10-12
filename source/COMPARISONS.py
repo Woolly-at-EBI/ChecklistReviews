@@ -172,3 +172,10 @@ def mixs6_matches_plots(df, new_df):
 def names2pair_string(left_name, right_name):
     return '::'.join([left_name, right_name])
 
+def pair_string2names(pair_string):
+    """
+    :param pair_string:
+    :return: left_string, right_string
+    """
+    return pair_string.split(":")
+
