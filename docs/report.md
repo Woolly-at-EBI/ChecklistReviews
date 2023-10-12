@@ -21,10 +21,10 @@
 | low_confident_matched    | ena_cl        | mixs_v6        |           20 |          625 |            14 |           795 |               401 |           |
 | vlow_confident_matched   | ena_cl        | mixs_v6        |          186 |          625 |            96 |           795 |               587 |           |
 | not_matched              | ena_cl        | mixs_v6        |           38 |          625 |           424 |           795 |               625 |           |
-left sum: 625 out of 625  
+left sum: 849 out of 625  
 
 Maximal total of mappings(changes to make) without adding new terms to ENA: 258  out of 625
-right sum: 915 out of 795 terms are being captured, expecting a higher than total score as often an many to 1 match of terms in MIXS match
+right sum: 1011 out of 795 terms are being captured, expecting a higher than total score as often an many to 1 match of terms in MIXS match
 
 Maximal total of mappings(changes to make) without adding new terms to ENA: 428  out of 795
 
@@ -41,20 +41,24 @@ Maximal total of mappings(changes to make) without adding new terms to ENA: 428 
 
 ### Medium confidence matches
  These are probably minor differences, a no brainer to change?
- <BR>ENA count=6
- <BR>ENA: ['biotic relationship', 'lung/nose-throat disorder', 'salinity method', 'sample transportation temperature', 'soil horizon method', 'total nitrogen method']
- <BR>MIXS: ['observed biotic relationship', 'nose throat disorder', 'salinity_meth', 'sample transport temperature', 'horizon method', 'total nitrogen content method']
+ <BR>ENA count=46
+ <BR>ENA: ['Event Label', 'age', 'annotation source', 'aquaculture origin', 'biotic relationship', 'cell_line', 'chemical compound', 'collector name', 'composite design/sieving (if any)', 'diagnostic method', 'genotype', 'growth condition', 'growth media', 'habitat', 'identified_by', 'individual', 'infect', 'inoculation dose', 'inoculation route', 'isolation_source', 'lung/nose-throat disorder', 'organism part', 'patient sex', 'phenotype', 'protocol', 'receipt date', 'relationship', 'replicate', 'salinity method', 'sample material', 'sample transportation temperature', 'sampled age', 'serotype', 'serovar', 'sex', 'soil horizon method', 'soil texture measurement', 'strain', 'sub_group', 'surveillance target', 'symbiont', 'time', 'total nitrogen method', 'total organic C method', 'trial timepoint', 'virus identifier']
+ <BR>MIXS: ['extreme weather event', 'MAG coverage software', 'annotation', 'food product origin geographic location', 'observed biotic relationship', 'single_cell_lysis_appr', 'fermentation chemical additives', 'food product name legal status', 'sieving', 'animal water delivery method', 'host genotype', 'isolation and growth condition', 'tissue culture growth media', 'host body habitat', 'food product by quality', 'host number individual', 'observed coinfecting organisms in host of host', 'microbial starter inoculation', 'food animal antimicrobial route of administration', 'animal intrusion near sample source', 'nose throat disorder', 'culture result organism', 'food animal source sex category', 'antimicrobial phenotype of spike-in bacteria', 'enrichment protocol', 'culture isolation date', 'host of the symbiotic host family relationship', 'biological sample replicate', 'salinity_meth', 'sample material processing', 'sample transport temperature', 'area sampled size', 'serovar or serotype', 'serovar or serotype', 'host sex', 'horizon method', 'texture', 'spike-in microbial strain', 'food animal group size', 'culture target microbial analyte', 'host of the symbiont role', 'fermentation time', 'total nitrogen content method', 'total organic carbon method', 'timepoint', 'cooling system identifier']
  <BR>
 
 ### Low confidence matches
  These are higher risk, will need checking to change
- <BR>ENA count= 20
- <BR>ENA: ['16S recovery software', 'UViG assembly quality', 'air temperature', 'experimental factor 1', 'experimental factor 2', 'experimental factor 3', 'experimental factor 4', 'experimental factor 5', 'geographic location (country and/or sea)', 'geographic location (latitude)', 'geographic location (longitude)', 'host habitat', 'mean annual and seasonal precipitation', 'mean annual and seasonal temperature', 'sample collection device or method', 'sample storage conditions', 'sample weight for DNA extraction', 'soil water content', 'subspecific genetic lineage name', 'subspecific genetic lineage rank']
- <BR>MIXS: ['x_16s_recover_software', 'assembly quality', 'temperature', 'experimental factor', 'experimental factor', 'experimental factor', 'experimental factor', 'experimental factor', 'geographic location (country and/or sea,region)', 'geographic location (latitude and longitude)', 'geographic location (latitude and longitude)', 'host body habitat', 'mean seasonal precipitation', 'mean seasonal temperature', 'sample collection device', 'storage conditions', 'sample volume or weight for DNA extraction', 'water content', 'subspecific genetic lineage', 'subspecific genetic lineage']
+ <BR>ENA count= 204
+ <BR>ENA: ['16S recovered', '16S recovery software', 'Chlorophyll Sensor', 'Citation', 'DNA concentration', 'Event Date/Time End', 'Event Date/Time Start', 'Further Details', 'GAL', 'GAL_sample_id', 'Last Update Date', 'Latitude End', 'Latitude Start', 'Longitude End', 'Longitude Start', 'Marine Region', 'Nitrate Sensor', 'Oxygen Sensor', 'Protocol Label', 'Salinity Sensor', 'Sample Status', 'Sampling Campaign', 'Sampling Platform', 'Sampling Site', 'Sampling Station', 'UViG assembly quality', 'WHO/OIE/FAO clade (required for HPAI H5N1 viruses)', 'adductor weight', 'air temperature', 'antiviral treatment', 'antiviral treatment dosage', 'antiviral treatment duration', 'antiviral treatment initiation', 'area of sampling site', 'barcoding center', 'bio_material', 'block', 'cell_type', 'cellular component', 'clinical setting', 'collected_by', 'collecting institution', 'country of travel', 'cultivar', 'culture_collection', 'date of birth', 'date of death', 'definition for seropositive sample', 'dev_stage', 'diagnosis', 'disease staging', 'dose', 'ecotype', 'engrafted tumor collection site', 'engrafted tumor sample passage', 'engraftment host strain name', 'environmental history', 'environmental package', 'environmental stress', 'environmental_sample', 'experimental factor 1', 'experimental factor 2', 'experimental factor 3', 'experimental factor 4', 'experimental factor 5', 'finishing strategy', 'geographic location (country and/or sea)', 'geographic location (latitude)', 'geographic location (longitude)', 'geographic location (region and locality)', 'germline', 'gonad weight', 'health or disease status of specific host', 'hospitalisation', 'host behaviour', 'host breed', 'host description', 'host diet treatment', 'host diet treatment concentration', 'host disease outcome', 'host disease stage', 'host gutted mass', 'host habitat', 'host health state', 'host storage container', 'host storage container pH', 'host storage container temperature', 'identifier_affiliation', 'illness duration', 'illness onset date', 'illness symptoms', 'immunoprecipitate', 'influenza strain unique number', 'influenza test method', 'influenza test result', 'influenza vaccination date', 'influenza vaccination type', 'influenza virus type', 'influenza-like illness at the time of sample collection', 'initial time point', 'inoculation stock availability', 'instrument for DNA concentration measurement', 'investigation type', 'isolate', 'isolation source host-associated', 'lab_host', 'library construction method', 'lifestage', 'lineage:swl (required for H1N1 viruses)', 'mating_type', 'mean annual and seasonal precipitation', 'mean annual and seasonal temperature', 'meaning of cut off value', 'metagenomic source', 'nose/mouth/teeth/throat disorder', 'number of inoculated individuals', 'organism common name', 'organism phenotype', 'original collection date', 'original geographic location', 'original geographic location (latitude)', 'original geographic location (longitude)', 'other pathogens test result', 'other pathogens tested', 'passage_history', 'pathotype', 'patient age at collection of tumor', 'patient tumor diagnosis at time of collection', 'patient tumor primary site', 'patient tumor site of collection', 'patient tumor type', 'personal protective equipment', 'plant body site', 'plant developmental stage', 'plant treatment', 'population size of the catchment area', 'proxy biomaterial', 'proxy voucher', 'read quality filter', 'reference host genome for decontamination', 'sample collection device or method', 'sample coordinator', 'sample coordinator affiliation', 'sample derived from', 'sample disease status', 'sample dry mass', 'sample health state', 'sample height', 'sample length', 'sample origin', 'sample phenotype', 'sample same as', 'sample storage buffer', 'sample storage conditions', 'sample storage container', 'sample symbiont of', 'sample taxon name', 'sample transportation date', 'sample transportation time', 'sample unique ID', 'sample weight for DNA extraction', 'sample wet mass', 'sampling time point', 'seabed habitat', 'serotype (required for a seropositive sample)', 'serovar_in-silico', 'shell length', 'shell markings', 'shell width', 'shellfish soft tissue weight', 'shellfish total weight', 'single cell or viral particle lysis approach', 'single cell or viral particle lysis kit protocol', 'size of the catchment area', 'soil water content', 'source material description', 'source of vaccination information', 'specific host', 'specimen_id', 'specimen_voucher', 'storage conditions (fresh/frozen/other)', 'sub_species', 'sub_strain', 'sub_type', 'subject exposure', 'subject exposure duration', 'subspecific genetic lineage name', 'subspecific genetic lineage rank', 'tissue_lib', 'tissue_type', 'tolid', 'total nitrogen', 'toxin burden', 'travel-relation', 'treatment agent', 'treatment date', 'treatment dose', 'trial length', 'type exposure', 'vaccine dosage', 'vaccine lot number', 'vaccine manufacturer', 'variety', 'was the PDX model humanised?']
+ <BR>MIXS: ['x_16s_recover_software', 'x_16s_recover_software', 'chlorophyll', '', 'air particulate matter concentration', 'fertilizer administration date', 'date last rain', '', '', 'amount or size of sample collected', 'fertilizer administration date', 'geographic location (latitude and longitude)', 'geographic location (latitude and longitude)', 'geographic location (latitude and longitude)', 'geographic location (latitude and longitude)', 'geographic location (country and/or sea,region)', 'nitrate', 'oxygen', '', 'salinity', 'amniotic fluid/foetal health status', 'occupant density at sampling', 'occupant density at sampling', 'collection site geographic feature', 'occupant density at sampling', 'assembly quality', 'reference for biomaterial', 'sample volume or weight for DNA extraction', 'temperature', '', 'pre-treatment', 'chemical treatment', 'chemical treatment', 'amount or size of sample collected', '', 'reference for biomaterial', '', 'Food_Product_type', '', '', 'amount or size of sample collected', '', 'amount or size of sample collected', '', 'collection site geographic feature', 'amount or size of sample collected', 'amount or size of sample collected', 'sample capture status', 'host life stage', '', 'host of the symbiotic host disease status', '', '', 'collection date', 'sample disease stage', 'assembly name', 'broad-scale environmental context', 'broad-scale environmental context', 'broad-scale environmental context', 'amount or size of sample collected', 'experimental factor', 'experimental factor', 'experimental factor', 'experimental factor', 'experimental factor', '', 'geographic location (country and/or sea,region)', 'geographic location (latitude and longitude)', 'geographic location (latitude and longitude)', 'door location', '', 'sample volume or weight for DNA extraction', 'amount of light', '', 'duration of association with the host', 'duration of association with the host', 'duration of association with the host', 'host diet', 'host diet', 'duration of association with the host', 'host disease status', 'duration of association with the host', 'host body habitat', 'amniotic fluid/foetal health status', 'duration of association with the host', 'fermentation pH', 'temperature', '', 'duration of association with the host', 'fertilizer administration date', '', '', 'lot number', 'extreme_unusual_properties/Al saturation method', 'culture result', 'collection date', 'Food_Product_type', 'ceiling type', 'amount of light', 'dew point', '', 'reference for biomaterial', 'ceiling type', '', 'Food_source', 'duration of association with the host', 'alkalinity method', '', 'reference for biomaterial', 'Food_Product_type', 'mean seasonal precipitation', 'mean seasonal temperature', 'amount of light', 'Food_source', 'blood/blood disorder', 'amount of light', 'assembly name', 'antimicrobial phenotype of spike-in bacteria', 'collection date', 'door location', 'door location', 'door location', 'culture result', 'equipment shared with other farms', 'history/agrochemical additions', '', 'amount of light', 'amount of light', 'host body site', 'amount of light', 'ceiling type', 'farm equipment used', 'collection site geographic feature', 'host life stage', 'chemical treatment method', 'amount of light', '', '', 'filter type', 'decontamination software', 'sample collection device', 'amount or size of sample collected', 'sample disease stage', 'amount or size of sample collected', 'sample disease stage', 'amount or size of sample collected', 'amniotic fluid/foetal health status', 'amount or size of sample collected', 'amount or size of sample collected', 'amount or size of sample collected', 'amount or size of sample collected', 'amount or size of sample collected', 'amount or size of sample collected', 'storage conditions', 'food stored by consumer (storage duration)', 'amount or size of sample collected', 'amount or size of sample collected', 'collection date', 'fermentation time', 'amount or size of sample collected', 'sample volume or weight for DNA extraction', 'amount or size of sample collected', 'dew point', '', 'biological sample replicate', 'antimicrobial phenotype of spike-in bacteria', '', '', '', 'sample volume or weight for DNA extraction', 'host of the symbiotic host total mass', 'OTU classification approach', 'WGA amplification kit', 'amount of light', 'water content', 'Food_source', 'Food_source', 'duration of association with the host', 'host of the symbiotic host subject id', '', 'storage conditions', '', 'spike-in microbial strain', 'Food_Product_type', 'host of the symbiotic host subject id', 'food stored by consumer (storage duration)', 'subspecific genetic lineage', 'subspecific genetic lineage', 'tissue culture growth media', 'Food_Product_type', '', 'nitrogen', '', 'travel outside the country in last six months', 'chemical treatment method', 'chemical treatment method', 'chemical treatment method', '', 'building occupancy type', '', 'lot number', '', '', 'host of the symbiotic host disease status']
  <BR>
 
 ## Exact Matches of ENA <a name="ExactMatches"></a>
-douche, conductivity, fertilizer regimen, redox potential, gastrointestinal tract disorder, WGA amplification kit, ancestral data, wind speed, host total mass, pooling of DNA extracts (if done), sample capture status, sewage type, soluble reactive phosphorus, salinity, library vector, silicate, potassium, predicted genome type, growth facility, solar irradiance, organism count, tissue culture growth media, total phosphorus, geographic location (latitude and longitude), suspended particulate matter, slope gradient, adapters, feature prediction, altitude, binning parameters, rooting conditions, history/previous land use method, project name, pH method, host disease status, dissolved inorganic nitrogen, ethnicity, biotic regimen, growth hormone regimen, OTU classification approach, history/crop rotation, soil_taxonomic/FAO classification, bacterial respiration, chimera check software, host body product, host HIV status, seasonal environment, pregnancy, bishomohopanol, amniotic fluid/maternal health status, filter type, medical history performed, oxygenation status of sample, presence of pets or farm animals, sulfate, known pathogenicity, nitrogen, carbon dioxide, MAG coverage software, water content, wind direction, heating and cooling system type, plant growth medium, n-alkanes, host sex, microbial biomass, temperature, extreme_unusual_properties/heavy metals, plant structure, sludge retention time, total depth of water column, calcium, host last meal, history/fire, time since last toothbrushing, host phenotype, smoker, sequencing method, hysterectomy, links to additional analysis, host body habitat, dew point, host dry mass, host blood pressure systolic, phosphate, amniotic fluid/foetal health status, amount or size of sample collected, chlorophyll, density, lung/pulmonary disorder, occupancy at sampling, soil type, liver disorder, nitrate, pollutants, pressure, soluble inorganic material, amniotic fluid/gestation state, history/tillage, mean friction velocity, reactor type, climate environment, host diet, extreme_unusual_properties/Al saturation method, target subfragment, glucosidase activity, urine/kidney disorder, organic matter, soil pH, pcr conditions, twin sibling presence, host color, sample storage location, mineral nutrient regimen, organic carbon, environmental medium, urogenital disorder, plant sex, sodium, extreme_unusual_properties/Al saturation, host shape, gynecological disorder, source material identifiers, sample storage duration, taxonomic identity marker, nucleic acid extraction, rooting medium regulators, host body temperature, bromide, weight loss in last three months, OTU database, chemical oxygen demand, gaseous environment, ploidy, chemical mutagen, HRT, phaeopigments, extrachromosomal elements, host prediction approach, tRNA extraction software, current vegetation method, light type, turbidity, total carbon, broad-scale environmental context, library reads sequenced, soluble organic material, relationship to oxygen, menarche, link to classification information, relevant electronic resources, urine/collection method, relative air humidity, water content method, dissolved hydrogen, absolute air humidity, sample material processing, nitrite, host taxid, water temperature regimen, dermatology disorder, host substrate, light regimen, surface material, slope aspect, fungicide regimen, host pulse, total organic carbon, rooting medium solidifier, host genotype, non-mineral nutrient regimen, chemical administration, history/flooding, completeness approach, current vegetation, sample volume or weight for DNA extraction, tertiary treatment, library size, assembly quality, host body-mass index, host prediction estimated accuracy, particulate organic carbon, petroleum hydrocarbon, rainfall regimen, humidity regimen, aminopeptidase activity, space typical state, herbicide regimen, light intensity, host growth conditions, sample disease stage, similarity search method, study completion status, carbon monoxide, emulsions, alkyl diethers, major diet change in last six months, mean peak friction velocity, WGA amplification approach, binning software, host age, host scientific name, contamination screening input, building setting, downward PAR, fluorescence, link to climate information, sequence quality check, collection date, soil type method, indoor space, total particulate carbon, photon flux, drainage classification, biochemical oxygen demand, organic particles, contamination screening parameters, oxygen, detection type, ventilation rate, dissolved inorganic phosphorus, drug usage, ammonium, assembly software, encoded traits, host subject id, surface moisture, secondary treatment, magnesium, water current, profile position, occupant density at sampling, carbon/nitrogen ratio, host wet mass, microbial biomass method, methane, atmospheric data, target gene, watering regimen, plant product, host blood pressure diastolic, predicted genome structure, host height, gaseous substances, reassembly post binning, sample collection method, history/extreme events, isolation and growth condition, culture rooting medium, history/previous land use, dissolved carbon dioxide, humidity, rooting medium carbon, dissolved organic nitrogen, air temperature regimen, extreme_unusual_properties/heavy metals method, viral identification software, local environmental context, depth, standing water regimen, indoor surface, particulate organic nitrogen, genetic modification, host life stage, positive control type, dissolved inorganic carbon, typical occupant density, relevant standard operating procedures, blood/blood disorder, multiplex identifiers, surface moisture pH, taxonomic classification, host common name, birth control, completeness software, perturbation, surface temperature, air particulate matter concentration, sample collection device, inorganic particles, barometric pressure, biological status, menopause, soil_taxonomic/local classification method, industrial effluent percent, rooting medium organic supplements, sample size sorting method, size fraction selected, substructure type, bacterial production, antibiotic regimen, sexual activity, rooting medium micronutrients, dominant hand, negative control type, travel outside the country in last six months, radiation regimen, soil_taxonomic/local classification, building occupancy type, elevation, growth habit, pH regimen, gravidity, source of UViGs, contamination score, biomass, reference database(s), reference for biomaterial, sulfide, dissolved oxygen, suspended solids, ventilation type, soil texture method, organic nitrogen, dissolved organic carbon, history/agrochemical additions, library screening strategy, OTU sequence comparison approach, observed biotic relationship, experimental factor, urine/urogenital tract disorder, IHMC medication code, current land use, bacterial carbon production, mechanical damage, diether lipids, soil horizon, phospholipid fatty acid, total phosphate, chloride, decontamination software, gravity, salt regimen, wastewater type, rooting medium macronutrients, total inorganic nitrogen, estimated size, number of replicons, completeness score, host subspecific genetic lineage, number of standard tRNAs extracted, host occupation, pcr primers, propagation, time since last wash, surface humidity, alkalinity, pesticide regimen, host body site, tidal stage, host length, primary treatment, volatile organic compounds, rooting medium pH, subspecific genetic lineage, virus enrichment approach, efficiency percent, pH, trophic level, special diet, amniotic fluid/color, sorting technology, nucleic acid amplification, sample storage temperature, total dissolved nitrogen, pre-treatment, primary production
+soil_taxonomic/local classification, time since last toothbrushing, elevation, host age, travel outside the country in last six months, ventilation type, detection type, amniotic fluid/color, sludge retention time, plant product, history/crop rotation, study completion status, aminopeptidase activity, extreme_unusual_properties/heavy metals method, atmospheric data, reference database(s), adapters, heating and cooling system type, urine/collection method, medical history performed, microbial biomass, pH, host body temperature, efficiency percent, particulate organic carbon, negative control type, sample disease stage, completeness approach, amount or size of sample collected, carbon/nitrogen ratio, gaseous substances, seasonal environment, occupant density at sampling, typical occupant density, host subspecific genetic lineage, soil pH, host wet mass, completeness software, soil_taxonomic/local classification method, bacterial carbon production, link to classification information, host last meal, host disease status, sample storage duration, host occupation, watering regimen, volatile organic compounds, sample storage location, glucosidase activity, alkalinity, extrachromosomal elements, surface humidity, links to additional analysis, oxygen, biomass, nucleic acid extraction, trophic level, slope gradient, host subject id, virus enrichment approach, phaeopigments, reassembly post binning, total inorganic nitrogen, plant sex, environmental medium, light type, culture rooting medium, pcr primers, surface temperature, standing water regimen, salinity, wind direction, urine/urogenital tract disorder, microbial biomass method, drug usage, redox potential, dermatology disorder, sample collection device, gravity, dissolved organic carbon, assembly software, surface moisture pH, gynecological disorder, host taxid, local environmental context, taxonomic identity marker, extreme_unusual_properties/Al saturation method, host life stage, fungicide regimen, project name, geographic location (latitude and longitude), plant structure, history/fire, indoor surface, amniotic fluid/maternal health status, solar irradiance, host length, history/tillage, nitrate, total carbon, sodium, diether lipids, predicted genome type, reference for biomaterial, total phosphate, host body site, amniotic fluid/foetal health status, growth facility, tRNA extraction software, gastrointestinal tract disorder, organism count, observed biotic relationship, drainage classification, pooling of DNA extracts (if done), soil_taxonomic/FAO classification, library vector, host common name, sample capture status, contamination screening input, host diet, relationship to oxygen, hysterectomy, depth, pollutants, HRT, OTU database, library size, subspecific genetic lineage, history/extreme events, silicate, amniotic fluid/gestation state, substructure type, binning parameters, soil texture method, OTU sequence comparison approach, total phosphorus, dissolved inorganic carbon, gaseous environment, total depth of water column, rooting medium macronutrients, soluble reactive phosphorus, link to climate information, rooting medium micronutrients, chloride, host prediction approach, current vegetation, turbidity, chemical administration, rooting medium regulators, taxonomic classification, surface material, particulate organic nitrogen, history/agrochemical additions, nucleic acid amplification, dissolved oxygen, sample collection method, history/flooding, relative air humidity, space typical state, host sex, ammonium, estimated size, biological status, birth control, dissolved organic nitrogen, dissolved hydrogen, indoor space, rooting medium carbon, sample material processing, slope aspect, douche, target subfragment, time since last wash, density, radiation regimen, history/previous land use method, primary production, carbon dioxide, rooting medium organic supplements, growth hormone regimen, mechanical damage, soil type, bishomohopanol, host total mass, source of UViGs, tidal stage, phospholipid fatty acid, calcium, surface moisture, MAG coverage software, binning software, host prediction estimated accuracy, gravidity, menopause, weight loss in last three months, host scientific name, total dissolved nitrogen, sewage type, predicted genome structure, downward PAR, dominant hand, wastewater type, nitrite, soluble inorganic material, pH regimen, chemical mutagen, inorganic particles, climate environment, water temperature regimen, pH method, methane, pressure, sulfate, smoker, relevant electronic resources, sequencing method, twin sibling presence, special diet, growth habit, contamination screening parameters, filter type, experimental factor, sample storage temperature, magnesium, water content, herbicide regimen, alkyl diethers, antibiotic regimen, contamination score, secondary treatment, presence of pets or farm animals, feature prediction, ventilation rate, host pulse, chimera check software, water current, fluorescence, rainfall regimen, menarche, current land use, host shape, relevant standard operating procedures, organic matter, bacterial respiration, ethnicity, dissolved inorganic nitrogen, biotic regimen, light regimen, temperature, absolute air humidity, air temperature regimen, liver disorder, mean friction velocity, soluble organic material, rooting medium pH, total organic carbon, suspended solids, broad-scale environmental context, petroleum hydrocarbon, primary treatment, biochemical oxygen demand, organic nitrogen, host dry mass, water content method, OTU classification approach, suspended particulate matter, host phenotype, ancestral data, photon flux, host substrate, blood/blood disorder, host blood pressure diastolic, light intensity, host body product, dissolved inorganic phosphorus, library reads sequenced, known pathogenicity, bromide, humidity, sample volume or weight for DNA extraction, urine/kidney disorder, profile position, lung/pulmonary disorder, pre-treatment, host color, decontamination software, building setting, current vegetation method, n-alkanes, similarity search method, positive control type, genetic modification, carbon monoxide, reactor type, propagation, fertilizer regimen, host height, air particulate matter concentration, barometric pressure, size fraction selected, sorting technology, library screening strategy, sexual activity, organic particles, IHMC medication code, major diet change in last six months, number of standard tRNAs extracted, completeness score, mineral nutrient regimen, host body-mass index, sequence quality check, chemical oxygen demand, extreme_unusual_properties/heavy metals, extreme_unusual_properties/Al saturation, pregnancy, assembly quality, occupancy at sampling, building occupancy type, isolation and growth condition, plant growth medium, WGA amplification kit, phosphate, salt regimen, WGA amplification approach, pcr conditions, rooting conditions, dissolved carbon dioxide, urogenital disorder, total particulate carbon, bacterial production, non-mineral nutrient regimen, source material identifiers, encoded traits, chlorophyll, humidity regimen, pesticide regimen, conductivity, rooting medium solidifier, host blood pressure systolic, number of replicons, history/previous land use, wind speed, potassium, soil type method, ploidy, host genotype, multiplex identifiers, target gene, tissue culture growth media, host growth conditions, dew point, mean peak friction velocity, organic carbon, sulfide, altitude, host body habitat, host HIV status, oxygenation status of sample, perturbation, tertiary treatment, emulsions, nitrogen, viral identification software, soil horizon, sample size sorting method, collection date, industrial effluent percent
+
+[Spreadsheets for having all matches and none ENA vs MIXS5 and vice versa](https://docs.google.com/spreadsheets/d/1fYgle5VqF36F2AZXaCfAklzEs_vLPPyLWkcroymaojU/edit?usp=sharing)
+
+
 
 ## mixs_v6Terms without exact matches, these are the most frequent <a name="mixs_v6Termswithoutexactmatches"></a>
 
@@ -65,427 +69,427 @@ douche, conductivity, fertilizer regimen, redox potential, gastrointestinal trac
 | geographic location (country and/or sea,region)                        |         277 |
 | sample name                                                            |         275 |
 | miscellaneous parameter                                                |         264 |
-| taxonomy ID of DNA sample                                              |         254 |
 | samp_collec_device                                                     |         254 |
 | samp_collec_method                                                     |         254 |
+| taxonomy ID of DNA sample                                              |         254 |
 | library layout                                                         |         233 |
-| assembly name                                                          |         211 |
 | annotation                                                             |         211 |
+| assembly name                                                          |         211 |
 | number of contigs                                                      |         208 |
 | host specificity or range                                              |         123 |
 | observed host symbionts                                                |         108 |
 | host_family_relation                                                   |          72 |
-| sequencing location                                                    |          60 |
-| food shipping transportation method                                    |          60 |
 | culture isolation date                                                 |          60 |
-| samp_stor_temp                                                         |          60 |
 | food shipping transportation vehicle                                   |          60 |
-| enrichment protocol                                                    |          60 |
-| sample pooling                                                         |          60 |
-| lot number                                                             |          60 |
+| samp_stor_temp                                                         |          60 |
 | library preparation kit                                                |          60 |
+| food shipping transportation method                                    |          60 |
 | total nitrogen concentration                                           |          60 |
-| spike-in microbial strain                                              |          48 |
-| Interagency Food Safety Analytics Collaboration (IFSAC) category       |          48 |
-| food container or wrapping                                             |          48 |
-| sequencing kit                                                         |          48 |
-| food treatment process                                                 |          48 |
-| food source                                                            |          48 |
-| culture result organism                                                |          48 |
-| purpose of sampling                                                    |          48 |
-| food contact surface                                                   |          48 |
-| repository name                                                        |          48 |
+| sample pooling                                                         |          60 |
+| enrichment protocol                                                    |          60 |
+| sequencing location                                                    |          60 |
+| lot number                                                             |          60 |
 | culture target microbial analyte                                       |          48 |
-| food product type                                                      |          48 |
-| food quality date                                                      |          48 |
+| food preservation process                                              |          48 |
+| sample source material category                                        |          48 |
+| food treatment process                                                 |          48 |
+| culture result organism                                                |          48 |
 | timepoint                                                              |          48 |
 | total nitrogen content                                                 |          48 |
-| culture result                                                         |          48 |
-| sample source material category                                        |          48 |
-| food preservation process                                              |          48 |
-| food production system characteristics                                 |          48 |
-| intended consumer                                                      |          48 |
-| samp_stor_dur                                                          |          48 |
-| sample type                                                            |          48 |
+| Interagency Food Safety Analytics Collaboration (IFSAC) category       |          48 |
 | part of plant or animal                                                |          48 |
+| food product type                                                      |          48 |
+| food contact surface                                                   |          48 |
 | food packing medium                                                    |          48 |
-| single_cell_lysis_appr                                                 |          47 |
-| x_16s_recover                                                          |          47 |
-| x_16s_recover_software                                                 |          47 |
+| sample type                                                            |          48 |
+| food container or wrapping                                             |          48 |
+| food quality date                                                      |          48 |
+| samp_stor_dur                                                          |          48 |
+| sequencing kit                                                         |          48 |
+| culture result                                                         |          48 |
+| spike-in microbial strain                                              |          48 |
+| purpose of sampling                                                    |          48 |
+| food source                                                            |          48 |
+| food production system characteristics                                 |          48 |
+| repository name                                                        |          48 |
+| intended consumer                                                      |          48 |
 | single_cell_lysis_prot                                                 |          47 |
-| food additive                                                          |          36 |
-| total organic carbon method                                            |          36 |
-| sample transport temperature                                           |          36 |
-| spike-in with heavy metals                                             |          36 |
-| collection site geographic feature                                     |          36 |
-| technical sample replicate                                             |          36 |
-| food ingredient                                                        |          36 |
-| food packing medium integrity                                          |          36 |
-| mean seasonal precipitation                                            |          36 |
-| food distribution point geographic location                            |          36 |
-| spike-in bacterial serovar or serotype                                 |          36 |
-| food product origin geographic location                                |          36 |
-| spike-in growth medium                                                 |          36 |
+| x_16s_recover_software                                                 |          47 |
+| x_16s_recover                                                          |          47 |
+| single_cell_lysis_appr                                                 |          47 |
 | porosity                                                               |          36 |
-| serovar or serotype                                                    |          36 |
-| food package capacity                                                  |          36 |
-| study design                                                           |          36 |
-| study incubation temperature                                           |          36 |
-| season                                                                 |          36 |
-| sample transport  container                                            |          36 |
 | food traceability list category                                        |          36 |
-| sample transport duration                                              |          36 |
-| Hazard Analysis Critical Control Points (HACCP) guide food safety term |          36 |
-| study incubation duration                                              |          36 |
-| mean seasonal temperature                                              |          36 |
-| samp_stor_loc                                                          |          36 |
-| sample storage media                                                   |          36 |
-| biological sample replicate                                            |          36 |
-| study treatment                                                        |          36 |
-| food cooking process                                                   |          36 |
+| sample transport  container                                            |          36 |
 | spike in organism                                                      |          36 |
-| bacteria density                                                       |          36 |
-| material of contact prior to food packaging                            |          36 |
-| spike-in with antibiotics                                              |          36 |
-| sample storage device                                                  |          36 |
-| microbiological culture medium                                         |          36 |
-| alkalinity method                                                      |          36 |
-| spike-in organism count                                                |          36 |
-| food product by quality                                                |          36 |
+| spike-in with heavy metals                                             |          36 |
+| study incubation temperature                                           |          36 |
 | food product synonym                                                   |          36 |
+| alkalinity method                                                      |          36 |
+| sample storage media                                                   |          36 |
+| bacteria density                                                       |          36 |
+| mean seasonal temperature                                              |          36 |
+| study design                                                           |          36 |
+| spike-in with antibiotics                                              |          36 |
+| technical sample replicate                                             |          36 |
+| Hazard Analysis Critical Control Points (HACCP) guide food safety term |          36 |
+| total organic carbon method                                            |          36 |
+| food ingredient                                                        |          36 |
+| spike-in bacterial serovar or serotype                                 |          36 |
+| food packing medium integrity                                          |          36 |
+| study incubation duration                                              |          36 |
+| mean seasonal precipitation                                            |          36 |
+| sample transport temperature                                           |          36 |
+| microbiological culture medium                                         |          36 |
+| season                                                                 |          36 |
+| food product origin geographic location                                |          36 |
+| sample transport duration                                              |          36 |
+| samp_stor_loc                                                          |          36 |
+| food distribution point geographic location                            |          36 |
+| food cooking process                                                   |          36 |
+| food product by quality                                                |          36 |
+| spike-in organism count                                                |          36 |
+| spike-in growth medium                                                 |          36 |
+| collection site geographic feature                                     |          36 |
 | time-course duration                                                   |          36 |
-| water source shared                                                    |          24 |
-| relative location of sample                                            |          24 |
-| horizon method                                                         |          24 |
-| mean annual temperature                                                |          24 |
-| fertilizer administration                                              |          24 |
-| sulfate in formation water                                             |          24 |
-| vfa in formation water                                                 |          24 |
-| basin name                                                             |          24 |
+| study treatment                                                        |          36 |
+| serovar or serotype                                                    |          36 |
+| food additive                                                          |          36 |
+| food package capacity                                                  |          36 |
+| material of contact prior to food packaging                            |          36 |
+| biological sample replicate                                            |          36 |
+| sample storage device                                                  |          36 |
 | animal housing system                                                  |          24 |
-| food distribution point geographic location (city)                     |          24 |
-| viscosity                                                              |          24 |
-| food animal source diet                                                |          24 |
-| mean annual precipitation                                              |          24 |
-| dissolved iron                                                         |          24 |
-| sample subtype                                                         |          24 |
-| field name                                                             |          24 |
+| quantity purchased                                                     |          24 |
 | food product name legal status                                         |          24 |
+| sieving                                                                |          24 |
+| frequency of cleaning                                                  |          24 |
+| saturates wt%                                                          |          24 |
+| plant water delivery method                                            |          24 |
+| sulfate in formation water                                             |          24 |
+| hydrocarbon resource original temperature                              |          24 |
+| environment adjacent to site                                           |          24 |
+| reservoir name                                                         |          24 |
+| food production characteristics                                        |          24 |
+| salinity_meth                                                          |          24 |
+| production labeling claims                                             |          24 |
+| vfa in formation water                                                 |          24 |
+| dissolved iron                                                         |          24 |
+| storage conditions                                                     |          24 |
 | volatile fatty acids                                                   |          24 |
-| crop yield                                                             |          24 |
-| equipment shared with other farms                                      |          24 |
+| toluene                                                                |          24 |
+| pour point                                                             |          24 |
+| formation water salinity                                               |          24 |
+| purchase date                                                          |          24 |
+| relative location of sample                                            |          24 |
+| hydrocarbon resource original pressure                                 |          24 |
+| ethylbenzene                                                           |          24 |
+| samp_salinity                                                          |          24 |
+| food distribution point geographic location (city)                     |          24 |
+| mean seasonal humidity                                                 |          24 |
+| farm equipment sanitization                                            |          24 |
+| average daily occupancy                                                |          24 |
+| depth (TVDSS) of hydrocarbon resource temperature                      |          24 |
+| nucleic acid extraction kit                                            |          24 |
 | sample transport conditions                                            |          24 |
+| water pH                                                               |          24 |
+| depth (TVDSS) of hydrocarbon resource pressure                         |          24 |
+| equipment shared with other farms                                      |          24 |
+| hydrocarbon type produced                                              |          24 |
+| farm watering water source                                             |          24 |
+| field name                                                             |          24 |
+| benzene                                                                |          24 |
+| food animal source diet                                                |          24 |
+| sample well name                                                       |          24 |
+| organism count qPCR information                                        |          24 |
+| horizon method                                                         |          24 |
+| well identification number                                             |          24 |
+| presence of pets, animals, or insects                                  |          24 |
+| basin name                                                             |          24 |
+| hydrocarbon resource geological age                                    |          24 |
+| soil cover                                                             |          24 |
+| dietary claim or use                                                   |          24 |
+| aromatics wt%                                                          |          24 |
+| mean annual temperature                                                |          24 |
+| animal feeding equipment                                               |          24 |
+| dissolved oxygen in fluids                                             |          24 |
+| depositional environment                                               |          24 |
+| additional info                                                        |          24 |
+| Food harvesting process                                                |          24 |
+| crop yield                                                             |          24 |
+| mean annual precipitation                                              |          24 |
+| water source shared                                                    |          24 |
+| sampling floor                                                         |          24 |
+| fertilizer administration                                              |          24 |
+| total acid number                                                      |          24 |
+| antimicrobial phenotype of spike-in bacteria                           |          24 |
+| xylene                                                                 |          24 |
+| asphaltenes wt%                                                        |          24 |
+| food animal group size                                                 |          24 |
+| food stored by consumer (storage temperature)                          |          24 |
+| total nitrogen content method                                          |          24 |
+| food allergen labeling                                                 |          24 |
+| animal water delivery method                                           |          24 |
+| total sulfur                                                           |          24 |
+| room dimensions                                                        |          24 |
+| resins wt%                                                             |          24 |
+| lithology                                                              |          24 |
+| sample subtype                                                         |          24 |
+| hydrocarbon resource type                                              |          24 |
+| viscosity                                                              |          24 |
+| nose throat disorder                                                   |          24 |
 | number of samples collected                                            |          24 |
 | total iron                                                             |          24 |
-| farm equipment sanitization                                            |          24 |
-| food allergen labeling                                                 |          24 |
-| ethylbenzene                                                           |          24 |
-| xylene                                                                 |          24 |
-| dissolved oxygen in fluids                                             |          24 |
-| pour point                                                             |          24 |
-| mean seasonal humidity                                                 |          24 |
-| hydrocarbon resource geological age                                    |          24 |
-| additional info                                                        |          24 |
-| benzene                                                                |          24 |
-| food production characteristics                                        |          24 |
-| sample well name                                                       |          24 |
-| formation water salinity                                               |          24 |
-| Food harvesting process                                                |          24 |
-| resins wt%                                                             |          24 |
-| dietary claim or use                                                   |          24 |
 | soil conductivity                                                      |          24 |
-| sieving                                                                |          24 |
-| hydrocarbon resource original pressure                                 |          24 |
-| saturates wt%                                                          |          24 |
-| nose throat disorder                                                   |          24 |
-| aromatics wt%                                                          |          24 |
-| food stored by consumer (storage duration)                             |          24 |
-| reservoir name                                                         |          24 |
-| food stored by consumer (storage temperature)                          |          24 |
-| organism count qPCR information                                        |          24 |
-| food animal group size                                                 |          24 |
-| toluene                                                                |          24 |
-| total nitrogen content method                                          |          24 |
-| production labeling claims                                             |          24 |
-| room dimensions                                                        |          24 |
-| depth (TVDSS) of hydrocarbon resource pressure                         |          24 |
-| sampling room ID or name                                               |          24 |
-| purchase date                                                          |          24 |
-| total acid number                                                      |          24 |
-| salinity_meth                                                          |          24 |
-| water pH                                                               |          24 |
 | API gravity                                                            |          24 |
-| environment adjacent to site                                           |          24 |
-| farm watering water source                                             |          24 |
-| frequency of cleaning                                                  |          24 |
-| antimicrobial phenotype of spike-in bacteria                           |          24 |
-| soil cover                                                             |          24 |
-| hydrocarbon resource type                                              |          24 |
-| depth (TVDSS) of hydrocarbon resource temperature                      |          24 |
-| depositional environment                                               |          24 |
-| samp_salinity                                                          |          24 |
-| animal feeding equipment                                               |          24 |
-| storage conditions                                                     |          24 |
-| sampling floor                                                         |          24 |
-| quantity purchased                                                     |          24 |
-| total sulfur                                                           |          24 |
-| nucleic acid extraction kit                                            |          24 |
-| hydrocarbon resource original temperature                              |          24 |
-| lithology                                                              |          24 |
-| animal water delivery method                                           |          24 |
-| well identification number                                             |          24 |
+| food stored by consumer (storage duration)                             |          24 |
 | farm equipment used                                                    |          24 |
-| average daily occupancy                                                |          24 |
-| asphaltenes wt%                                                        |          24 |
-| hydrocarbon type produced                                              |          24 |
-| plant water delivery method                                            |          24 |
-| presence of pets, animals, or insects                                  |          24 |
-| microbial starter                                                      |          12 |
-| injection water fraction                                               |          12 |
-| quadrant position                                                      |          12 |
-| host of the symbiotic host disease status                              |          12 |
-| furniture                                                              |          12 |
-| architectural structure                                                |          12 |
-| exterior door count                                                    |          12 |
-| last time swept/mopped/vacuumed                                        |          12 |
-| wall thermal mass                                                      |          12 |
-| tot_n_meth                                                             |          12 |
-| orientations of exterior wall                                          |          12 |
-| wall surface treatment                                                 |          12 |
-| facility type                                                          |          12 |
-| fermentation chemical additives percentage                             |          12 |
-| fermentation chemical additives                                        |          12 |
-| biocide                                                                |          12 |
-| type of symbiosis                                                      |          12 |
-| relative sampling location                                             |          12 |
-| food production environmental monitoring zone                          |          12 |
-| wall height                                                            |          12 |
-| secondary and tertiary recovery methods and start date                 |          12 |
-| floor thermal mass                                                     |          12 |
-| injection water breakthrough date of specific well                     |          12 |
-| symbiotic host organism life cycle type                                |          12 |
-| food cleaning process                                                  |          12 |
-| mechanical structure                                                   |          12 |
-| production start date                                                  |          12 |
-| ceiling condition                                                      |          12 |
-| escalator count                                                        |          12 |
-| shading device material                                                |          12 |
+| sampling room ID or name                                               |          24 |
 | soil texture classification                                            |          12 |
-| growth medium                                                          |          12 |
-| tot_car                                                                |          12 |
-| fermentation temperature                                               |          12 |
-| chemical treatment                                                     |          12 |
-| frequency of cooking                                                   |          12 |
-| weekday                                                                |          12 |
-| rooms that share a door with sampling room                             |          12 |
-| host specificity                                                       |          12 |
-| food animal antimicrobial route of administration                      |          12 |
-| room window count                                                      |          12 |
-| rooms connected by a doorway                                           |          12 |
-| built structure setting                                                |          12 |
-| room volume                                                            |          12 |
-| floor finish material                                                  |          12 |
-| Food_Product_type                                                      |          12 |
-| cooling system identifier                                              |          12 |
-| previous_land_use_meth                                                 |          12 |
-| gender of restroom                                                     |          12 |
-| fermentation headspace oxygen                                          |          12 |
-| train stop collection location                                         |          12 |
-| animal intrusion near sample source                                    |          12 |
-| window horizontal position                                             |          12 |
-| door type, composite                                                   |          12 |
-| texture_meth                                                           |          12 |
-| source rock lithology                                                  |          12 |
-| oil water contact depth                                                |          12 |
-| sampling room sterilization method                                     |          12 |
-| visual media                                                           |          12 |
-| door signs of water/mold                                               |          12 |
-| door type, wood                                                        |          12 |
-| host of the symbiotic host taxon id                                    |          12 |
-| floor condition                                                        |          12 |
-| ceiling type                                                           |          12 |
-| room count                                                             |          12 |
-| chemical treatment method                                              |          12 |
-| shading device condition                                               |          12 |
-| host of the symbiotic host infra-specific name                         |          12 |
-| host_infra_specific_name                                               |          12 |
-| average temperature                                                    |          12 |
-| microbial starter organism count                                       |          12 |
-| sample surface moisture                                                |          12 |
-| permeability                                                           |          12 |
-| specifications                                                         |          12 |
-| window status                                                          |          12 |
-| heating delivery locations                                             |          12 |
-| wall area                                                              |          12 |
-| heating system delivery method                                         |          12 |
-| particle classification                                                |          12 |
-| host of the symbiotic host family relationship                         |          12 |
-| sample measured depth                                                  |          12 |
-| food animal antimicrobial                                              |          12 |
-| sample location condition                                              |          12 |
-| host of the symbiotic host gravidity                                   |          12 |
-| window area/size                                                       |          12 |
-| water delivery frequency                                               |          12 |
-| room architectural elements                                            |          12 |
-| biocide administration                                                 |          12 |
-| mode of transmission                                                   |          12 |
-| extreme weather date                                                   |          12 |
-| bedroom count                                                          |          12 |
-| plant reproductive part                                                |          12 |
-| heating system identifier                                              |          12 |
-| microbial starter preparation                                          |          12 |
-| photosynthetic activity                                                |          12 |
-| date last rain                                                         |          12 |
-| built structure type                                                   |          12 |
-| host number individual                                                 |          12 |
-| sediment type                                                          |          12 |
-| local air flow impediments                                             |          12 |
-| room sampling position                                                 |          12 |
-| floor area                                                             |          12 |
-| shading device location                                                |          12 |
-| window location                                                        |          12 |
-| water feature size                                                     |          12 |
-| room net area                                                          |          12 |
-| host of the symbiotic host subject id                                  |          12 |
-| door condition                                                         |          12 |
-| adjacent rooms                                                         |          12 |
-| host of the symbiotic host local environmental context                 |          12 |
-| fermentation vessel                                                    |          12 |
-| aerospace structure                                                    |          12 |
-| room condition                                                         |          12 |
-| orientations of exterior window                                        |          12 |
-| exposed ductwork                                                       |          12 |
-| sample_collec_method                                                   |          12 |
-| food animal body condition                                             |          12 |
-| photosynthetic activity method                                         |          12 |
-| host of the symbiotic host common name                                 |          12 |
-| fermentation relative humidity                                         |          12 |
-| floor count                                                            |          12 |
-| wall location                                                          |          12 |
-| window vertical position                                               |          12 |
-| outside relative humidity                                              |          12 |
-| sample collection point                                                |          12 |
-| amount of light                                                        |          12 |
-| inside lux light                                                       |          12 |
-| number of pets                                                         |          12 |
-| number of houseplants                                                  |          12 |
-| water production rate                                                  |          12 |
-| microbial starter NCBI taxonomy ID                                     |          12 |
-| wall construction type                                                 |          12 |
-| interior wall condition                                                |          12 |
-| ceiling finish material                                                |          12 |
-| height carpet fiber mat                                                |          12 |
-| source rock geological age                                             |          12 |
-| room door distance                                                     |          12 |
-| sampling time outside                                                  |          12 |
-| host of the symbiont role                                              |          12 |
-| assembly_quality                                                       |          12 |
-| area sampled size                                                      |          12 |
-| window covering                                                        |          12 |
-| food animal antimicrobial duration                                     |          12 |
-| hygienic food production area                                          |          12 |
-| room occupancy                                                         |          12 |
-| handidness                                                             |          12 |
-| room type                                                              |          12 |
-| maximum occupancy                                                      |          12 |
-| seasonal use                                                           |          12 |
-| observed coinfecting organisms in host of host                         |          12 |
-| door area or size                                                      |          12 |
-| sample storage solution                                                |          12 |
-| host_infra_specific_rank                                               |          12 |
-| shading device type                                                    |          12 |
+| ceiling texture                                                        |          12 |
 | air_particulate_matter_concentration                                   |          12 |
-| food animal antimicrobial frequency                                    |          12 |
-| host cellular location                                                 |          12 |
+| door type, wood                                                        |          12 |
 | microbial starter inoculation                                          |          12 |
 | train line                                                             |          12 |
-| url                                                                    |          12 |
-| source rock depositional environment                                   |          12 |
-| train station collection location                                      |          12 |
-| door location                                                          |          12 |
-| floor structure                                                        |          12 |
-| sample true vertical depth subsea                                      |          12 |
-| biocide administration method                                          |          12 |
-| soil sediment porosity                                                 |          12 |
-| door direction of opening                                              |          12 |
-| fireplace type                                                         |          12 |
-| sampling day weather                                                   |          12 |
-| room location in building                                              |          12 |
-| door type                                                              |          12 |
-| microbial starter source                                               |          12 |
-| production rate                                                        |          12 |
-| rooms that share a wall with sampling room                             |          12 |
-| window condition                                                       |          12 |
-| duration of association with the host                                  |          12 |
-| ceiling signs of water/mold                                            |          12 |
-| door type, metal                                                       |          12 |
-| farm equipment sanitization frequency                                  |          12 |
-| soil_text_measure                                                      |          12 |
-| number of residents                                                    |          12 |
-| source rock kerogen type                                               |          12 |
-| room air exchange rate                                                 |          12 |
-| host of the symbiotic host total mass                                  |          12 |
-| door movement                                                          |          12 |
-| ceiling thermal mass                                                   |          12 |
-| floor signs of water/mold                                              |          12 |
-| hallway/corridor count                                                 |          12 |
-| extreme weather event                                                  |          12 |
-| water cut                                                              |          12 |
-| shading device signs of water/mold                                     |          12 |
-| fermentation time                                                      |          12 |
-| rooms that are on the same hallway                                     |          12 |
-| food source age                                                        |          12 |
-| water feature type                                                     |          12 |
-| sample_name                                                            |          12 |
-| route of transmission                                                  |          12 |
-| door material                                                          |          12 |
-| host dependence                                                        |          12 |
-| corrosion rate at sample location                                      |          12 |
-| exposed pipes                                                          |          12 |
-| degree of plant part maturity                                          |          12 |
-| tot_phos                                                               |          12 |
-| window open frequency                                                  |          12 |
-| non_mineral_nutr_regm                                                  |          12 |
-| environmental feature adjacent water source                            |          12 |
-| host of the symbiotic host genotype                                    |          12 |
-| design, construction, and operation documents                          |          12 |
-| ceiling area                                                           |          12 |
-| wall signs of water/mold                                               |          12 |
-| address                                                                |          12 |
-| built structure age                                                    |          12 |
-| elevator count                                                         |          12 |
-| bathroom count                                                         |          12 |
-| Food_source                                                            |          12 |
-| texture                                                                |          12 |
-| window signs of water/mold                                             |          12 |
-| host of the symbiotic host infra-specific rank                         |          12 |
-| fermentation medium                                                    |          12 |
-| window type                                                            |          12 |
-| fertilizer administration date                                         |          12 |
-| preservative added to sample                                           |          12 |
-| specific intended consumer                                             |          12 |
-| food animal source sex category                                        |          12 |
-| host of the symbiotic host phenotype                                   |          12 |
-| specific humidity                                                      |          12 |
-| temperature outside house                                              |          12 |
-| occupancy documentation                                                |          12 |
-| wall finish material                                                   |          12 |
-| host of the symbiotic host environemental medium                       |          12 |
-| ceiling structure                                                      |          12 |
-| ceiling texture                                                        |          12 |
-| room moisture damage or mold history                                   |          12 |
 | drawings                                                               |          12 |
-| food animal antimicrobial intended use                                 |          12 |
-| horizon                                                                |          12 |
-| wall texture                                                           |          12 |
-| microbial_biomass_meth                                                 |          12 |
-| fermentation pH                                                        |          12 |
-| average dew point                                                      |          12 |
+| shading device material                                                |          12 |
+| room moisture damage or mold history                                   |          12 |
+| sample_name                                                            |          12 |
+| sample collection point                                                |          12 |
+| degree of plant part maturity                                          |          12 |
+| Food_Product_type                                                      |          12 |
+| sample surface moisture                                                |          12 |
+| production rate                                                        |          12 |
+| escalator count                                                        |          12 |
+| production start date                                                  |          12 |
+| room air exchange rate                                                 |          12 |
+| specific humidity                                                      |          12 |
+| window type                                                            |          12 |
+| sample true vertical depth subsea                                      |          12 |
+| wall location                                                          |          12 |
+| ceiling finish material                                                |          12 |
+| sample measured depth                                                  |          12 |
+| handidness                                                             |          12 |
+| heating delivery locations                                             |          12 |
+| number of houseplants                                                  |          12 |
+| door type                                                              |          12 |
+| source rock kerogen type                                               |          12 |
+| heating system identifier                                              |          12 |
+| non_mineral_nutr_regm                                                  |          12 |
+| shading device signs of water/mold                                     |          12 |
+| room sampling position                                                 |          12 |
+| amount of light                                                        |          12 |
+| door type, composite                                                   |          12 |
+| wall thermal mass                                                      |          12 |
+| photosynthetic activity                                                |          12 |
+| ceiling area                                                           |          12 |
+| number of residents                                                    |          12 |
+| cooling system identifier                                              |          12 |
+| food production environmental monitoring zone                          |          12 |
+| extreme weather date                                                   |          12 |
+| wall finish material                                                   |          12 |
+| source rock depositional environment                                   |          12 |
+| injection water breakthrough date of specific well                     |          12 |
+| fermentation chemical additives percentage                             |          12 |
+| observed coinfecting organisms in host of host                         |          12 |
+| window covering                                                        |          12 |
+| built structure setting                                                |          12 |
+| room door distance                                                     |          12 |
+| host of the symbiotic host subject id                                  |          12 |
+| host_infra_specific_name                                               |          12 |
+| microbial starter source                                               |          12 |
+| food cleaning process                                                  |          12 |
+| door material                                                          |          12 |
+| area sampled size                                                      |          12 |
+| wall signs of water/mold                                               |          12 |
+| previous_land_use_meth                                                 |          12 |
 | floor age                                                              |          12 |
+| type of symbiosis                                                      |          12 |
+| floor condition                                                        |          12 |
+| fermentation pH                                                        |          12 |
+| permeability                                                           |          12 |
+| fermentation time                                                      |          12 |
+| particle classification                                                |          12 |
+| ceiling structure                                                      |          12 |
+| address                                                                |          12 |
+| microbial starter preparation                                          |          12 |
+| mechanical structure                                                   |          12 |
+| quadrant position                                                      |          12 |
+| corrosion rate at sample location                                      |          12 |
+| source rock geological age                                             |          12 |
+| frequency of cooking                                                   |          12 |
+| door direction of opening                                              |          12 |
+| url                                                                    |          12 |
+| sampling time outside                                                  |          12 |
+| shading device type                                                    |          12 |
+| rooms connected by a doorway                                           |          12 |
+| wall texture                                                           |          12 |
+| sample location condition                                              |          12 |
+| door signs of water/mold                                               |          12 |
+| door type, metal                                                       |          12 |
+| host of the symbiotic host common name                                 |          12 |
+| wall surface treatment                                                 |          12 |
+| built structure type                                                   |          12 |
+| horizon                                                                |          12 |
+| mode of transmission                                                   |          12 |
+| rooms that share a wall with sampling room                             |          12 |
+| food animal source sex category                                        |          12 |
+| temperature outside house                                              |          12 |
+| interior wall condition                                                |          12 |
+| inside lux light                                                       |          12 |
+| environmental feature adjacent water source                            |          12 |
+| elevator count                                                         |          12 |
+| room count                                                             |          12 |
+| fermentation temperature                                               |          12 |
+| water cut                                                              |          12 |
+| orientations of exterior wall                                          |          12 |
+| fermentation vessel                                                    |          12 |
+| floor area                                                             |          12 |
+| window open frequency                                                  |          12 |
+| assembly_quality                                                       |          12 |
+| exterior door count                                                    |          12 |
+| water feature type                                                     |          12 |
+| weekday                                                                |          12 |
+| hallway/corridor count                                                 |          12 |
+| sample_collec_method                                                   |          12 |
+| texture_meth                                                           |          12 |
+| food animal antimicrobial frequency                                    |          12 |
+| food animal antimicrobial intended use                                 |          12 |
+| microbial starter                                                      |          12 |
+| photosynthetic activity method                                         |          12 |
+| fermentation medium                                                    |          12 |
+| tot_n_meth                                                             |          12 |
+| rooms that share a door with sampling room                             |          12 |
+| soil_text_measure                                                      |          12 |
+| ceiling thermal mass                                                   |          12 |
+| shading device condition                                               |          12 |
+| architectural structure                                                |          12 |
+| maximum occupancy                                                      |          12 |
+| outside relative humidity                                              |          12 |
+| room volume                                                            |          12 |
+| sediment type                                                          |          12 |
+| heating system delivery method                                         |          12 |
+| hygienic food production area                                          |          12 |
+| plant reproductive part                                                |          12 |
+| last time swept/mopped/vacuumed                                        |          12 |
+| texture                                                                |          12 |
+| window area/size                                                       |          12 |
+| ceiling signs of water/mold                                            |          12 |
+| food animal body condition                                             |          12 |
+| host of the symbiotic host infra-specific name                         |          12 |
+| door movement                                                          |          12 |
+| number of pets                                                         |          12 |
+| fermentation relative humidity                                         |          12 |
+| wall construction type                                                 |          12 |
+| host of the symbiotic host total mass                                  |          12 |
+| average temperature                                                    |          12 |
+| exposed pipes                                                          |          12 |
+| train stop collection location                                         |          12 |
+| date last rain                                                         |          12 |
+| furniture                                                              |          12 |
+| soil sediment porosity                                                 |          12 |
+| fertilizer administration date                                         |          12 |
+| room architectural elements                                            |          12 |
+| fermentation headspace oxygen                                          |          12 |
+| food source age                                                        |          12 |
+| tot_phos                                                               |          12 |
+| water feature size                                                     |          12 |
+| ceiling condition                                                      |          12 |
+| host of the symbiont role                                              |          12 |
+| fermentation chemical additives                                        |          12 |
+| host of the symbiotic host disease status                              |          12 |
+| sampling day weather                                                   |          12 |
+| train station collection location                                      |          12 |
+| average dew point                                                      |          12 |
+| water delivery frequency                                               |          12 |
+| chemical treatment method                                              |          12 |
+| specific intended consumer                                             |          12 |
+| room location in building                                              |          12 |
+| door condition                                                         |          12 |
+| sampling room sterilization method                                     |          12 |
+| built structure age                                                    |          12 |
+| room condition                                                         |          12 |
+| host of the symbiotic host local environmental context                 |          12 |
+| microbial starter organism count                                       |          12 |
+| microbial_biomass_meth                                                 |          12 |
+| tot_car                                                                |          12 |
+| oil water contact depth                                                |          12 |
+| host of the symbiotic host phenotype                                   |          12 |
+| orientations of exterior window                                        |          12 |
+| growth medium                                                          |          12 |
+| host of the symbiotic host infra-specific rank                         |          12 |
+| relative sampling location                                             |          12 |
+| source rock lithology                                                  |          12 |
+| food animal antimicrobial                                              |          12 |
+| animal intrusion near sample source                                    |          12 |
+| window status                                                          |          12 |
+| wall height                                                            |          12 |
+| room net area                                                          |          12 |
+| window condition                                                       |          12 |
+| host specificity                                                       |          12 |
+| floor signs of water/mold                                              |          12 |
+| host cellular location                                                 |          12 |
+| floor finish material                                                  |          12 |
+| symbiotic host organism life cycle type                                |          12 |
+| duration of association with the host                                  |          12 |
+| window vertical position                                               |          12 |
+| window signs of water/mold                                             |          12 |
+| host of the symbiotic host environemental medium                       |          12 |
+| food animal antimicrobial duration                                     |          12 |
+| wall area                                                              |          12 |
+| chemical treatment                                                     |          12 |
+| fireplace type                                                         |          12 |
+| local air flow impediments                                             |          12 |
+| floor thermal mass                                                     |          12 |
+| rooms that are on the same hallway                                     |          12 |
+| bedroom count                                                          |          12 |
+| secondary and tertiary recovery methods and start date                 |          12 |
+| sample storage solution                                                |          12 |
+| farm equipment sanitization frequency                                  |          12 |
+| specifications                                                         |          12 |
+| gender of restroom                                                     |          12 |
 | window material                                                        |          12 |
-| has_numeric_value                                                      |           1 |
+| host of the symbiotic host genotype                                    |          12 |
+| biocide                                                                |          12 |
+| extreme weather event                                                  |          12 |
+| injection water fraction                                               |          12 |
+| host number individual                                                 |          12 |
+| seasonal use                                                           |          12 |
+| aerospace structure                                                    |          12 |
+| floor count                                                            |          12 |
+| microbial starter NCBI taxonomy ID                                     |          12 |
+| host dependence                                                        |          12 |
+| Food_source                                                            |          12 |
+| food animal antimicrobial route of administration                      |          12 |
+| design, construction, and operation documents                          |          12 |
+| occupancy documentation                                                |          12 |
+| room window count                                                      |          12 |
+| ceiling type                                                           |          12 |
+| host of the symbiotic host gravidity                                   |          12 |
+| floor structure                                                        |          12 |
+| biocide administration                                                 |          12 |
+| water production rate                                                  |          12 |
+| host of the symbiotic host family relationship                         |          12 |
+| window horizontal position                                             |          12 |
+| route of transmission                                                  |          12 |
+| adjacent rooms                                                         |          12 |
+| height carpet fiber mat                                                |          12 |
+| bathroom count                                                         |          12 |
+| preservative added to sample                                           |          12 |
+| door area or size                                                      |          12 |
+| visual media                                                           |          12 |
+| host_infra_specific_rank                                               |          12 |
+| room type                                                              |          12 |
+| host of the symbiotic host taxon id                                    |          12 |
+| exposed ductwork                                                       |          12 |
+| biocide administration method                                          |          12 |
+| facility type                                                          |          12 |
+| door location                                                          |          12 |
+| room occupancy                                                         |          12 |
+| shading device location                                                |          12 |
+| window location                                                        |          12 |
 | has_unit                                                               |           1 |
 | has_raw_value                                                          |           1 |
+| has_numeric_value                                                      |           1 |
 
 
 ## Harmonised Matches <a name="HarmonisedMatches"></a>
