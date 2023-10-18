@@ -47,7 +47,9 @@ def clean_list_ena_rules(my_list):
     :return:
     """
     my_list = clean_list_simple(my_list)
-    my_list = [s.replace('_', ' ') for s in my_list]
+    my_list = [s.replace('samp_stor_temp', 'sample storage termperature') for s in my_list]
+    my_list = [s.replace('tot n meth', 'total nitrogen meth') for s in my_list]
+
     return my_list
 
 def generate_clean_dict(my_list):
