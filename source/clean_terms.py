@@ -18,16 +18,28 @@ def clean_list(my_list):
         :param my_list:
         :return: clean_list
     """
-    term_list_clean = list(map(str.lower, my_list))
-    term_list_clean = [s.replace(' ', '_') for s in term_list_clean]
-    term_list_clean = [s.replace('-', '_') for s in term_list_clean]
+    term_list_clean = clean_list_simple
+
     term_list_clean = [s.replace('/', '_') for s in term_list_clean]
     term_list_clean = [s.replace('_and_', '_') for s in term_list_clean]
     term_list_clean = [s.replace('_or_', '_') for s in term_list_clean]
-    term_list_clean = [s.replace('__', '_') for s in term_list_clean]
     term_list_clean = [s.removesuffix("_") for s in term_list_clean]
     return term_list_clean
 
+def clean_list_simple(my_list):
+    """
+            function to do some simple cleaning on textual lists.
+            make lower case
+            use underscore as the main delimiter.
+            :param my_list:
+            :return: clean_list
+        """
+    term_list_clean = list(map(str.lower, my_list))
+    term_list_clean = [s.replace(' ', '_') for s in term_list_clean]
+    term_list_clean = [s.replace('-', '_') for s in term_list_clean]
+    term_list_clean = [s.replace('__', '_') for s in term_list_clean]
+    term_list_clean = [s.removesuffix("_") for s in term_list_clean]
+    return term_list_clean
 
 def generate_clean_dict(my_list):
     """
