@@ -12,6 +12,9 @@ from icecream import ic
 import os
 import argparse
 import pandas as pd
+pd.set_option('display.max_rows', 500)
+pd.set_option('display.max_columns', 500)
+pd.set_option('display.width', 1000)
 import sys
 import re
 datadir = "/Users/woollard/projects/ChecklistReviews/data/"
@@ -84,12 +87,17 @@ def process_fuzzy_terms(df_ena2mixs, df_mixs2ena, stats_dict):
 
     return df_ena2mixs, df_mixs2ena, stats_dict
 
-def create_annotated_list(list_length,annotation):
-        my_list = []
-        for i in range(list_length):
-            my_list.append(annotation)
-
-        return my_list
+def create_annotated_list(list_length, annotation):
+    """
+    creates a list all populated withe supplied annotation
+    :param list_length:
+    :param annotation:
+    :return:
+    """
+    my_list = []
+    for i in range(list_length):
+        my_list.append(annotation)
+    return my_list
 
 def assess2lists4left_rules(left_list, right_list, action_list):
     """
@@ -127,11 +135,11 @@ def generatePrioritisingSpreadsheet(stats_dict,prioritised_xlsx_filename):
     #improved changes to ENA terms to start with
     priority_list = create_annotated_list(len(stats_dict['harmonised_ena']),"high")
     action_list = create_annotated_list(len(stats_dict['harmonised_ena']), "map the terms")
-    comment_list = create_annotated_list(len(stats_dict['harmonised_ena']), "")
-    assess2lists4left_rules(stats_dict['harmonised_ena'], stats_dict['harmonised_mixs'], action_list)
+    comment_list = create_annotated_list(len(stats_dict['harmonised_ena']), "these are the harmonised terms")
+    action_list = assess2lists4left_rules(stats_dict['harmonised_ena'], stats_dict['harmonised_mixs'], action_list)
 
     df = pd.DataFrame({'ENA_term': stats_dict['harmonised_ena'], 'MIXSv6_term': stats_dict['harmonised_mixs'],
-                       'priority': priority_list, 'comment': comment_list})
+                       'priority': priority_list, 'action': action_list, 'comment': comment_list})
     ic(df)
     # mapping "harmonised"
 
