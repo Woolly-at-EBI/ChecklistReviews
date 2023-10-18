@@ -17,6 +17,7 @@ pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 import sys
 import re
+from clean_terms import clean_list_ena_rules
 datadir = "/Users/woollard/projects/ChecklistReviews/data/"
 
 def get_input_data():
@@ -143,13 +144,21 @@ def generatePrioritisingSpreadsheet(stats_dict,prioritised_xlsx_filename):
     ic(df)
     # mapping "harmonised"
 
-
-
     # actions for the unsures
-
+    # unsure_df = pd.DataFrame({'ENA_term': stats_dict['harmonised_ena'], 'MIXSv6_term': stats_dict['harmonised_mixs'],
+    #                    'priority': priority_list, 'action': action_list, 'comment': comment_list})
+    # ic(unsure_df)
 
     # actions for uniq 2 mixs terms
+    priority_list = create_annotated_list(len(stats_dict['uniq2mixs']), "medium")
+    comment_list = create_annotated_list(len(stats_dict['uniq2mixs']), "automatically suggested terms in the ENA_term columns")
+    action_list = create_annotated_list(len(stats_dict['uniq2mixs']), "create new ENA terms")
 
+    ena_term_list = clean_list_ena_rules(stats_dict['uniq2mixs'])
+    ena_term_list = [s.replace('_', ' ') for s in ena_term_list]
+    uniqmixs_df = pd.DataFrame({'ENA_term': ena_term_list, 'MIXSv6_term': stats_dict['uniq2mixs'],
+                        'priority': priority_list, 'action': action_list, 'comment': comment_list})
+    ic(uniqmixs_df)
 
 
 
