@@ -327,6 +327,10 @@ def get_mixs_dict(dict_name):
 
     return my_dict
 def generate_mixs6_object():
+    """
+    mixs_v6_obj, mixs_v6_dict, linkml_mixs_dict = generate_mixs6_object()
+    :return:
+    """
     linkml_mixs_dict = parse_new_linkml()
     my_dict_v6 = get_mixs_dict("my_dict_v6")
     mixs_v6_dict = process_mixs_dict(my_dict_v6, linkml_mixs_dict)

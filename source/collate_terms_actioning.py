@@ -18,6 +18,8 @@ pd.set_option('display.width', 1000)
 import sys
 import re
 from clean_terms import clean_list_ena_rules
+from analyse_mixs import *
+from mixs import generate_mixs6_object
 datadir = "/Users/woollard/projects/ChecklistReviews/data/"
 
 def get_input_data():
@@ -79,7 +81,7 @@ def process_fuzzy_terms(df_ena2mixs, df_mixs2ena, stats_dict):
     stats_dict['unsure_ena'] = df_ena2mixs.query('mapping_recommend in ["PARTIAL","UNSURE"]')['left_term'].tolist()
     stats_dict['unsure_mixs'] = df_ena2mixs.query('mapping_recommend in ["PARTIAL","UNSURE"]')['match in MIXS'].tolist()
     stats_dict['unsure_mixs_set'] = set(stats_dict['unsure_mixs'])
-    ic(stats_dict['unsure_mixs_set'])
+    #ic(stats_dict['unsure_mixs_set'])
     df_ena2mixs = df_ena2mixs.query('mapping_recommend not in ["PARTIAL","UNSURE"]')
     ic(len(df_ena2mixs))
     tmp_set = set(df_mixs2ena['left_term'].tolist())  # this is what is left
@@ -111,17 +113,29 @@ def assess2lists4left_rules(left_list, right_list, action_list):
     for i in range(len(left_list)):
         found_US = False
         if "_" in left_list[i]:
-            ic(f"{left_list[i]} contains '_'")
+            #ic(f"{left_list[i]} contains '_'")
             action_list[i] = "remove '_' from the ENA term name and then map them"
             found_US = True
         if bool(re.match(r'[A-Z]', left_list[i])):
-            ic(f"{left_list[i]} contains upper case chars")
+            #ic(f"{left_list[i]} contains upper case chars")
             if found_US:
                action_list[i] = "remove '_' from the ENA term name, make lower case; then map them"
             else:
                 action_list[i] = "make ENA term lower case; then map them"
 
     return action_list
+
+def mixs_package_freq_annotate(my_list):
+    mixs_v6_obj, mixs_v6_dict, linkml_mixs_dict = generate_mixs6_object()
+
+    mix_v6_terms_by_freq = mixs_v6_obj.get_terms_with_freq()
+    #ic(mix_v6_terms_by_freq)
+
+    package_freq_annotated_list = []
+    for term in my_list:
+        package_freq_annotated_list.append(mix_v6_terms_by_freq[term])
+
+    return package_freq_annotated_list
 
 def generatePrioritisingSpreadsheet(stats_dict,prioritised_xlsx_filename):
     """
@@ -134,6 +148,8 @@ def generatePrioritisingSpreadsheet(stats_dict,prioritised_xlsx_filename):
     """
 
     #improved changes to ENA terms to start with
+    ic()
+
 
     # mapping "harmonised"
     priority_list = create_annotated_list(len(stats_dict['harmonised_ena']),"high")
@@ -165,7 +181,16 @@ def generatePrioritisingSpreadsheet(stats_dict,prioritised_xlsx_filename):
                         'priority': priority_list, 'action': action_list, 'comment': comment_list})
 
     df = pd.concat([harmonised_df, unsure_df, uniqmixs_df])
-    ic(df.sample(20))
+    ic(df.query('priority == "high"').sample(3))
+    ic(df.query('priority == "medium"').sample(3))
+    ic(df.query('priority == "low"').sample(3))
+
+    #adding checklist/package frequency
+    all_mixs_term_list = df['MIXSv6_term'].values.tolist()
+    mixs_package_freq_list = mixs_package_freq_annotate(all_mixs_term_list)
+    df['mixs_package_freq'] = pd.Series(mixs_package_freq_list)
+    ic(df.sample(n=4))
+
     ic(f"creating {prioritised_xlsx_filename}")
     df.to_excel(prioritised_xlsx_filename, index=False)
 
