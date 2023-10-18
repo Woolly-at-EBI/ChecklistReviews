@@ -134,33 +134,40 @@ def generatePrioritisingSpreadsheet(stats_dict,prioritised_xlsx_filename):
     """
 
     #improved changes to ENA terms to start with
+
+    # mapping "harmonised"
     priority_list = create_annotated_list(len(stats_dict['harmonised_ena']),"high")
     action_list = create_annotated_list(len(stats_dict['harmonised_ena']), "map the terms")
     comment_list = create_annotated_list(len(stats_dict['harmonised_ena']), "these are the harmonised terms")
     action_list = assess2lists4left_rules(stats_dict['harmonised_ena'], stats_dict['harmonised_mixs'], action_list)
 
-    df = pd.DataFrame({'ENA_term': stats_dict['harmonised_ena'], 'MIXSv6_term': stats_dict['harmonised_mixs'],
+    harmonised_df = pd.DataFrame({'ENA_term': stats_dict['harmonised_ena'], 'MIXSv6_term': stats_dict['harmonised_mixs'],
                        'priority': priority_list, 'action': action_list, 'comment': comment_list})
-    ic(df)
-    # mapping "harmonised"
+
 
     # actions for the unsures
-    # unsure_df = pd.DataFrame({'ENA_term': stats_dict['harmonised_ena'], 'MIXSv6_term': stats_dict['harmonised_mixs'],
-    #                    'priority': priority_list, 'action': action_list, 'comment': comment_list})
-    # ic(unsure_df)
+    priority_list = create_annotated_list(len(stats_dict['unsure_ena']),"medium")
+    action_list = create_annotated_list(len(stats_dict['unsure_ena']), "investigate and decide if valid mapping")
+    comment_list = create_annotated_list(len(stats_dict['unsure_ena']), "these are the unsure terms")
+    unsure_df = pd.DataFrame({'ENA_term': stats_dict['unsure_ena'], 'MIXSv6_term': stats_dict['unsure_mixs'],
+                        'priority': priority_list, 'action': action_list, 'comment': comment_list})
 
     # actions for uniq 2 mixs terms
-    priority_list = create_annotated_list(len(stats_dict['uniq2mixs']), "medium")
+    priority_list = create_annotated_list(len(stats_dict['uniq2mixs']), "low")
     comment_list = create_annotated_list(len(stats_dict['uniq2mixs']), "automatically suggested terms in the ENA_term columns")
     action_list = create_annotated_list(len(stats_dict['uniq2mixs']), "create new ENA terms")
+
+
 
     ena_term_list = clean_list_ena_rules(stats_dict['uniq2mixs'])
     ena_term_list = [s.replace('_', ' ') for s in ena_term_list]
     uniqmixs_df = pd.DataFrame({'ENA_term': ena_term_list, 'MIXSv6_term': stats_dict['uniq2mixs'],
                         'priority': priority_list, 'action': action_list, 'comment': comment_list})
-    ic(uniqmixs_df)
 
-
+    df = pd.concat([harmonised_df, unsure_df, uniqmixs_df])
+    ic(df.sample(20))
+    ic(f"creating {prioritised_xlsx_filename}")
+    df.to_excel(prioritised_xlsx_filename, index=False)
 
 def printStats(stats_dict):
     ic()
