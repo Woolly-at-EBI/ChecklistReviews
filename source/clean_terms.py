@@ -40,6 +40,15 @@ def clean_list_simple(my_list):
     term_list_clean = [s.replace('__', '_') for s in term_list_clean]
     term_list_clean = [s.removesuffix("_") for s in term_list_clean]
     return term_list_clean
+def clean_list_ena_rules(my_list):
+    """
+
+    :param my_list:
+    :return:
+    """
+    my_list = clean_list_simple(my_list)
+    my_list = [s.replace('_', ' ') for s in my_list]
+    return my_list
 
 def generate_clean_dict(my_list):
     """
