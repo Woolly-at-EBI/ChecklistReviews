@@ -74,32 +74,7 @@ def get_data(source_name):
     return r_json
 
 
-def get_mixs_dict(dict_name):
-    """
 
-    :return:
-    """
-    if dict_name == "my_dict_v6":
-        pickle_file = '../data/v6_mixs.schema.json.pickle'
-    elif dict_name == "my_dict_v5":
-        pickle_file = '../data/v5_mixs.schema.json.pickle'
-    else:
-        print(f"ERROR: {dict_name} is not recognised")
-        sys.exit()
-
-    if not os.path.isfile(pickle_file):
-        my_dict = json.loads(get_data())
-        with open(pickle_file, 'wb') as handle:
-            pickle.dump(my_dict, handle, protocol = pickle.HIGHEST_PROTOCOL)
-
-    if os.path.isfile(pickle_file):
-        with open(pickle_file, 'rb') as handle:
-            my_dict = pickle.load(handle)
-    else:
-        print(f"ERROR no {pickle_file}")
-        sys.exit()
-
-    return my_dict
 
 
 
@@ -115,67 +90,7 @@ def print_mixs_review_dict_stats(mixs_review_dict):
         print(f"{checklist_name} field_count={mixs_review_dict['by_package'][checklist_name]['count']}")
 
 
-def process_mixs_dict(my_dict, linkml_dict):
-    """
-    /used for mixs5 at least
 
-    :param my_dict:
-    :param linkml_dict:
-    :return:
-    """
-    # for top in my_dict:
-    #     print(top)
-
-    #
-    # for top_defs in my_dict["$defs"]:
-    #     # ic(top_defs)
-    #     pass
-    #
-    # for agr_defs in my_dict["$defs"]["Agriculture"]:
-    #     ic(agr_defs)
-    #
-    # for agr_prop_defs in my_dict["$defs"]["Agriculture"]["properties"]:
-    #     ic(agr_prop_defs)
-
-    MIXS_review_dict = {"by_package": {}, "by_term": {}}
-
-    def get_long_name(short_term_name, linkml_dict):
-        if short_term_name in linkml_dict["slots"]:
-            return linkml_dict["slots"][short_term_name]['title']
-        return short_term_name
-
-    for top_def in my_dict["$defs"]:
-        # print(top_def)
-        package_name = top_def
-        printed_top = False
-        for second_def in my_dict["$defs"][top_def]:
-            if not printed_top and second_def == 'properties':
-                MIXS_review_dict["by_package"][top_def] = {}
-                MIXS_review_dict["by_package"][top_def]["count"] = 0
-                MIXS_review_dict["by_package"][top_def]["field"] = {}
-                # print("") #
-                # print(top_def, end = ": ")
-                printed_top = True
-            # print(f"\t{second_def}")
-            # print(f"\t\tsub_dict={my_dict['$defs'][top_def][second_def]}")
-            # sub_dict = my_dict["$defs"][top_def][second_def]
-            # print(f"\t\tsub={sub_dict}")
-            if second_def == 'properties':
-                # print(f"\t\t{second_def} property_count={len(my_dict['$defs'][top_def][second_def])}", end = " properties: ")
-                for third_def in my_dict["$defs"][top_def][second_def]:
-                    # print(f"{third_def}", end = ", ")
-
-                    term_name = get_long_name(third_def, linkml_dict)
-                    MIXS_review_dict["by_package"][top_def]["field"][term_name] = {}
-
-                MIXS_review_dict["by_package"][package_name]["count"] = len(
-                    MIXS_review_dict["by_package"][package_name]["field"])
-            else:
-                pass
-    # ic(MIXS_review_dict)
-    MIXS_review_dict = add_term_package_count(MIXS_review_dict)
-    # print_mixs_review_dict_stats(MIXS_review_dict)
-    return MIXS_review_dict
 
 # this is the mixs.py too, need to work out how to only have one copy!
 def add_term_package_count(my_dict):
@@ -1103,32 +1018,7 @@ def analyse_term_matches(ena_cl_obj, mixs_v6_obj, report):
     do_hist(mixs_v6_df, 'MIXS_v6')
 
 
-def parse_new_linkml():
-    """
 
-    :return:
-    mixs6_2_dict
-        ["slots"][short_term_name]['description'] = "description"
-        ["slots"][short_term_name]['title'] = "long_name_ena_uses"
-    """
-    json_file = "/Users/woollard/projects/GSC/code/mixs-6-2-release-candidate/schema-derivatives/mixs_6_2_rc.json"
-
-    if os.path.isfile(json_file):
-        ic(f"about to open {json_file}")
-        with open(json_file) as f:
-            r_json = json.load(f)
-
-    # for slot in r_json["slots"]:
-    #     print(slot)
-    #     #title  id
-    #     for tag in ('slot_uri', 'description', 'title'):
-    #         if tag in r_json['slots'][slot]:
-    #             print(f"\t{tag}=\t{r_json['slots'][slot][tag]}")
-    #
-    #     if slot == "alt":
-    #         print(r_json['slots'][slot])
-
-    return r_json
 
 def compareAndReport(left_obj, right_obj, report):
     pair_string = names2pair_string(left_obj.type, right_obj.type)

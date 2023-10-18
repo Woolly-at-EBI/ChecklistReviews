@@ -1,17 +1,16 @@
 import sys
 import unittest
 from analyse_mixs import *
+from mixs import generate_mixs6_object
 from icecream import ic
 
 
+
 class Testmixs(unittest.TestCase):
-    linkml_mixs_dict = parse_new_linkml()
+
+    mixs_v6_obj, mixs_v6_dict, linkml_mixs_dict = generate_mixs6_object()
     ena_cl_dict = get_ena_dict()
     ena_cl_obj = mixs(ena_cl_dict, "ena_cl", linkml_mixs_dict)
-
-    my_dict_v6 = get_mixs_dict("my_dict_v6")
-    mixs_v6_dict = process_mixs_dict(my_dict_v6, linkml_mixs_dict)
-    mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6", linkml_mixs_dict)
 
     mixs_v5_dict = get_mixs_v5_dict()
     mixs_v5_obj = mixs(mixs_v5_dict, "mixs_v5", linkml_mixs_dict)
