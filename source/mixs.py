@@ -256,23 +256,33 @@ def process_mixs_dict(my_dict, linkml_dict):
                 # print("") #
                 # print(top_def, end = ": ")
                 printed_top = True
-            # print(f"\t{second_def}")
-            # print(f"\t\tsub_dict={my_dict['$defs'][top_def][second_def]}")
+            #print(f"\t{second_def}")
+            #print(f"\t\tsub_dict={my_dict['$defs'][top_def][second_def]}")
+
             # sub_dict = my_dict["$defs"][top_def][second_def]
             # print(f"\t\tsub={sub_dict}")
             if second_def == 'properties':
                 # print(f"\t\t{second_def} property_count={len(my_dict['$defs'][top_def][second_def])}", end = " properties: ")
                 for third_def in my_dict["$defs"][top_def][second_def]:
                     # print(f"{third_def}", end = ", ")
-
+                    # print(f"\t\t{second_def}/{third_def} {my_dict['$defs'][top_def][second_def][third_def]}")
                     term_name = get_long_name(third_def, linkml_dict)
                     MIXS_review_dict["by_package"][top_def]["field"][term_name] = {}
-
+                    MIXS_review_dict["by_term"][term_name] = {}
+                    factors = ['description', 'type']
+                    for factor in factors:
+                       if factor in my_dict['$defs'][top_def][second_def][third_def]:
+                          MIXS_review_dict["by_package"][top_def]["field"][term_name][factor] = my_dict['$defs'][top_def][second_def][third_def][factor]
+                       else:
+                           MIXS_review_dict["by_package"][top_def]["field"][term_name][factor] = ""
+                       MIXS_review_dict["by_term"][term_name][factor] = MIXS_review_dict["by_package"][top_def]["field"][term_name][factor]
                 MIXS_review_dict["by_package"][package_name]["count"] = len(
                     MIXS_review_dict["by_package"][package_name]["field"])
+
             else:
                 pass
     # ic(MIXS_review_dict)
+    #sys.exit()
     MIXS_review_dict = add_term_package_count(MIXS_review_dict)
     # print_mixs_review_dict_stats(MIXS_review_dict)
     return MIXS_review_dict
@@ -311,6 +321,7 @@ def get_mixs_dict(dict_name):
     """
     if dict_name == "my_dict_v6":
         pickle_file = '../data/v6_mixs.schema.json.pickle'
+        pickle_file = "../data/stub_tmp.json.pickle"
     elif dict_name == "my_dict_v5":
         pickle_file = '../data/v5_mixs.schema.json.pickle'
     else:
@@ -318,7 +329,13 @@ def get_mixs_dict(dict_name):
         sys.exit()
 
     if not os.path.isfile(pickle_file):
-        my_dict = json.loads(get_data())
+        my_dict = json.loads(get_data("mixs_v6"))
+        # #Peter adding after to debug
+        # ic(parse_new_linkml())
+        # #my_dict = json.loads(parse_new_linkml())
+        # my_dict = parse_new_linkml()
+        #ic(my_dict)
+        ic()
         with open(pickle_file, 'wb') as handle:
             pickle.dump(my_dict, handle, protocol = pickle.HIGHEST_PROTOCOL)
 
@@ -337,6 +354,9 @@ def generate_mixs6_object():
     """
     linkml_mixs_dict = parse_new_linkml()
     my_dict_v6 = get_mixs_dict("my_dict_v6")
+    ic(my_dict_v6.keys())
+    ic(linkml_mixs_dict.keys())
+
     mixs_v6_dict = process_mixs_dict(my_dict_v6, linkml_mixs_dict)
     mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6", linkml_mixs_dict)
     return mixs_v6_obj, mixs_v6_dict, linkml_mixs_dict
@@ -400,8 +420,8 @@ def process_ena_cl(my_dict, linkml_mixs_dict):
                         description = field["LABEL"]
                         # print(f"no description so using label={description}")
 
-                MIXS_review_dict["by_term"][long_field_name]['DESCRIPTION'] = description
-                MIXS_review_dict["by_package"][checklist_name]['field'][long_field_name]["DESCRIPTION"] = description
+                MIXS_review_dict["by_term"][long_field_name]['description'] = description
+                MIXS_review_dict["by_package"][checklist_name]['field'][long_field_name]["description"] = description
                 # ic(MIXS_review_dict["by_package"][checklist_name]['field'][field_name])
 
             # end of for field_group
@@ -469,4 +489,33 @@ def add_term_package_count(my_dict):
     # ic(my_dict["by_term_count"])
     # sys.exit()
     return my_dict
+
+def get_data(source_name):
+    """
+
+    :return:
+    """
+    ic()
+    if source_name == "mixs_v6":
+        json_file = "../data/v6_mixs.schema.json"
+    # cat ../data/mixs.schema.json | sed 's/\\"/"/g;s/\\n/\n/g;s/^"//;s/"$//' | sed 's/\\\\"//g'  | jq
+    ic(json_file)
+    # r_text = '{ "test": "test_val"}'
+    if os.path.isfile(json_file):
+        ic(f"about to open {json_file}")
+        with open(json_file) as f:
+            r_json = json.load(f)
+            ic(r_json)
+    else:
+        json_url = ("https://raw.githubusercontent.com/GenomicsStandardsConsortium/mixs/main/mixs/jsonschema/mixs"
+                    ".schema.json")
+        ic(json_url)
+        r = requests.get(json_url)
+        r_json = r.text
+
+        with open(json_file, 'w') as f:
+            json.dump(r_json, f, indent = 4)
+        ic(f"Created {json_file}")
+    return r_json
+
 
