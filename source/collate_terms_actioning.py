@@ -7,17 +7,12 @@ __docformat___ = 'reStructuredText'
 chmod a+x collated_terms_actioning.py
 """
 
-
-from icecream import ic
-import os
-import argparse
 import pandas as pd
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
-import sys
 import re
-from clean_terms import clean_list_ena_rules
+# from clean_terms import clean_list_ena_rules
 from analyse_mixs import *
 from mixs import generate_mixs6_object
 datadir = "/Users/woollard/projects/ChecklistReviews/data/"
@@ -126,6 +121,10 @@ def assess2lists4left_rules(left_list, right_list, action_list):
     return action_list
 
 def mixs_package_freq_annotate(my_list):
+    """
+    :param my_list:
+    :return: package_freq_annotated_list
+    """
     mixs_v6_obj, mixs_v6_dict, linkml_mixs_dict = generate_mixs6_object()
 
     mix_v6_terms_by_freq = mixs_v6_obj.get_terms_with_freq()
@@ -136,6 +135,17 @@ def mixs_package_freq_annotate(my_list):
         package_freq_annotated_list.append(mix_v6_terms_by_freq[term])
 
     return package_freq_annotated_list
+
+def mixs_package_cat_annotate(all_mixs_term_list):
+    mixs_v6_obj, mixs_v6_dict, linkml_mixs_dict = generate_mixs6_object()
+    mixs_package_cat_list = []
+    term_dict = mixs_v6_obj.get_term_dict()
+    for term in all_mixs_term_list:
+        ic(term_dict[term]['package_category_set'])
+        package_set = term_dict[term]['package_category_set']
+        mixs_package_cat_list.append(', '.join(sorted(list(package_set))))
+
+    return mixs_package_cat_list
 
 def generatePrioritisingSpreadsheet(stats_dict,prioritised_xlsx_filename):
     """
@@ -191,10 +201,21 @@ def generatePrioritisingSpreadsheet(stats_dict,prioritised_xlsx_filename):
     df['mixs_package_freq'] = pd.Series(mixs_package_freq_list)
     ic(df.sample(n=4))
 
+    mixs_package_cat_list = mixs_package_cat_annotate(all_mixs_term_list)
+
+
+    sys.exit()
     ic(f"creating {prioritised_xlsx_filename}")
     df.to_excel(prioritised_xlsx_filename, index=False)
 
+    return df
+
 def printStats(stats_dict):
+    """
+
+    :param stats_dict:
+    :return:
+    """
     ic()
     ic(stats_dict['total_ena'])
     ic(stats_dict['total_mixs'])

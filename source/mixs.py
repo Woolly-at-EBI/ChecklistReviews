@@ -3,6 +3,7 @@ import sys
 import os
 import json
 import pickle
+import re
 
 class mixs:
     def ingest_ena_cl(self):
@@ -44,6 +45,9 @@ class mixs:
             self.get_terms_by_freq()
 
         return self.terms_with_freq
+
+    def get_term_dict(self):
+        return self.my_dict['by_term']
 
     def get_terms_by_freq(self):
         """
@@ -183,7 +187,7 @@ class mixs:
 
     def print_package_summary(self):
         """
-        all kinds of wierdness happening with a simple list to string conversion...
+        all kinds of weirdness happening with a simple list to string conversion...
         f strings even misbehaved so had to break it down. no idea why. oh well.
         :return:
         """
@@ -430,17 +434,28 @@ def add_term_package_count(my_dict):
     :param my_dict:
     :return: my_dict
     """
+    def package2category(package_name):
+        """
+        WaterMIGSBacteria -> Water
+        :param package_name:
+        :return: category
+        """
+        match = re.match('[A-Z][a-z]*', package_name)
+        return match.group(0)
+
 
     for package_name in my_dict["by_package"]:
         for term_name in my_dict["by_package"][package_name]["field"]:
             if term_name in my_dict["by_term"] and 'packages' in my_dict["by_term"][term_name]:
                 my_dict["by_term"][term_name]['packages'].append(package_name)
                 my_dict["by_term"][term_name]['count'] += 1
+                my_dict["by_term"][term_name]['package_category_set'].add(package2category(package_name))
             else:
                 if term_name not in my_dict["by_term"]:
                     my_dict["by_term"][term_name] = {}
                 my_dict["by_term"][term_name]['packages'] = [package_name]
                 my_dict["by_term"][term_name]['count'] = 1
+                my_dict["by_term"][term_name]['package_category_set'] = set([package2category(package_name)])
     my_dict["by_term_count"] = {}
 
     # now to add by_term_count
