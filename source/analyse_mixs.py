@@ -169,28 +169,7 @@ def get_ena_cl_details(ena_cl_dict):
 
 # **********************************************************************************
 
-def get_ena_dict():
-    # curl https://www.ebi.ac.uk/ena/browser/api/xml/ERC000001-ERC000999 | xq >  ENA_checklists.json
-    json_file = "../data/ENA/ENA_checklists.json"
-    pickle_file = json_file + ".pickle"
 
-    if os.path.isfile(pickle_file):
-        with open(pickle_file, 'rb') as handle:
-            my_dict = pickle.load(handle)
-    elif os.path.isfile(json_file):
-        ic(f"about to open {json_file}")
-        with open(json_file) as f:
-            my_dict = json.load(f)
-            # ic(my_dict)
-            with open(pickle_file, 'wb') as handle:
-                pickle.dump(my_dict, handle, protocol = pickle.HIGHEST_PROTOCOL)
-    else:
-        print("ERROR: unable to find file: {json_file}")
-        print(
-            "Run: curl https://www.ebi.ac.uk/ena/browser/api/xml/ERC000001-ERC000999 | xq >  ..data/ENA/ENA_checklists.json")
-        sys.exit()
-
-    return my_dict
 
 
 def get_mixs_v5_dict():
