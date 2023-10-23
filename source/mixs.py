@@ -275,6 +275,7 @@ def process_mixs_dict(my_dict, linkml_dict):
                           MIXS_review_dict["by_package"][top_def]["field"][term_name][factor] = my_dict['$defs'][top_def][second_def][third_def][factor]
                        else:
                            MIXS_review_dict["by_package"][top_def]["field"][term_name][factor] = ""
+                       MIXS_review_dict["by_package"][top_def]["field"][term_name][factor].replace("\n", " ").replace("\r", "")
                        MIXS_review_dict["by_term"][term_name][factor] = MIXS_review_dict["by_package"][top_def]["field"][term_name][factor]
                 MIXS_review_dict["by_package"][package_name]["count"] = len(
                     MIXS_review_dict["by_package"][package_name]["field"])
@@ -286,6 +287,28 @@ def process_mixs_dict(my_dict, linkml_dict):
     MIXS_review_dict = add_term_package_count(MIXS_review_dict)
     # print_mixs_review_dict_stats(MIXS_review_dict)
     return MIXS_review_dict
+def get_ena_dict():
+    # curl https://www.ebi.ac.uk/ena/browser/api/xml/ERC000001-ERC000999 | xq >  ENA_checklists.json
+    json_file = "../data/ENA/ENA_checklists.json"
+    pickle_file = json_file + ".pickle"
+
+    if os.path.isfile(pickle_file):
+        with open(pickle_file, 'rb') as handle:
+            my_dict = pickle.load(handle)
+    elif os.path.isfile(json_file):
+        ic(f"about to open {json_file}")
+        with open(json_file) as f:
+            my_dict = json.load(f)
+            # ic(my_dict)
+            with open(pickle_file, 'wb') as handle:
+                pickle.dump(my_dict, handle, protocol = pickle.HIGHEST_PROTOCOL)
+    else:
+        print("ERROR: unable to find file: {json_file}")
+        print(
+            "Run: curl https://www.ebi.ac.uk/ena/browser/api/xml/ERC000001-ERC000999 | xq >  ..data/ENA/ENA_checklists.json")
+        sys.exit()
+
+    return my_dict
 
 def parse_new_linkml():
     """
@@ -361,6 +384,17 @@ def generate_mixs6_object():
     mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6", linkml_mixs_dict)
     return mixs_v6_obj, mixs_v6_dict, linkml_mixs_dict
 
+def generate_ena_object():
+    """
+
+    :return:
+    """
+    linkml_mixs_dict = parse_new_linkml()
+    ena_cl_dict = get_ena_dict()
+    ena_cl_obj = mixs(ena_cl_dict, "ena_cl", linkml_mixs_dict)
+
+
+    return ena_cl_obj, ena_cl_dict
 
 def process_ena_cl(my_dict, linkml_mixs_dict):
     """
@@ -374,69 +408,75 @@ def process_ena_cl(my_dict, linkml_mixs_dict):
     # print(my_dict["CHECKLIST_SET"].keys())
     MIXS_review_dict = {"by_package": {}, "by_term": {}}
 
+    ic()
+
+    def process_description(field):
+        if "DESCRIPTION" in field:
+            description = field["DESCRIPTION"]
+            #ic(f" found \"{description}\"")
+        elif "LABEL" in field:
+            # print(f"no DESCRIPTION, so using LABEL for {field_name}")
+            description = field["LABEL"]
+            # print(f"no description so using label={description}")
+        else:
+            ic("NEITHER DESCRIPTION NOR LABEL found")
+            sys.exit()
+        return description
+
+    def process_field_group(field, checklist_name, MIXS_review_dict):
+        #ic(field)
+        description = process_description(field)
+        #ic(description)
+        long_field_name = field['NAME']
+
+        if long_field_name not in MIXS_review_dict["by_term"]:
+           MIXS_review_dict["by_term"][long_field_name] = {'description': description}
+        if long_field_name not in MIXS_review_dict["by_package"][checklist_name]:
+           MIXS_review_dict["by_package"][checklist_name]['field'][long_field_name] = {'description': description}
+        # ic(MIXS_review_dict["by_package"][checklist_name]['field'][field_name])
+        # end of for field_group
+        # ic(MIXS_review_dict["by_package"])
+        # ic(MIXS_review_dict["by_term"])
+        # sys.exit()
+
     # print("----------------------------------")
+    description_json_str = {'description': "no_description"}
     for checklist in my_dict["CHECKLIST_SET"]["CHECKLIST"]:
+        term_count = 0 # count of terms in a particular checklist
         # print(checklist)
         # print(checklist["@accession"])
         # print(checklist["@checklistType"])
         # print(f"name={checklist['DESCRIPTOR']['NAME']} DESCRIPTION={checklist['DESCRIPTOR']['DESCRIPTION']}")
         checklist_name = checklist['DESCRIPTOR']['NAME']
-        # ic(checklist_name)
+        ic(checklist_name)
         if not hasattr(MIXS_review_dict["by_package"], checklist_name):
             MIXS_review_dict["by_package"][checklist_name] = {'field': {}}
+        #ic(f"{checklist_name} {checklist['DESCRIPTOR']['FIELD_GROUP']}")
+        field_group_count = -1
+
+        field_group_names_set = set()
 
         for field_group in checklist['DESCRIPTOR']["FIELD_GROUP"]:
-            # print(field_group)
+            field_group_count += 1
+            #print(f"\n\n {field_group_count} group={field_group['FIELD']}\n")
+            field = field_group["FIELD"]
             # print(f"\tname={field_group['NAME']} DESCRIPTION={field_group['DESCRIPTION']}")
-            for field in field_group["FIELD"]:
-                # print(f"\t\tfield={field}")
-                # ic(field)
-                if field in ["LABEL", "NAME", "DESCRIPTION", "FIELD_TYPE", "MANDATORY", "MULTIPLICITY", "SYNONYM",
-                             "UNITS"]:
-                    continue
-                field_name = field['NAME']
 
-                if field_name in linkml_mixs_dict['slots']:
-                    # ic(linkml_mixs_dict['slots'][field_name])
-                    long_field_name = linkml_mixs_dict['slots'][field_name]['title']  # ENA uses the long_field_name
-                    # ic(field_name)
-                    # ic(long_field_name)
-                    # sys.exit()
-                else:
-                    long_field_name = field_name
+            # print(type(field_group['FIELD']))
+            if type(field_group['FIELD']) is list:
+                for sub_field_group in field_group['FIELD']:
+                    process_field_group(sub_field_group,checklist_name, MIXS_review_dict)
+            else:
+                process_field_group(field_group['FIELD'], checklist_name, MIXS_review_dict)
 
-                if field_name not in MIXS_review_dict["by_term"]:
-                    MIXS_review_dict["by_term"][long_field_name] = {}
-                if field_name not in MIXS_review_dict["by_package"][checklist_name]['field']:
-                    MIXS_review_dict["by_package"][checklist_name]['field'][long_field_name] = {}
-                # MIXS_review_dict["by_package"][checklist_name][field_name]['name'] = field_name
-
-                description = "no_description"
-                if "DESCRIPTION" in field:
-                    description = field["DESCRIPTION"]
-                else:
-                    # print(f"no DESCRIPTION, so using LABEL for {field_name}")
-                    if 'LABEL' in field:
-                        description = field["LABEL"]
-                        # print(f"no description so using label={description}")
-
-                MIXS_review_dict["by_term"][long_field_name]['description'] = description
-                MIXS_review_dict["by_package"][checklist_name]['field'][long_field_name]["description"] = description
-                # ic(MIXS_review_dict["by_package"][checklist_name]['field'][field_name])
-
-            # end of for field_group
-            # ic(MIXS_review_dict["by_package"])
-            # ic(MIXS_review_dict["by_term"])
-            # sys.exit()
-            for checklist_name in MIXS_review_dict["by_package"]:
-                # ic(checklist_name)
-                # ic(MIXS_review_dict["by_package"][checklist_name])
-                if 'field' in MIXS_review_dict["by_package"][checklist_name]:
-                    MIXS_review_dict["by_package"][checklist_name]['count'] = len(
-                        MIXS_review_dict["by_package"][checklist_name]['field'].keys())
-                # else:
-                # ic("WARNING: package seems to be missing any fields!", checklist_name)
-
+        for checklist_name in MIXS_review_dict["by_package"]:
+            # ic(checklist_name)
+            # ic(MIXS_review_dict["by_package"][checklist_name])
+            if 'field' in MIXS_review_dict["by_package"][checklist_name]:
+                MIXS_review_dict["by_package"][checklist_name]['count'] = len(
+                    MIXS_review_dict["by_package"][checklist_name]['field'].keys())
+            # else:
+            # ic("WARNING: package seems to be missing many fields!", checklist_name)
         # print()
         # end of for each checklist
         # sys.exit()
