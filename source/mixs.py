@@ -11,17 +11,18 @@ class mixs:
 
     def __init__(self, my_dict, type, linkml_mixs_dict):
         ic()
-        # type could be  "mixs_v5" or "mixs_v6"
+        # type could be  "mixs_v5", "mixs_v6" or "ena_cl"
         self.type = type
 
         if type == "ena_cl":
-            #ic(f"type = {type}")
-            #ic(f"self.type = {self.type}")
+            ic(f"type = {self.type}")
             self.my_dict_raw = my_dict
             self.linkml_mixs_dict = linkml_mixs_dict
             self.ingest_ena_cl()
             # self.cl_details_dict = get_ena_cl_details(self.my_dict_raw)
             # ic(f"self.type = {self.type}")
+            ic("FFFFFFFFFF")
+            ic(len(self.my_dict["by_term"].keys()))
         else:
             # ic(f"type = {type}")
             self.my_dict = my_dict
@@ -428,6 +429,7 @@ def process_ena_cl(my_dict, linkml_mixs_dict):
         description = process_description(field)
         #ic(description)
         long_field_name = field['NAME']
+        #print(f"\t\t{long_field_name} - {description}\n")
 
         if long_field_name not in MIXS_review_dict["by_term"]:
            MIXS_review_dict["by_term"][long_field_name] = {'description': description}
@@ -438,15 +440,12 @@ def process_ena_cl(my_dict, linkml_mixs_dict):
         # ic(MIXS_review_dict["by_package"])
         # ic(MIXS_review_dict["by_term"])
         # sys.exit()
+        return MIXS_review_dict
 
     # print("----------------------------------")
     description_json_str = {'description': "no_description"}
     for checklist in my_dict["CHECKLIST_SET"]["CHECKLIST"]:
         term_count = 0 # count of terms in a particular checklist
-        # print(checklist)
-        # print(checklist["@accession"])
-        # print(checklist["@checklistType"])
-        # print(f"name={checklist['DESCRIPTOR']['NAME']} DESCRIPTION={checklist['DESCRIPTOR']['DESCRIPTION']}")
         checklist_name = checklist['DESCRIPTOR']['NAME']
         ic(checklist_name)
         if not hasattr(MIXS_review_dict["by_package"], checklist_name):
@@ -465,9 +464,9 @@ def process_ena_cl(my_dict, linkml_mixs_dict):
             # print(type(field_group['FIELD']))
             if type(field_group['FIELD']) is list:
                 for sub_field_group in field_group['FIELD']:
-                    process_field_group(sub_field_group,checklist_name, MIXS_review_dict)
+                    MIXS_review_dict = process_field_group(sub_field_group,checklist_name, MIXS_review_dict)
             else:
-                process_field_group(field_group['FIELD'], checklist_name, MIXS_review_dict)
+                MIXS_review_dict = process_field_group(field_group['FIELD'], checklist_name, MIXS_review_dict)
 
         for checklist_name in MIXS_review_dict["by_package"]:
             # ic(checklist_name)
@@ -477,12 +476,12 @@ def process_ena_cl(my_dict, linkml_mixs_dict):
                     MIXS_review_dict["by_package"][checklist_name]['field'].keys())
             # else:
             # ic("WARNING: package seems to be missing many fields!", checklist_name)
-        # print()
         # end of for each checklist
-        # sys.exit()
 
     MIXS_review_dict = add_term_package_count(MIXS_review_dict)
 
+    #ic(MIXS_review_dict["by_term"])
+    #sys.exit()
     return MIXS_review_dict
 
 
