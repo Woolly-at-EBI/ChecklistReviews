@@ -1,9 +1,8 @@
 import sys
 import unittest
 from analyse_mixs import *
-from mixs import generate_mixs6_object
+from mixs import generate_mixs6_object, generate_ena_object, get_ena_dict
 from icecream import ic
-
 
 
 class Testmixs(unittest.TestCase):
@@ -25,10 +24,29 @@ class Testmixs(unittest.TestCase):
         self.assertEqual(self.mixs_v5_obj.get_type(), 'mixs_v5')
         self.assertEqual(self.mixs_v6_obj.get_type(), 'mixs_v6')
 
+    def test_generate_ena_object(self):
+        ena_cl_obj, ena_cl_dict = generate_ena_object()
+        self.assertEqual(ena_cl_obj.type,'ena_cl')
+
     def test_get_all_term_list(self):
         # ic(self.ena_cl_obj.get_all_term_list())
         term_list = self.ena_cl_obj.get_all_term_list()
         self.assertEqual(term_list[0], '16S recovered')
+
+    def test_get_term_dict(self):
+        my_term_dict = self.ena_cl_obj.get_term_dict()
+        #ic(my_term_dict)
+        term_count_w_des = 0
+        term_count_wo_des = 0
+        for term in my_term_dict:
+            if 'description' in my_term_dict[term]:
+                term_count_w_des += 1
+            else:
+                term_count_wo_des += 1
+        #ic(term_count_w_des)
+        #ic(term_count_wo_des)
+        self.assertEqual(term_count_wo_des, 0)
+
 
     def test_get_terms_with_freq(self):
         # ic(self.ena_cl_obj.get_terms_with_freq())
@@ -37,14 +55,16 @@ class Testmixs(unittest.TestCase):
 
     def test_get_terms_by_freq(self):
         my_dict = self.ena_cl_obj.get_terms_by_freq()
-        test_18 = {'term_count_with_freq': 7,
+        test_18 = {'term_count_with_freq': 9,
                    'terms': ['ploidy',
                              'estimated size',
                              'sample volume or weight for DNA extraction',
                              'pcr primers',
                              'isolation and growth condition',
                              'sample storage duration',
-                             'sample storage location']}
+                             'sample storage location',
+                             'host disease status',
+                             'known pathogenicity']}
         self.assertDictEqual(my_dict[18], test_18)
 
     def test_get_term_top(self):
@@ -55,11 +75,11 @@ class Testmixs(unittest.TestCase):
 
     def test_get_all_term_count(self):
         #ic(self.ena_cl_obj.get_all_term_count())
-        self.assertEqual(self.ena_cl_obj.get_all_term_count(), 625)
+        self.assertEqual(self.ena_cl_obj.get_all_term_count(), 631)
 
     def test_print_term_summary(self):
         # ic(self.ena_cl_obj.print_term_summary(2))
-        test_out = "term_count=625 first 2 terms=['16S recovered', '16S recovery software']"
+        test_out = "term_count=631 first 2 terms=['16S recovered', '16S recovery software']"
         self.assertEqual(self.ena_cl_obj.print_term_summary(2), test_out)
 
     def test_get_all_package_list(self):
