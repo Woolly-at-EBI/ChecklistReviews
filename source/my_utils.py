@@ -14,20 +14,29 @@ import argparse
 from collections import Counter
 
 
+def find_list_duplicates_dict(in_list):
+    """
+
+    :param in_list:
+    :return: duplicates_dict
+    """
+    counts = dict(Counter(in_list))
+    duplicates = {key: value for key, value in counts.items() if value > 1}
+    return duplicates
+
+
 def find_list_duplicates(in_list):
     """
 
     :param in_list:
-    :return:
+    :return: duplicated key term list
     """
-    counts = dict(Counter(in_list))
-    duplicates = {key: value for key, value in counts.items() if value > 1}
-    #ic(duplicates.keys())
+    duplicates = find_list_duplicates_dict(in_list)
     return list(duplicates.keys())
 
 def main():
     in_list = ['a','b','c','a','b']
-    find_list_duplicates(in_list)
+    ic(find_list_duplicates(in_list))
 
 if __name__ == '__main__':
     ic()
