@@ -10,19 +10,18 @@ class mixs:
         self.my_dict = process_ena_cl(self.my_dict_raw, self.linkml_mixs_dict)
 
     def __init__(self, my_dict, type, linkml_mixs_dict):
-        ic()
         # type could be  "mixs_v5", "mixs_v6" or "ena_cl"
         self.type = type
 
         if type == "ena_cl":
-            ic(f"type = {self.type}")
+            #ic(f"type = {self.type}")
             self.my_dict_raw = my_dict
             self.linkml_mixs_dict = linkml_mixs_dict
             self.ingest_ena_cl()
             # self.cl_details_dict = get_ena_cl_details(self.my_dict_raw)
             # ic(f"self.type = {self.type}")
-            ic("FFFFFFFFFF")
-            ic(len(self.my_dict["by_term"].keys()))
+            #ic("FFFFFFFFFF")
+            #ic(len(self.my_dict["by_term"].keys()))
         else:
             # ic(f"type = {type}")
             self.my_dict = my_dict
@@ -31,9 +30,7 @@ class mixs:
         return self.type
 
     def get_all_term_list(self):
-        my_list = list(self.my_dict['by_term'].keys())
-        my_list.sort()
-        return my_list
+        return sorted(self.my_dict['by_term'].keys())
 
     def get_terms_with_freq(self):
         """
@@ -379,7 +376,7 @@ def generate_mixs6_object():
     linkml_mixs_dict = parse_new_linkml()
     my_dict_v6 = get_mixs_dict("my_dict_v6")
     ic(my_dict_v6.keys())
-    ic(linkml_mixs_dict.keys())
+    #ic(linkml_mixs_dict.keys())
 
     mixs_v6_dict = process_mixs_dict(my_dict_v6, linkml_mixs_dict)
     mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6", linkml_mixs_dict)
@@ -390,8 +387,10 @@ def generate_ena_object():
 
     :return:
     """
-    linkml_mixs_dict = parse_new_linkml()
+    #linkml_mixs_dict = parse_new_linkml()
+    linkml_mixs_dict = {}
     ena_cl_dict = get_ena_dict()
+
     ena_cl_obj = mixs(ena_cl_dict, "ena_cl", linkml_mixs_dict)
 
 
@@ -409,8 +408,6 @@ def process_ena_cl(my_dict, linkml_mixs_dict):
     # print(my_dict["CHECKLIST_SET"].keys())
     MIXS_review_dict = {"by_package": {}, "by_term": {}}
 
-    ic()
-
     def process_description(field):
         if "DESCRIPTION" in field:
             description = field["DESCRIPTION"]
@@ -420,6 +417,7 @@ def process_ena_cl(my_dict, linkml_mixs_dict):
             description = field["LABEL"]
             # print(f"no description so using label={description}")
         else:
+            ic()
             ic("NEITHER DESCRIPTION NOR LABEL found")
             sys.exit()
         return description
@@ -447,7 +445,7 @@ def process_ena_cl(my_dict, linkml_mixs_dict):
     for checklist in my_dict["CHECKLIST_SET"]["CHECKLIST"]:
         term_count = 0 # count of terms in a particular checklist
         checklist_name = checklist['DESCRIPTOR']['NAME']
-        ic(checklist_name)
+        # ic(checklist_name)
         if not hasattr(MIXS_review_dict["by_package"], checklist_name):
             MIXS_review_dict["by_package"][checklist_name] = {'field': {}}
         #ic(f"{checklist_name} {checklist['DESCRIPTOR']['FIELD_GROUP']}")
