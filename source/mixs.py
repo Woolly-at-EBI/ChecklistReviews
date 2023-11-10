@@ -4,6 +4,7 @@ import os
 import json
 import pickle
 import re
+import requests
 
 class mixs:
     def ingest_ena_cl(self):
@@ -12,7 +13,7 @@ class mixs:
     def __init__(self, my_dict, type, linkml_mixs_dict):
         # type could be  "mixs_v5", "mixs_v6" or "ena_cl"
         self.type = type
-
+        self.corePackageSet = set()
         if type == "ena_cl":
             #ic(f"type = {self.type}")
             self.my_dict_raw = my_dict
@@ -22,9 +23,11 @@ class mixs:
             # ic(f"self.type = {self.type}")
             #ic("FFFFFFFFFF")
             #ic(len(self.my_dict["by_term"].keys()))
+
         else:
             # ic(f"type = {type}")
             self.my_dict = my_dict
+            self.corePackageSet.add('BuiltEnvironment')
 
     def get_type(self):
         return self.type
@@ -119,6 +122,7 @@ class mixs:
             return_str = f"term_count={self.get_all_term_count()} first {top} terms={self.get_all_term_list()[0:top]}"
         return return_str
 
+
     def get_gsc_packages(self):
         if hasattr(self, 'gsc_package_set'):
             return list(self.gsc_package_set)
@@ -132,11 +136,26 @@ class mixs:
         return list(self.gsc_package_set)
 
     def get_gsc_package_name_dict(self):
+        """
+        N.B. is the ENA GSC package_name_dict
+        :return:  ENA GSC package_name_dict
+        """
+        ic()
         if hasattr(self, 'gsc_package_name_dict'):
-            return self.gsc_package_name_dict
-        self.get_gsc_packages()
-        return self.gsc_package_name_dict
+            return self.my_dict['by_package']
+        self.get_gsc_packages() #populates it
+        return self.my_dict['by_package']
 
+    def get_gsc_package_name_specific_dict(self, specific_package_name):
+        gsc_package_name_dict = self.get_gsc_package_name_dict()
+        if specific_package_name in gsc_package_name_dict:
+           return gsc_package_name_dict[specific_package_name]
+        else:
+            ic(f"{specific_package_name} not found in gsc_package_name_dict")
+            return None
+    def get_gsc_package_name_specific_fields_list(self, specific_package_name):
+        specific_dict = self.get_gsc_package_name_specific_dict(specific_package_name)
+        return list(specific_dict['field'].keys())
 
     def get_not_gsc_packages(self):
         if not hasattr(self, 'not_gsc_package_set'):
@@ -238,6 +257,12 @@ def process_mixs_dict(my_dict, linkml_dict):
     MIXS_review_dict = {"by_package": {}, "by_term": {}}
 
     def get_long_name(short_term_name, linkml_dict):
+        """
+        ToDo: Need to test why a minority of slot terms are not returning the title
+        :param short_term_name:
+        :param linkml_dict:
+        :return:
+        """
         if short_term_name in linkml_dict["slots"]:
             return linkml_dict["slots"][short_term_name]['title']
         return short_term_name
