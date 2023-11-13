@@ -21,13 +21,14 @@ class mixs:
             self.ingest_ena_cl()
             # self.cl_details_dict = get_ena_cl_details(self.my_dict_raw)
             # ic(f"self.type = {self.type}")
-            #ic("FFFFFFFFFF")
             #ic(len(self.my_dict["by_term"].keys()))
-
         else:
             # ic(f"type = {type}")
             self.my_dict = my_dict
-            self.corePackageSet.add('BuiltEnvironment')
+            corePackageList = ['BuiltEnvironment', 'Air']
+            self.corePackageSet.union(set(corePackageList))
+            ic(set(corePackageList))
+            #sys.exit()
 
     def get_type(self):
         return self.type
