@@ -38,28 +38,28 @@ def getENA_Cls(ena_cl_obj, cl_hl):
 def process_matching_ena_checklists(ena_cl_obj, mixs_v6_obj, cl_hl, ena_results_list):
     ic()
 
-    ic(mixs_v6_obj.get_gsc_packages())
-    mixs_results_set = set(find_substrings(cl_hl, mixs_v6_obj.get_gsc_packages()))
-    ic(mixs_results_set)
+    #ic(mixs_v6_obj.get_gsc_packages())
+    mixs_cat_packages_set = set(find_substrings(cl_hl, mixs_v6_obj.get_gsc_packages()))
+    ic(mixs_cat_packages_set)
     ic(mixs_v6_obj.corePackageSet)
-    ic(mixs_results_set.intersection(mixs_v6_obj.corePackageSet))
-    mixs_core_package_set = mixs_results_set.intersection(mixs_v6_obj.corePackageSet)
+    ic(mixs_cat_packages_set.intersection(mixs_v6_obj.corePackageSet))
+    mixs_core_package_set = mixs_cat_packages_set.intersection(mixs_v6_obj.corePackageSet)
+    ic(mixs_core_package_set)
     if len(mixs_core_package_set) < 1:
         ic("ERROR len(mixs_core_package_set) < 1")
         sys.exit()
 
+    ic()
+    mixs_core_package = list(mixs_core_package_set)[0]
     print(f"Total ENA checklists matching: {len(ena_results_list)}")
     for ena_checklist in ena_results_list:
         ic(ena_checklist)
         ena_term_list = ena_cl_obj.get_gsc_package_name_specific_fields_list(ena_checklist)
         ic(len(ena_term_list))
-
+        # ic(ena_term_list)
         ic(mixs_core_package_set)
-        mixs_core_package = list(mixs_core_package_set)[0]
-        mixs_term_list = mixs_v6_obj.get_gsc_package_name_specific_fields_list(mixs_core_package)
-        ic(len(mixs_term_list))
-
-
+        combined_MIXS_term_list = mixs_v6_obj.get_combined_MIXS_term_list(mixs_core_package, mixs_cat_packages_set)
+        ic(len(combined_MIXS_term_list))
 
 def main():
 

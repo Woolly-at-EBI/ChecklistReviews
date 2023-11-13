@@ -140,7 +140,7 @@ class mixs:
         N.B. is the ENA GSC package_name_dict
         :return:  ENA GSC package_name_dict
         """
-        ic()
+        #ic()
         if hasattr(self, 'gsc_package_name_dict'):
             return self.my_dict['by_package']
         self.get_gsc_packages() #populates it
@@ -216,6 +216,31 @@ class mixs:
         return_str = "package_count=" + str(self.get_all_package_count()) + " packages=" + package_list_string
         # print(return_str)
         return return_str
+
+    def get_combined_MIXS_term_list(self, mixs_core_package, mixs_cat_packages_set):
+        """
+           To do, to dynamically work out the core package
+        :param mixs_v6_obj:
+        :param mixs_core_package:
+        :param mixs_cat_packages_set:
+        :return: combined_MIXS_term_set
+        """
+        #ic("----------------------------------------------------------------------------------------")
+        #ic()
+
+        mixs_cat_packages_list = list(mixs_cat_packages_set)
+        #ic(mixs_cat_packages_list)
+
+        combined_MIXS_term_set = set()
+        for mixs_package in mixs_cat_packages_set:
+            #ic(mixs_package)
+            # if  mixs_package == mixs_core_package:
+            #    ic("** N.B is the CORE mixs_package **")
+            mixs_term_list = self.get_gsc_package_name_specific_fields_list(mixs_package)
+            #ic(len(mixs_term_list))
+            combined_MIXS_term_set = combined_MIXS_term_set.union(set(mixs_term_list))
+            #ic(len(combined_MIXS_term_set))
+        return combined_MIXS_term_set
 
     def print_summaries(self):
         print(self.print_term_summary(10))
