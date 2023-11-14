@@ -14,6 +14,7 @@ class mixs:
         # type could be  "mixs_v5", "mixs_v6" or "ena_cl"
         self.type = type
         self.corePackageSet = set()
+
         if type == "ena_cl":
             #ic(f"type = {self.type}")
             self.my_dict_raw = my_dict
@@ -22,13 +23,16 @@ class mixs:
             # self.cl_details_dict = get_ena_cl_details(self.my_dict_raw)
             # ic(f"self.type = {self.type}")
             #ic(len(self.my_dict["by_term"].keys()))
-        else:
+        elif type in ["mixs_v5", "mixs_v6"]:
             # ic(f"type = {type}")
             self.my_dict = my_dict
             corePackageList = ['BuiltEnvironment', 'Air']
             self.corePackageSet.union(set(corePackageList))
             ic(set(corePackageList))
-            #sys.exit()
+        else:
+            print(f"no valid type: \"{type}\" in class mixs")
+            sys.exit()
+
 
     def get_type(self):
         return self.type
