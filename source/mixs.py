@@ -26,13 +26,12 @@ class mixs:
         elif type in ["mixs_v5", "mixs_v6"]:
             # ic(f"type = {type}")
             self.my_dict = my_dict
-            corePackageList = ['BuiltEnvironment', 'Air']
-            self.corePackageSet.union(set(corePackageList))
-            ic(set(corePackageList))
+            self.corePackageSet = {'Agriculture', 'Air', 'BuiltEnvironment', 'Core', 'Food', 'Host', 'Human', 'Hydrocarbon', 'Microbial', 'Miscellaneous', 'Plant', 'Sediment', 'Soil', 'Symbiont', 'Wastewater', 'Water'}
+            # Agriculture, Air, BuiltEnvironment, Core, Food, Host, Human, Hydrocarbon, Microbial, Miscellaneous, Plant, Sediment, Soil, Symbiont, Wastewater, Water
+            ic(self.corePackageSet)
         else:
             print(f"no valid type: \"{type}\" in class mixs")
             sys.exit()
-
 
     def get_type(self):
         return self.type
@@ -246,6 +245,21 @@ class mixs:
             combined_MIXS_term_set = combined_MIXS_term_set.union(set(mixs_term_list))
             #ic(len(combined_MIXS_term_set))
         return combined_MIXS_term_set
+
+    def get_high_level_cat_list(self):
+        """
+        TODO: only works for mixs so far
+        :return: list of the high level categories
+        """
+        if hasattr(self, 'high_level_cat_list'):
+            return self.high_level_cat_list
+        self.high_level_cat_list = set()
+        for hl_cat in self.corePackageSet:
+            self.high_level_cat_list.add(hl_cat.lower())
+        ic(', '.join(self.high_level_cat_list))
+        return self.high_level_cat_list
+
+
 
     def print_summaries(self):
         print(self.print_term_summary(10))
