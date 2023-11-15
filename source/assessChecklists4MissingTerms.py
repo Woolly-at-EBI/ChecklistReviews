@@ -22,19 +22,26 @@ def find_substrings(input_string, string_list):
 
 def getENA_Cls(ena_cl_obj, cl_hl):
     """
-    get ENA checklsits corresponding to the parameter.
+    get ENA checklists corresponding to the parameter.
     :param cl_hl:
-    :return:
+    :return:  results_list of 0 or more terms...
     """
     ic()
     all_gsc_packages = ena_cl_obj.get_gsc_packages()
 
-    results_list = find_substrings(cl_hl, all_gsc_packages)
+    # these are the non-straightforward ones
+    MIXS_CorePackages = {'host': 'Host-associated', 'builtenvironment': 'built environment'}
 
-    if results_list:
-        ic(f"yippee: \"{cl_hl}\" matches {results_list}")
+    if cl_hl in MIXS_CorePackages:
+        tmp_cl_hl = MIXS_CorePackages[cl_hl]
     else:
-        print(f"\"{cl_hl}\" was not found in {all_gsc_packages}")
+        tmp_cl_hl = cl_hl
+    results_list = find_substrings(tmp_cl_hl, all_gsc_packages)
+    if results_list:
+        ic(f"INFO: \"{cl_hl}\" matches {results_list}")
+    else:
+        print(f"WARNING: \"{cl_hl}\" was not found in {all_gsc_packages}")
+
     return results_list
 
 def get_matching_ena_terms(checklist_synonym_dict, mixs_list):
@@ -55,22 +62,59 @@ def process_matching_ena_checklists(ena_cl_obj, mixs_v6_obj, cl_hl, ena_results_
     :return: mixs_list_missing, ena_list_missing
     """
     ic()
+    ic(ena_cl_obj.type)
+    ic(mixs_v6_obj.type)
+
+    def remove_exceptions(cl_hl, package_set):
+        """
+        Human food related checklists were being incorrectly assigned, so removing them here
+        :param cl_hl:
+        :param package_set:
+        :return:
+        """
+        ic()
+        ic(package_set)
+        remove_set = set()
+        if cl_hl == 'human':
+             remove_set = set(find_substrings('food', package_set))
+
+        if len(remove_set) > 0:
+            ic(remove_set)
+            for key in remove_set:
+                package_set.remove(key)
+            # package_set.remove(remove_set)
+            ic("removed")
+            ic(package_set)
+            sys.exit()
+
+        if cl_hl == 'human':
+            sys.exit()
+
+        return package_set
 
     #ic(mixs_v6_obj.get_gsc_packages())
-    mixs_cat_packages_set = set(find_substrings(cl_hl, mixs_v6_obj.get_gsc_packages()))
-    ic(mixs_cat_packages_set)
-    ic(mixs_v6_obj.corePackageSet)
-    ic(mixs_cat_packages_set.intersection(mixs_v6_obj.corePackageSet))
-    ic(mixs_v6_obj.print_summaries())
-    sys.exit()
+    mixs_cat_packages_set = remove_exceptions(cl_hl,set(find_substrings(cl_hl, mixs_v6_obj.get_gsc_packages())))
+    ic(', '.join(list(mixs_cat_packages_set)))
+    #ic(mixs_v6_obj.corePackageSet)
+    ic(', '.join(mixs_cat_packages_set.intersection(mixs_v6_obj.corePackageSet)))
     mixs_core_package_set = mixs_cat_packages_set.intersection(mixs_v6_obj.corePackageSet)
-    ic(mixs_core_package_set)
+    ic(', '.join(list(mixs_core_package_set)))
     if len(mixs_core_package_set) < 1:
-        ic("ERROR len(mixs_core_package_set) < 1")
-        sys.exit()
+        ic(f"ERROR {len(mixs_core_package_set)} < 1")
+        #sys.exit()
+        ic(', '.join(list(mixs_v6_obj.corePackageSet)))
+        lc_mixs_core_set = set(x.lower() for x in mixs_v6_obj.corePackageSet)
+        ic(f"{cl_hl} core set={lc_mixs_core_set}")
+        for core_value in lc_mixs_core_set:
+           if cl_hl in core_value:
+            ic(f"core_value {core_value}")
+        #sys.exit()
+    else:
+        mixs_core_package = list(mixs_core_package_set)[0]
 
     ic()
-    mixs_core_package = list(mixs_core_package_set)[0]
+    ic(mixs_core_package)
+    #sys.exit()
     print(f"Total ENA checklists matching: {len(ena_results_list)}")
 
     checklist_synonym_dict = get_checklist_synonym_dict()
@@ -133,6 +177,7 @@ def process_matching_ena_checklists(ena_cl_obj, mixs_v6_obj, cl_hl, ena_results_
         ena_term_set = set(ena_cl_obj.get_gsc_package_name_specific_fields_list(ena_checklist))
         ic(len(ena_term_set))
         # ic(ena_term_set)
+        ic()
         ic(mixs_core_package_set)
         combined_MIXS_term_set = set(mixs_v6_obj.get_combined_MIXS_term_list(mixs_core_package, mixs_cat_packages_set))
         ic(len(combined_MIXS_term_set))
@@ -140,7 +185,7 @@ def process_matching_ena_checklists(ena_cl_obj, mixs_v6_obj, cl_hl, ena_results_
         ic(len(intersection_terms))
         ena_difference_terms = ena_term_set.difference(combined_MIXS_term_set)
         ic(len(ena_difference_terms))
-        ic(ena_difference_terms)
+        ic(', '.join(list(ena_difference_terms)))
         mixs_difference_terms = combined_MIXS_term_set.difference(ena_term_set)
         ic(len(mixs_difference_terms))
 
@@ -149,8 +194,8 @@ def process_matching_ena_checklists(ena_cl_obj, mixs_v6_obj, cl_hl, ena_results_
         ic(len(intersection_terms))
         ena_difference_terms = ena_term_set.difference(intersection_terms)
         ic(len(ena_difference_terms))
-        ic(ena_difference_terms)
-        ic(mixs_syn_matches_set)
+        ic(', '.join(list(ena_difference_terms)))
+        ic(', '.join(list(mixs_syn_matches_set)))
         mixs_difference_terms = mixs_difference_terms.difference(mixs_syn_matches_set)
         ic(len(mixs_difference_terms))
         #ic(mixs_difference_terms)
@@ -214,10 +259,7 @@ def get_all_ena_term_dict():
 
 def create_ena_style_terms_to_add(mixs_v6_obj, cl_hl, mixs_list_missing):
     ic()
-
     all_ena_term_dict = get_all_ena_term_dict()
-
-
     by_term_dict = mixs_v6_obj.get_term_dict()
     ic(len(by_term_dict))
     filtered_dict = {key: by_term_dict[key] for key in mixs_list_missing}
@@ -227,8 +269,10 @@ def create_ena_style_terms_to_add(mixs_v6_obj, cl_hl, mixs_list_missing):
     # for key in tmp_dict:
     #     ic(f"key=\"{key}\" description={tmp_dict[key]['description']}")
 
-    #ic(tmp_dict)
+    ic(tmp_dict)
     df = pd.DataFrame.from_dict(tmp_dict, orient='index')
+    ic(df)
+    ic(df.columns)
     df = df.drop('packages', axis = 1)
     df['term_name'] = df.index
     # #ic(df)
@@ -240,7 +284,7 @@ def create_ena_style_terms_to_add(mixs_v6_obj, cl_hl, mixs_list_missing):
     #ic(df_to_print.head())
     out_file = out_dir + cl_hl + '_new_terms.tsv'
     ic(f"creating {out_file}")
-    df_to_print.to_csv(out_file, sep='\t')
+    df_to_print.to_csv(out_file, sep='\t', index=False)
 
 
 def main():
@@ -248,15 +292,22 @@ def main():
     mixs_v6_obj, mixs_v6_dict, linkml_mixs_dict = generate_mixs6_object()
     ena_cl_dict = get_ena_dict()
     ena_cl_obj = mixs(ena_cl_dict, "ena_cl", linkml_mixs_dict)
+    ic(','.join(ena_cl_obj.get_all_package_list()))
 
-    ch_hl_list = ['built', 'air']
+    # ch_hl_list = ['built', 'air']
+    ch_hl_list = sorted(mixs_v6_obj.get_high_level_cat_list())
     for cl_hl in ch_hl_list:
+        ic("--------------------------------------------------------------\n")
         ic(cl_hl)
         results_list = getENA_Cls(ena_cl_obj, cl_hl)
-        mixs_list_missing, ena_list_missing = process_matching_ena_checklists(ena_cl_obj, mixs_v6_obj, cl_hl, results_list)
-        ic(len(mixs_list_missing))
-        create_ena_style_terms_to_add(mixs_v6_obj, cl_hl, mixs_list_missing)
-        ic("--------------------------------------------------------------\n")
+        if len(results_list) == 0:
+            ic(f"No ENA checklists corresponding to {cl_hl}")
+            # in future populate this  mixs_list_missing
+        else:
+          mixs_list_missing, ena_list_missing = process_matching_ena_checklists(ena_cl_obj, mixs_v6_obj, cl_hl, results_list)
+          ic(len(mixs_list_missing))
+          create_ena_style_terms_to_add(mixs_v6_obj, cl_hl, mixs_list_missing)
+
 
 if __name__ == '__main__':
     ic()
