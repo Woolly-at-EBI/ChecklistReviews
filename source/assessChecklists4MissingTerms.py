@@ -20,23 +20,84 @@ def find_substrings(input_string, string_list):
     matches = [element for element in string_list if input_string.lower() in element.lower()]
     return matches
 
+def find_starting_substrings(input_string, string_list):
+    matches = []
+    for element in string_list:
+        input_lower = input_string.lower()
+        element_lower = element.lower()
+        if input_lower == element or element_lower.startswith(input_lower):
+            matches.append(element)
+    return matches
+
+def find_ending_substrings(input_string, string_list):
+    matches = []
+    for element in string_list:
+        input_lower = input_string.lower()
+        element_lower = element.lower()
+        if input_lower == element or element_lower.endswith(input_lower):
+            matches.append(element)
+    return matches
+def remove_word(results_list, remove_word_list):
+    results_set = set(results_list)
+    ic(results_list)
+    for rm_word in remove_word_list:
+        ic(rm_word)
+        for element in results_list:
+            if rm_word.lower() in element:
+                results_set.remove(element)
+                print(f"INFO rm {element} from: {', '.join(results_list)}")
+
+    return list(results_set)
 def getENA_Cls(ena_cl_obj, cl_hl):
     """
     get ENA checklists corresponding to the parameter.
     :param cl_hl:
     :return:  results_list of 0 or more terms...
+
+
+    ic| ','.join(ena_cl_obj.get_all_package_list()): ('COMPARE-ECDC-EFSA pilot food-associated reporting standard,COMPARE-ECDC-EFSA '
+                                                  'pilot human-associated reporting standard,ENA Crop Plant sample enhanced '
+                                                  'annotation checklist,ENA Global Microbial Identifier Proficiency Test (GMI '
+                                                  'PT) checklist,ENA Global Microbial Identifier reporting standard checklist '
+                                                  'GMI_MDM:1.1,ENA Influenza virus reporting standard checklist,ENA Marine '
+                                                  'Microalgae Checklist,ENA Micro B3,ENA Plant Sample Checklist,ENA Shellfish '
+                                                  'Checklist,ENA Tara Oceans,ENA UniEuk_EukBank Checklist,ENA binned '
+                                                  'metagenome,ENA default sample checklist,ENA mutagenesis by carcinogen '
+                                                  'treatment checklist,ENA parasite sample checklist,ENA prokaryotic pathogen '
+                                                  'minimal sample checklist,ENA sewage checklist,ENA virus pathogen reporting '
+                                                  'standard checklist,GSC MIMAGS,GSC MISAGS,GSC MIUVIGS,GSC MIxS air,GSC MIxS '
+                                                  'built environment,GSC MIxS host associated,GSC MIxS human associated,GSC '
+                                                  'MIxS human gut,GSC MIxS human oral,GSC MIxS human skin,GSC MIxS human '
+                                                  'vaginal,GSC MIxS microbial mat biolfilm,GSC MIxS miscellaneous natural or '
+                                                  'artificial environment,GSC MIxS plant associated,GSC MIxS sediment,GSC MIxS '
+                                                  'soil,GSC MIxS wastewater sludge,GSC MIxS water,HoloFood Checklist,PDX '
+                                                  'Checklist,Tree of Life Checklist')
     """
     ic()
     all_gsc_packages = ena_cl_obj.get_gsc_packages()
 
-    # these are the non-straightforward ones
-    MIXS_CorePackages = {'host': 'Host-associated', 'builtenvironment': 'built environment'}
+    # these are the non-straightforward ones  echo $ena_packages | tr "'" ' ' | sed 's/^ *//' | tr '\t' ' ' | tr '\n' ' ' | sed -e 's/ */ /g' | tr ',' '\n'
+    MIXS_CorePackages2ena = {'host': 'Host-associated', 'builtenvironment': 'built environment',
+                             'MicrobialMatBiofilm': 'microbial mat biolfilm',
+                             'humanassociated': 'human associated',
+                             'humangut': 'human gut',
+                             'humanoral': 'human gut',
+                             'humanskin': 'human gut',
+                             'humanvaginal': 'human vaginal',
+                             'Plant-associated': 'plant associated',
+                             'WastewaterSludge': 'wastewater sludge',
+                             'MiscellaneousNaturalOrArtificialEnvironment': 'miscellaneous natural or artificial environment'
+                         }
 
-    if cl_hl in MIXS_CorePackages:
-        tmp_cl_hl = MIXS_CorePackages[cl_hl]
+    if cl_hl in MIXS_CorePackages2ena:
+        tmp_cl_hl = MIXS_CorePackages2ena[cl_hl]
     else:
         tmp_cl_hl = cl_hl
     results_list = find_substrings(tmp_cl_hl, all_gsc_packages)
+    if tmp_cl_hl == 'Water':
+        ic()
+        results_list = remove_word(results_list, ['Waste'])
+        sys.exit()
     if results_list:
         ic(f"INFO: \"{cl_hl}\" matches {results_list}")
     else:
@@ -85,15 +146,14 @@ def process_matching_ena_checklists(ena_cl_obj, mixs_v6_obj, cl_hl, ena_results_
             # package_set.remove(remove_set)
             ic("removed")
             ic(package_set)
-            sys.exit()
 
-        if cl_hl == 'human':
-            sys.exit()
+        # if cl_hl == 'human':
+        #     sys.exit()
 
         return package_set
 
     #ic(mixs_v6_obj.get_gsc_packages())
-    mixs_cat_packages_set = remove_exceptions(cl_hl,set(find_substrings(cl_hl, mixs_v6_obj.get_gsc_packages())))
+    mixs_cat_packages_set = remove_exceptions(cl_hl,set(find_starting_substrings(cl_hl, mixs_v6_obj.get_gsc_packages())))
     ic(', '.join(list(mixs_cat_packages_set)))
     #ic(mixs_v6_obj.corePackageSet)
     ic(', '.join(mixs_cat_packages_set.intersection(mixs_v6_obj.corePackageSet)))
@@ -101,7 +161,7 @@ def process_matching_ena_checklists(ena_cl_obj, mixs_v6_obj, cl_hl, ena_results_
     ic(', '.join(list(mixs_core_package_set)))
     if len(mixs_core_package_set) < 1:
         ic(f"ERROR {len(mixs_core_package_set)} < 1")
-        #sys.exit()
+        sys.exit()
         ic(', '.join(list(mixs_v6_obj.corePackageSet)))
         lc_mixs_core_set = set(x.lower() for x in mixs_v6_obj.corePackageSet)
         ic(f"{cl_hl} core set={lc_mixs_core_set}")
@@ -113,7 +173,6 @@ def process_matching_ena_checklists(ena_cl_obj, mixs_v6_obj, cl_hl, ena_results_
         mixs_core_package = list(mixs_core_package_set)[0]
 
     ic()
-    ic(mixs_core_package)
     #sys.exit()
     print(f"Total ENA checklists matching: {len(ena_results_list)}")
 
@@ -172,6 +231,7 @@ def process_matching_ena_checklists(ena_cl_obj, mixs_v6_obj, cl_hl, ena_results_
     #if len(ena_results_list) > 1:
     #    printf(f"WARNING there are multiple ena_results: {ena_results_list} - this means ")
 
+    ic(','.join(ena_results_list))
     for ena_checklist in ena_results_list:
         ic(ena_checklist)
         ena_term_set = set(ena_cl_obj.get_gsc_package_name_specific_fields_list(ena_checklist))
@@ -263,16 +323,16 @@ def create_ena_style_terms_to_add(mixs_v6_obj, cl_hl, mixs_list_missing):
     by_term_dict = mixs_v6_obj.get_term_dict()
     ic(len(by_term_dict))
     filtered_dict = {key: by_term_dict[key] for key in mixs_list_missing}
-    ic(len(filtered_dict))
+    # ic(len(#)
 
-    tmp_dict = {k: filtered_dict[k] for k in filtered_dict.keys() & {'assembly quality', 'geographic location (country and/or sea,region)','temperature'}}
+    #tmp_dict = {k: filtered_dict[k] for k in filtered_dict.keys() & {'assembly quality', 'geographic location (country and/or sea,region)','temperature'}}
     # for key in tmp_dict:
     #     ic(f"key=\"{key}\" description={tmp_dict[key]['description']}")
 
-    ic(tmp_dict)
-    df = pd.DataFrame.from_dict(tmp_dict, orient='index')
-    ic(df)
-    ic(df.columns)
+    #ic(tmp_dict)
+    df = pd.DataFrame.from_dict(filtered_dict, orient='index')
+    #ic(df)
+    #ic(df.columns)
     df = df.drop('packages', axis = 1)
     df['term_name'] = df.index
     # #ic(df)
@@ -296,6 +356,7 @@ def main():
 
     # ch_hl_list = ['built', 'air']
     ch_hl_list = sorted(mixs_v6_obj.get_high_level_cat_list())
+    ch_hl_list = ['Water']
     for cl_hl in ch_hl_list:
         ic("--------------------------------------------------------------\n")
         ic(cl_hl)
@@ -307,7 +368,7 @@ def main():
           mixs_list_missing, ena_list_missing = process_matching_ena_checklists(ena_cl_obj, mixs_v6_obj, cl_hl, results_list)
           ic(len(mixs_list_missing))
           create_ena_style_terms_to_add(mixs_v6_obj, cl_hl, mixs_list_missing)
-
+        ic('end of this iterastion of ch_hl_list loop')
 
 if __name__ == '__main__':
     ic()
