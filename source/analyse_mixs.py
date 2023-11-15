@@ -32,7 +32,7 @@ from pairwise_term_matches import pairwise_term_matches, compareAllTerms
 from COMPARISONS import COMPARISONS, pair_string2names
 from source_package_name_comparisons import source_package_name_comparisons
 import mixs
-from mixs import mixs
+from mixs import mixs, parse_new_linkml, get_ena_dict, get_mixs_dict, process_mixs_dict
 from clean_terms import *
 
 pd.set_option('display.max_rows', 500)
@@ -1053,6 +1053,16 @@ def compareChecklistsByName(ena_obj, mixs_obj):
     sys.exit()
 
 
+def do_extra_check(mixs_v6_obj):
+    ic()
+    extra_mixs_list = ['tot_car', 'sample true vertical depth subsea', 'pooling of DNA extracts (if done)', 'sampling room ID or name', 'organism count qPCR information', 'non_mineral_nutr_regm', 'microbial starter NCBI taxonomy ID', 'texture_meth', 'soil_text_measure', 'previous_land_use_meth', 'samp_salinity', 'sample_collec_method', 'has_numeric_value', 'samp_stor_loc', 'has_unit', 'timepoint', 'time-course duration', 'samp_collec_device', 'single_cell_lysis_prot', 'x_16s_recover', 'host_infra_specific_name', 'tot_n_meth', 'presence of pets or farm animals', 'nitrogen', 'samp_collec_method', 'tot_phos', 'samp_stor_dur', 'single_cell_lysis_appr', 'x_16s_recover_software', 'texture', 'samp_stor_temp', 'soil horizon', 'additional info', 'sample_name', 'salinity_meth', 'sample transport temperature', 'spike in organism', 'microbial_biomass_meth']
+        #['air_particulate_matter_concentration', 'host_family_relation', 'has_unit', 'has_numeric_value', 'previous_land_use_meth', 'food distribution point geographic location (city)', 'Food_Product_type', 'geographic location (country and/or sea,region)', 'host of the symbiotic host environemental medium', 'additional info', 'room architectural elements', 'depth (TVDSS) of hydrocarbon resource temperature', 'Hazard Analysis Critical Control Points (HACCP) guide food safety term', 'assembly_quality', 'window open frequency', 'spike in organism', 'time-course duration', 'food product origin geographic location', 'Interagency Food Safety Analytics Collaboration (IFSAC) category', 'depth (TVDSS) of hydrocarbon resource pressure', 'sample_name', 'geographic location (latitude and longitude)', 'food distribution point geographic location', 'fermentation pH', 'organism count qPCR information', 'API gravity', 'microbial starter NCBI taxonomy ID', 'sampling room ID or name', 'Food harvesting process']
+
+    term_dict = mixs_v6_obj.get_term_dict()
+    for term in extra_mixs_list:
+        print(f"{term}={term_dict[term]['description']}")
+        print(f"\n\n--------------------------------------------------------")
+
 def main():
     linkml_mixs_dict = parse_new_linkml()
 
@@ -1065,8 +1075,18 @@ def main():
     mixs_v6_dict = process_mixs_dict(my_dict_v6, linkml_mixs_dict)
     mixs_v6_obj = mixs(mixs_v6_dict, "mixs_v6", linkml_mixs_dict)
 
+    do_extra_check(mixs_v6_obj)
+    sys.exit()
+
+    out_file = '../data/output/v6_term_list.txt'
+    with open(out_file, 'w') as f:
+        f.write('\n'.join(map(str, mixs_v6_obj.get_all_term_list())))
+    ic(f"created {out_file}")
+    print (mixs_v6_obj.get_all_term_list())
     # compareChecklistsByName(ena_cl_obj, mixs_v6_obj)
-    # sys.exit()
+
+
+    sys.exit()
 
     ic("do ena_cl and mix_v6")
     ic(ena_cl_obj.type)

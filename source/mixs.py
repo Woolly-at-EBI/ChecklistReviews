@@ -200,7 +200,6 @@ class mixs:
         if hasattr(self, 'all_package_list'):
             return self.all_package_list
         self.all_package_list = sorted(self.my_dict['by_package'].keys())
-        #ic(type(self.all_package_list))
         return self.all_package_list
 
     def get_all_package_count(self):
