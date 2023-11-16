@@ -14,7 +14,7 @@ from mixs import mixs, generate_mixs6_object, get_ena_dict
 
 out_dir = "/Users/woollard/projects/ChecklistReviews/data/output/"
 log_file = out_dir + 'ena_mixs_logfile_Nov2022.txt'
-global log_file_handle
+log_file_handle = open(log_file, "w")
 
 def find_substrings(input_string, string_list):
     matches = [element for element in string_list if input_string.lower() in element.lower()]
@@ -282,7 +282,7 @@ def process_matching_ena_checklists(ena_cl_obj, mixs_v6_obj, cl_hl, ena_results_
             # ic(len(mixs_difference_terms))
             # ic(mixs_difference_terms)
             mixs_list_missing_set = mixs_list_missing_set.union(mixs_difference_terms)
-            ena_list_missing_set = ena_list_missing_set.union()
+            ena_list_missing_set = ena_difference_terms
     # END OF if len(ena_results_list) > 0:
 
     return mixs_list_missing_set, ena_list_missing_set
@@ -357,6 +357,7 @@ def create_ena_existing_terms(cl_hl, ena_obj, ena_sp_package_term_list):
     # ic(df_to_print.head())
     out_file = out_dir + cl_hl.lower() + '_old_terms.tsv'
     ic(f"creating {out_file}")
+    log_file_handle.write(f"creating {out_file}\n")
     df_to_print.to_csv(out_file, sep = '\t', index = False)
 
 
@@ -400,6 +401,7 @@ def create_ena_style_terms_to_add(mixs_v6_obj, cl_hl, mixs_list_missing):
     # ic(df_to_print.head())
     out_file = out_dir + cl_hl.lower() + '_new_terms.tsv'
     ic(f"creating {out_file}")
+    log_file_handle.write(f"creating {out_file}\n")
     df_to_print.to_csv(out_file, sep = '\t', index = False)
 
 
@@ -419,11 +421,12 @@ def combined_comparision(cl_hl, mixs_list_missing, ena_sp_package_term_list):
     df = pd.DataFrame.from_dict(row_dict, orient = 'index')
     out_file = out_dir + cl_hl.lower() + '_missing_terms_context.tsv'
     ic(f"creating {out_file}")
+    log_file_handle.write(f"creating {out_file}")
     df.to_csv(out_file, sep = '\t', index = False)
 
 
 def main():
-    log_file_handle = open(log_file, "w")
+    # log_file_handle = open(log_file, "w")
     print(f"logging to {log_file}")
     log_file_handle.write(f"Log of the Checklists ENA to MIxS on {date.today().isoformat()}\n\n")
     mixs_v6_obj, mixs_v6_dict, linkml_mixs_dict = generate_mixs6_object()
@@ -438,6 +441,7 @@ def main():
     # ch_hl_list = ['Water', 'Agriculture', 'Food']
     # ch_hl_list = ['Agriculture']
     # ch_hl_list = ['miscellaneousnaturalorartificialenvironment']
+    log_file_handle.write(f"High level categories: {', '.join(ch_hl_list)}\n\n")
     for cl_hl in ch_hl_list:
         ic(cl_hl)
         log_file_handle.write(f"\nHigh level MIXS category: {cl_hl}\n")
@@ -458,16 +462,21 @@ def main():
             mixs_list_missing, ena_list_missing = process_matching_ena_checklists(ena_cl_obj, mixs_v6_obj, cl_hl,
                                                                                   results_list)
             # ic(len(mixs_list_missing))
+            log_file_handle.write(f"\tList of ENA terms not present in the MIxS, Total={len(ena_list_missing)}\n")
+            log_file_handle.write(f"\t\t{', '.join(sorted(ena_list_missing))}\n")
+
             log_file_handle.write(f"\tList of MIxS terms not present in ENA, Total={len(mixs_list_missing)}\n")
-            log_file_handle.write(f"\t{', '.join(sorted(mixs_list_missing))}\n")
+            log_file_handle.write(f"\t\t{', '.join(sorted(mixs_list_missing))}\n")
 
             create_ena_style_terms_to_add(mixs_v6_obj, cl_hl, mixs_list_missing)
             create_ena_existing_terms(cl_hl, ena_cl_obj, ena_sp_package_term_list)
             combined_comparision(cl_hl, mixs_list_missing, ena_sp_package_term_list)
         else:
             print(f"ERROR Multiple ENA files {results_list} match {cl_hl}")
+            log_file_handle.write(f"ERROR Multiple ENA files {results_list} match {cl_hl}")
             sys.exit()
         ic('end of this iteration of ch_hl_list loop')
+        log_file_handle.write(f"\n")
 
 
 if __name__ == '__main__':
