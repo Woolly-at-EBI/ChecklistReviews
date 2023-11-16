@@ -159,7 +159,7 @@ class mixs:
             return None
     def get_gsc_package_name_specific_fields_list(self, specific_package_name):
         specific_dict = self.get_gsc_package_name_specific_dict(specific_package_name)
-        return list(specific_dict['field'].keys())
+        return sorted(specific_dict['field'].keys())
 
     def get_not_gsc_packages(self):
         if not hasattr(self, 'not_gsc_package_set'):
@@ -255,7 +255,7 @@ class mixs:
             #ic(len(mixs_term_list))
             combined_MIXS_term_set = combined_MIXS_term_set.union(set(mixs_term_list))
             #ic(len(combined_MIXS_term_set))
-        return combined_MIXS_term_set
+        return sorted(combined_MIXS_term_set)
 
     def get_high_level_cat_list(self):
         """
