@@ -26,7 +26,7 @@ class mixs:
         elif type in ["mixs_v5", "mixs_v6"]:
             # ic(f"type = {type}")
             self.my_dict = my_dict
-            self.corePackageSet = {'Agriculture', 'Air', 'BuiltEnvironment', 'Core', 'Food', 'Host', 'Human', 'Hydrocarbon', 'Microbial', 'Miscellaneous', 'Plant', 'Sediment', 'Soil', 'Symbiont', 'Wastewater', 'Water'}
+            self.corePackageSet = {'Agriculture', 'Air', 'BuiltEnvironment', 'Core', 'Food', 'Host', 'Human-associated','Human-gut','Human-oral','Human-skin','Human-vaginal', 'Hydrocarbon', 'MicrobialMatBiofilm', 'MiscellaneousNaturalOrArtificialEnvironment', 'Plant-associated', 'Sediment', 'Soil', 'Symbiont', 'WastewaterSludge', 'Water'}
             # Agriculture, Air, BuiltEnvironment, Core, Food, Host, Human, Hydrocarbon, Microbial, Miscellaneous, Plant, Sediment, Soil, Symbiont, Wastewater, Water
             ic(self.corePackageSet)
         else:
@@ -195,6 +195,18 @@ class mixs:
             self.gsc_packages_mixs_style_nomenclature_set = set(self.get_gsc_packages())
         #ic(self.gsc_package_name_dict)
         return self.gsc_packages_mixs_style_nomenclature_set
+
+    def get_MIXS_package_mapping_dict(self):
+        mapping_dict = {
+            'food': {'core': 'Food-humanFoods'},
+            'host': {'core': 'Host-associatedMISAG'},
+            'hydrocarbon': {'core': 'HydrocarbonResources-cores'},
+            'symbiont': {'core': 'Symbiont-associated'},
+            'wastewatersludge': {'core': 'WastewaterSludge'},
+            'miscellaneousnaturalorartificialenvironment': {'core': 'MiscellaneousNaturalOrArtificialEnvironment'}
+        }
+        return mapping_dict
+
 
     def get_all_package_list(self):
         if hasattr(self, 'all_package_list'):
@@ -567,7 +579,6 @@ def add_term_package_count(my_dict):
         """
         match = re.match('[A-Z][a-z]*', package_name)
         return match.group(0)
-
 
     for package_name in my_dict["by_package"]:
         for term_name in my_dict["by_package"][package_name]["field"]:
