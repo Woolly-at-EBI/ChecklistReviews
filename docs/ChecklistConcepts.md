@@ -9,4 +9,7 @@
      Field-->E(ENUM list);
      Field-->S(synonym)
      S-->Field
+     Field-->V(value);
+     V-->P;
+     V-->E;
 ```
