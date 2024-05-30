@@ -13,6 +13,11 @@ import argparse
 import pandas as pd
 import logging
 import coloredlogs
+import numpy as np
+
+pd.set_option('display.max_rows', 500)
+pd.set_option('display.max_columns', 500)
+pd.set_option('display.width', 1000)
 
 my_coloredFormatter = coloredlogs.ColoredFormatter(
     fmt='[%(name)s] %(asctime)s %(funcName)s %(lineno)-3d  %(message)s',
@@ -102,16 +107,123 @@ def add_in_site_specific_names(mapped_df, site_only_set, site_df, site_df_name2i
     :param site_df:
     :return: mapped_df
     """
-    site_df = site_df.set_index(site_df_name2index)
+    # print("=========================================================")
+    logger.info(f"add_in_site_specific_names site_df_mapped_name={site_df_mapped_name}<---,site_df_name2index={site_df_name2index}<---")
+    site_df['my_index'] = site_df[site_df_name2index]
+    site_df = site_df.set_index('my_index')
     site_only_list = list(site_only_set)
     tmp_df = site_df.loc[site_only_list]
-    #print("=========================================================")
+    # print("=========================================================")
+    # logger.info(f"columns = {tmp_df.columns}")
+    # logger.info(f"tmp_df {tmp_df.head()}")
+    # print("=========================================================")
+    # logger.info(site_df[site_df_name2index])
+    # logger.info(site_df[site_df_name2index].value_counts())
+    # print("=========================================================")
+    tmp_df[site_df_mapped_name] = tmp_df[site_df_name2index]
     logger.info(f"{site_df_mapped_name} len of site_only_set  {len(site_only_set)}")
     logger.info(f"{site_df_mapped_name} len of df to merge in {len(tmp_df)}")
-    mapped_df = pd.concat([mapped_df, tmp_df])
-    logger.info(mapped_df.head())
-
+    mapped_df = pd.concat([mapped_df, tmp_df], join='outer').reset_index()
+    print_mapped_3_head(mapped_df)
+    logger.info(mapped_df.columns)
     return mapped_df
+
+def generate_syn_dict(df_ena_working,synonym_col,field_name_col):
+        """ generate_syn_dict
+
+        :param df_ena_working:
+        :return: ena_synonym_dict
+        """
+        logger.info(f"df_ena_working len {len(df_ena_working)}")
+        ena_synonym_dict = dict(zip(df_ena_working[synonym_col], df_ena_working[field_name_col]))
+        logger.info(f"ena_synonym_dict len {ena_synonym_dict}")
+        ena_synonym_dict.pop('\n', None)
+
+        ena_synonym_set = set(ena_synonym_dict.keys())
+        logger.info(f"ena_synonym_set len {len(ena_synonym_set)}")
+
+        clean_syn_dict = {}
+        #deal with multiple synonyms i.e. separated by a ;
+        for ena_synonym in ena_synonym_dict:
+            split_ena_synonym = ena_synonym.split(';')
+            if len(split_ena_synonym) > 1:
+                # logger.info(f"split_ena_synonym  {split_ena_synonym}")
+                for individual_ena_synonym in split_ena_synonym:
+                    clean_syn_dict[individual_ena_synonym] = ena_synonym_dict[ena_synonym]
+            else:
+                clean_syn_dict[ena_synonym] = ena_synonym_dict[ena_synonym]
+        logger.info(f"ena_synonym_dict len {len(clean_syn_dict)}")
+        return clean_syn_dict
+def get_name_centric_matches(synonym2fieldname_dict, synonym_hit_set):
+    """
+            # need to add ENA_mapping_note: "mapped_on_synonyms"
+    :param synonym2fieldname_dict:
+    :param synonym_hit_set:
+    :return:
+    """
+    fieldname_syn_intersection_set = set()
+    for ena_syn in synonym_hit_set:
+        if ena_syn in synonym2fieldname_dict:
+            # logger.info(f"-->{ena_syn}<-- matching-->{synonym2fieldname_dict[ena_syn]}<--")
+            fieldname_syn_intersection_set.add(synonym2fieldname_dict[ena_syn])
+    logger.info(f"fieldname_syn_intersection_set len = {len(fieldname_syn_intersection_set)}")
+
+    return fieldname_syn_intersection_set
+
+def process_ENA_terms_to_map(data_files_dict):
+    logging.info(data_files_dict.keys())
+    logger.info(f"process_ENA_terms_to_map ")
+    df_ncbi = data_files_dict['NCBI']['fields_df']
+    logging.info(df_ncbi.head())
+    logger.info(data_files_dict['ENA'].keys())
+    df_ena = data_files_dict['ENA']['fields_df']
+    logging.info(df_ena.head())
+    logging.info(df_ena.columns)
+    #harmonised name
+
+    ena_long_name_set = set(df_ena['CHECKLIST_FIELD_NAME'])
+    logger.info(f"ena initial name total = {len(ena_long_name_set)}")
+    ncbi_long_name_set = set(df_ncbi['Name'])
+    logger.info(f"NCBI initial name total = {len(ncbi_long_name_set)}")
+    ncbi_harmonised_name_set = set(df_ncbi['Harmonized name'])
+    ena_long_ncbi_long_intersection_set = ena_long_name_set.intersection(ncbi_long_name_set)
+    logger.info(f"ena_long_ncbi_long_intersection_set {len(ena_long_ncbi_long_intersection_set)}")
+
+    df_ena_working = df_ena.query('CHECKLIST_FIELD_NAME not in @ena_long_ncbi_long_intersection_set')
+    logger.info(f"df_ena_working len {len(df_ena_working)}")
+    ena_long_name_set = set(df_ena_working['CHECKLIST_FIELD_NAME'])
+    ena_long_ncbi_harmonised_intersection_set = ena_long_name_set.intersection(ncbi_harmonised_name_set)
+    logger.info(f"ena_long_ncbi_harmonised_intersection_set len = {len(ena_long_ncbi_harmonised_intersection_set)}")
+    df_ena_working = df_ena_working.query('CHECKLIST_FIELD_NAME not in @ena_long_ncbi_harmonised_intersection_set')
+
+    ena_synonym_dict = generate_syn_dict(df_ena_working, "SYNONYMS", "CHECKLIST_FIELD_NAME")
+    ena_synonym_set = set(ena_synonym_dict.keys())
+    ena_syn_ncbi_long_intersection_set = ena_synonym_set.intersection(ncbi_long_name_set)
+    logger.info(f"ena_syn_ncbi_long_intersection_set len = {len(ena_syn_ncbi_long_intersection_set)}")
+    ena_syn_ncbi_harmonised_intersection_set = ena_synonym_set.intersection(ncbi_long_name_set)
+    logger.info(f"ena_syn_ncbi_harmonised_intersection_set len = {len(ena_syn_ncbi_harmonised_intersection_set)}")
+    ena_syn_ncbi_long_or_harmonised_intersection_set = ena_syn_ncbi_harmonised_intersection_set.union(ena_syn_ncbi_long_intersection_set)
+    logger.info(f"ena_syn_ncbi_long_or_harmonised_intersection_set len = {len(ena_syn_ncbi_long_or_harmonised_intersection_set)}")
+
+    ena_fieldname_syn_intersection_set = get_name_centric_matches(ena_synonym_dict, ena_syn_ncbi_long_or_harmonised_intersection_set)
+    df_ena_working = df_ena_working.query('CHECKLIST_FIELD_NAME not in @ena_fieldname_syn_intersection_set')
+    logger.info(f"df_ena_working len = {len(df_ena_working)}")
+
+    sys.exit()
+
+    ncbi_synonym_set = set(df_ncbi['Synonyms'])
+    logger.info(f"ncbi_synonym_set = {ncbi_synonym_set}")
+
+    sys.exit()
+    ena_long_ncbi_harmonised_intersection_set = ena_long_name_set.intersection(ncbi_harmonised_name_set)
+    logger.info(f"ena_long_ncbi_harmonised_intersection_set {len(ena_long_ncbi_harmonised_intersection_set)}")
+
+
+    sys.exit()
+
+    return data_files_dict
+
+
 
 def process_NCBI_DDBJ(data_files_dict):
     logging.info(msg="process_NCBI_DDBJ================================================")
@@ -135,19 +247,24 @@ def process_NCBI_DDBJ(data_files_dict):
     mapped_df = add_in_easy_mappings(mapped_df, 'NCBI_mapped_name', 'DDBJ_mapped_name', ddbj_ncbi_intersect_set)
 
     ddbj_df = prefix_name2columns('DDBJ:', data_files_dict['DDBJ']['fields_df'])
-    mapped_df = add_in_site_specific_names(mapped_df, ddbj_only_set, ddbj_df, 'DDBJ:Name', 'DDBJ_mapped_name')
-
-
+    data_files_dict['mapped_df'] = add_in_site_specific_names(mapped_df, ddbj_only_set, ddbj_df, 'DDBJ:Name', 'DDBJ_mapped_name')
     data_files_dict = add_mapping_corrections(data_files_dict, 'DDBJ')
-    logging.info(ddbj_df.head())
+    logging.info(data_files_dict['mapped_df'].head())
 
-    data_files_dict['mapped_df'] = mapped_df
+    logging.info(data_files_dict['mapped_df'].columns)
+    mapped_df = data_files_dict['mapped_df']
+    logger.info(mapped_df['DDBJ_mapped_note'].value_counts())
+
     return data_files_dict
+
+def print_mapped_3_head(mapped_df):
+    tmp_mapped_df = mapped_df[['DDBJ_mapped_name', 'ENA_mapped_name', 'NCBI_mapped_name']]
+    logger.info("\n" + tmp_mapped_df.head().to_markdown(index=False))
 
 def map_field_names(data_files_dict):
     logging.warning(msg = "************ map_field_names *************")
     mapped_df = data_files_dict['NCBI']['fields_df'].copy()
-    logging.info(mapped_df.columns)
+    logger.info(mapped_df.columns)
 
     mapped_df.rename(columns={'Name': 'NCBI:Name', 'Harmonized name': 'NCBI:Harmonized name', 'Synonyms': 'NCBI:Synonyms',
                               'Description': 'NCBI:Description', 'Rule': 'NCBI:Rule',
@@ -155,12 +272,20 @@ def map_field_names(data_files_dict):
     mapped_df['NCBI_mapped_name'] = mapped_df['NCBI:Harmonized name']
     mapped_df['ENA_mapped_name'] = ""
     mapped_df['DDBJ_mapped_name'] = ""
-#
+    mapped_df = mapped_df[['DDBJ_mapped_name', 'ENA_mapped_name', 'NCBI_mapped_name',
+     'NCBI:Name', 'NCBI:Harmonized name', 'NCBI:Synonyms',
+     'NCBI:Description', 'NCBI:Rule', 'NCBI:Format']]
+    print_mapped_3_head(mapped_df)
     data_files_dict['mapped_df'] = mapped_df
+    logger.info(mapped_df.columns)
 
     data_files_dict = process_NCBI_DDBJ(data_files_dict)
     logging.info(msg = "map NCBI and DDBJ")
     print(mapped_df[['NCBI_mapped_name', 'ENA_mapped_name', 'DDBJ_mapped_name']].head())
+
+    data_files_dict = process_ENA_terms_to_map(data_files_dict)
+    #     sys.exit()
+    logger.info("leaving map_field_names")
     return data_files_dict
 
 
@@ -200,7 +325,23 @@ def add_mapping_corrections(data_files_dict, INSDC_site):
 
     return data_files_dict
 
-
+def generate_stats(data_files_dict):
+    print("++++++++++++++ Generate Statistics ++++++++++++++")
+    logger.info(type(data_files_dict))
+    logger.info(data_files_dict.keys())
+    mapped_df = data_files_dict['mapped_df']
+    print(mapped_df.columns)
+    total_combined_entries = mapped_df.shape[0]
+    print(f"total_combined_entries {total_combined_entries}")
+    total_ncbi_entries = mapped_df.loc[~mapped_df['NCBI_mapped_name'].isna()].shape[0]
+    print(f"total_ncbi_entries {total_ncbi_entries}")
+    total_ddbj_entries = mapped_df.loc[~mapped_df['DDBJ_mapped_name'].isna()].shape[0]
+    print(f"total_ddbj_entries {total_ddbj_entries}")
+    total_ena_entries = mapped_df.loc[~mapped_df['ENA_mapped_name'].isna()].shape[0]
+    print(f"total_ena_entries {total_ena_entries}")
+    slim_mapped_df = mapped_df[['ENA_mapped_name', 'NCBI_mapped_name', 'DDBJ_mapped_name']]
+    print(slim_mapped_df.query('ENA_mapped_name != ""'))
+    print(slim_mapped_df.query('ENA_mapped_name != ""').columns)
 
 def main():
     logger.warning(msg='in main (should be yellow)')
@@ -208,6 +349,7 @@ def main():
     data_files_dict = populate_input_data_structure()
     logging.info(msg= (data_files_dict.keys()))
     data_files_dict = map_field_names(data_files_dict)
+    generate_stats(data_files_dict)
 
 
     logger.info("finished......")
