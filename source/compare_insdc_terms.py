@@ -14,6 +14,8 @@ import pandas as pd
 import logging
 import coloredlogs
 import numpy as np
+import re
+from analyse_mixs import *
 
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
@@ -170,6 +172,39 @@ def get_name_centric_matches(synonym2fieldname_dict, synonym_hit_set):
 
     return fieldname_syn_intersection_set
 
+def clean_ncbi_syn(ncbi_synonym_set):
+    logging.debug(ncbi_synonym_set)
+
+    clean_set = set()
+    for synonym_line in ncbi_synonym_set:
+        synonym_line = str(synonym_line)
+        for synonym in synonym_line.split(','):
+            clean_set.add(synonym.strip())
+    return clean_set
+
+def get_fuzzy_matches(left_name, right_name, left_list, right_list):
+        pair_string = names2pair_string(left_name, right_name )
+        pairwise_obj = pairwise_term_matches(pair_string, left_list, right_list)
+        # left_conf_set = pairwise_obj.get_left_confident_matched_list()
+        # return left_conf_set
+        # logger.info(left_conf_set)
+
+        return pairwise_obj.get_medium_confidence_dict()
+
+def run_process_fuzzy_matches(df_ena, df_ena_working, left_name, right_name, left_list, right_list):
+        fuzzy_medium_confidence_dict = get_fuzzy_matches(left_name, right_name, left_list, right_list)
+        logger.info(fuzzy_medium_confidence_dict)
+        ena_long_name_set = set(df_ena['CHECKLIST_FIELD_NAME'])
+        left_terms_matched_set = set()
+        for left_term in fuzzy_medium_confidence_dict.keys():
+            right_term, fuzzy_score = fuzzy_medium_confidence_dict[left_term]
+            logger.info(f"Fuzzy match for -->{left_term}<-- -->{right_term}<-- with {fuzzy_score}")
+            if right_term in ena_long_name_set:
+                logger.info(f"\tright_term is already in ENA list: {right_term}")
+            else:
+                left_terms_matched_set.add(left_term)
+        return left_terms_matched_set
+
 def process_ENA_terms_to_map(data_files_dict):
     logging.info(data_files_dict.keys())
     logger.info(f"process_ENA_terms_to_map ")
@@ -196,6 +231,11 @@ def process_ENA_terms_to_map(data_files_dict):
     logger.info(f"ena_long_ncbi_harmonised_intersection_set len = {len(ena_long_ncbi_harmonised_intersection_set)}")
     df_ena_working = df_ena_working.query('CHECKLIST_FIELD_NAME not in @ena_long_ncbi_harmonised_intersection_set')
 
+    ena_short_name_set = set(df_ena_working['SHORT_FIELD_NAME_FROM_MIXS_LINKML'])
+    ena_short_ncbi_harmonised_intersection_set = ena_short_name_set.intersection(ncbi_harmonised_name_set)
+    logger.info(f"ena_short_ncbi_harmonised_intersection_set len= {len(ena_short_ncbi_harmonised_intersection_set)}")
+    df_ena_working = df_ena_working.query('SHORT_FIELD_NAME_FROM_MIXS_LINKML not in @ena_short_ncbi_harmonised_intersection_set')
+
     ena_synonym_dict = generate_syn_dict(df_ena_working, "SYNONYMS", "CHECKLIST_FIELD_NAME")
     ena_synonym_set = set(ena_synonym_dict.keys())
     ena_syn_ncbi_long_intersection_set = ena_synonym_set.intersection(ncbi_long_name_set)
@@ -209,15 +249,29 @@ def process_ENA_terms_to_map(data_files_dict):
     df_ena_working = df_ena_working.query('CHECKLIST_FIELD_NAME not in @ena_fieldname_syn_intersection_set')
     logger.info(f"df_ena_working len = {len(df_ena_working)}")
 
-    sys.exit()
+    ncbi_synonym_set = clean_ncbi_syn(set(df_ncbi['Synonyms']))
+    logger.debug(ncbi_synonym_set)
 
-    ncbi_synonym_set = set(df_ncbi['Synonyms'])
-    logger.info(f"ncbi_synonym_set = {ncbi_synonym_set}")
+    ena_long_ncbi_synonyms_intersection_set = ena_long_name_set.intersection(ncbi_synonym_set)
+    logger.info(f"ena_long_ncbi_synonyms_intersection_set {len(ena_long_ncbi_synonyms_intersection_set)}")
+    logger.info(f"ena_long_ncbi_synonyms_intersection_set = {ena_long_ncbi_synonyms_intersection_set}")
+    df_ena_working = df_ena_working.query('CHECKLIST_FIELD_NAME not in @ena_long_ncbi_synonyms_intersection_set')
+    logger.info(f"df_ena_working len = {len(df_ena_working)}")
 
-    sys.exit()
-    ena_long_ncbi_harmonised_intersection_set = ena_long_name_set.intersection(ncbi_harmonised_name_set)
-    logger.info(f"ena_long_ncbi_harmonised_intersection_set {len(ena_long_ncbi_harmonised_intersection_set)}")
+    ena_long_ncbi_synonyms_intersection_set = ena_long_name_set.intersection(ncbi_synonym_set)
+    logger.info(f"ena_long_ncbi_synonyms_intersection_set {len(ena_long_ncbi_synonyms_intersection_set)}")
+    logger.info(f"ena_long_ncbi_synonyms_intersection_set = {ena_long_ncbi_synonyms_intersection_set}")
+    df_ena_working = df_ena_working.query('CHECKLIST_FIELD_NAME not in @ena_long_ncbi_synonyms_intersection_set')
+    logger.info(f"df_ena_working len = {len(df_ena_working)}")
 
+
+
+    ena_long_name_set = df_ena_working['CHECKLIST_FIELD_NAME']
+    logger.info(f"ena_long_name_set len = {len(ena_long_name_set)}")
+
+    ena_terms_matched_set = run_process_fuzzy_matches(df_ena, df_ena_working,'ENA_long_name', 'NCBI_harmonised_name', list(ena_long_name_set), list(ncbi_harmonised_name_set))
+    ena_long_name_set = df_ena_working['CHECKLIST_FIELD_NAME']
+    logger.info(f"ena_long_name_set len = {len(ena_long_name_set)}")
 
     sys.exit()
 
@@ -362,7 +416,7 @@ if __name__ == '__main__':
     ch = logging.StreamHandler(stream = sys.stdout)
     ch.setFormatter(fmt = my_coloredFormatter)
     logger.addHandler(hdlr = ch)
-    logger.setLevel(level = logging.DEBUG)
+    logger.setLevel(level = logging.INFO)
 
     logger.warning('colors')
     logger.info(msg="testing, should be green")
