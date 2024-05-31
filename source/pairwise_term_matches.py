@@ -24,10 +24,10 @@ class pairwise_term_matches:
         self.right_name = pair_source[1]
 
     def get_left_name(self):
-        return(self.left_name)
+        return self.left_name
 
     def get_right_name(self):
-        return(self.right_name)
+        return self.right_name
 
     def unique_sorted_list(self, my_list):
         return sorted(list(set(my_list)))
@@ -44,15 +44,19 @@ class pairwise_term_matches:
         # ic(self.get_left_name())
         self.left_term_list = self.unique_sorted_list(left_term_list)
         self.right_term_list = self.unique_sorted_list(right_term_list)
-        clean_hash = self.get_clean_hash()
+        # clean_hash = self.get_clean_hash()
 
         pairwise_matches = {'left': {"exact": {}, "harmonised": {}, "no_matches": {}}, 'right': {"no_matches": {}}}
         self.pairwise_matches = pairwise_matches
-        left_pairwise_matches = pairwise_matches["left"]
-        right_pairwise_matches = pairwise_matches["right"]
+        # left_pairwise_matches = pairwise_matches["left"]
+        # right_pairwise_matches = pairwise_matches["right"]
 
         self.comparison_df = compareAllTerms(self.left_term_list, self.right_term_list)
         df = self.comparison_df
+
+        self.pair_string = ""
+        self.left_name = ""
+        self.right_name = ""
 
         # ic(df.head(20))
         # ic(df['match_type'].unique())
@@ -61,6 +65,7 @@ class pairwise_term_matches:
         self.left_fuzzy_matched_set = set()
         self.left_harmonised_matched_set = set()
         self.left_not_matched_set = set()
+        self.left_medium_confidence_dict = {}
 
         self.left_high_confident_matched_list = []
         self.left_medium_confident_matched_list = []
@@ -74,15 +79,22 @@ class pairwise_term_matches:
         self.right_harmonised_matched_set = set()
         self.right_not_matched_set = set()
 
+        self.harmonised_df = ""
+        self.vlow_confidence_mapping_df = ""
 
+        # ic()
+        #ic(df.head())
         for match_type in df['match_type'].unique():
             tmp_df = df.query('match_type == @match_type')
             #ic(match_type)
             #ic(tmp_df.head(5))
             if match_type == "exact":
+
                 self.left_exact_matched_set = set(tmp_df.left_term)
                 self.right_exact_matched_set = set(tmp_df.match)
+                self.left_medium_confidence_dict[tmp_df.left_term] = {"right_match": tmp_df.match}
             elif match_type == "harmonised":
+
                 self.left_harmonised_matched_set = set(tmp_df.left_term)
                 self.right_harmonised_matched_set = set(tmp_df.match)
             elif match_type == "fuzzy":
@@ -95,7 +107,7 @@ class pairwise_term_matches:
                 sys.exit()
 
         self.left_confident_matched_set = set(self.left_exact_matched_set)
-        self.left_confident_matched_set.union(self.left_harmonised_matched_set )
+        self.left_confident_matched_set = self.left_confident_matched_set.union(self.left_harmonised_matched_set)
         self.set_right_sets()
 
     def get_complete_matches_df(self):
@@ -103,17 +115,37 @@ class pairwise_term_matches:
 
         :return: the dataframe of all the matches (and none matches)
         """
-        return (self.comparison_df)
+        return self.comparison_df
 
+    def get_medium_confidence_dict(self):
+        """
+         dictionary of the form: left_term: [right_term, fuzzy_score]
+
+          tmp_dict: {'Depth': ['depth', 100],
+               'GAL_sample_id': ['gap sample id', 92],
+               'antiviral treatment': ['antiviral treatment agent', 95],
+               'date of birth': ['birth date', 95],
+               'date of death': ['death date', 95],
+        :return:
+        """
+        ic()
+        df = self.get_harmonised_and_exact_match_df()
+        df = df.sort_values(by=['fuzzy_score'], ascending=False)
+        get_medium_confidence_dict = df[['left_term', 'match', 'fuzzy_score']].set_index('left_term').T.to_dict('list')
+        return get_medium_confidence_dict
+
+
+        sys.exit()
 
     def get_harmonised_and_exact_match_df(self):
         """
         filters the df to just provide the confident match rows, N.B. may still have some errors
         :return: harmonised_df
         """
+        ic("--------------------------------------------------------------------")
         ic()
 
-        if hasattr(self,'harmonised_df'):
+        if hasattr(self, 'harmonised_df') and len(self.harmonised_df) > 0:
             return self.harmonised_df
 
         df = self.comparison_df
@@ -123,7 +155,7 @@ class pairwise_term_matches:
         self.harmonised_df = self.assess_likely_map_accuracy(harmonised_df)
 
         self.vlow_confidence_mapping_df = df.query('fuzzy_score <= @fuzzy_cut_off & match_type != "none"')
-        #print(self.vlow_confidence_mapping_df.head(30).to_markdown())
+        # print(self.vlow_confidence_mapping_df.head(30).to_markdown())
         ic(len(self.harmonised_df))
         return self.harmonised_df
 
@@ -132,12 +164,12 @@ class pairwise_term_matches:
             self.left_vlow_confident_matched_list = self.vlow_confidence_mapping_df['left_term'].to_list()
             self.right_vlow_confident_matched_list = self.vlow_confidence_mapping_df['match'].to_list()
 
-        if hasattr(self,'vlow_confidence_mapping_df'):
+        if hasattr(self, 'vlow_confidence_mapping_df'):
             do_counts()
             return self.vlow_confidence_mapping_df
 
-        self.get_harmonised_and_exact_match_df()   #runs this, it populates the df needed to.
-        #means don;t have the fizzy cut off in 2 places
+        self.get_harmonised_and_exact_match_df()   # runs this, it populates the df needed to.
+        # means don;t have the fizzy cut off in 2 places
         do_counts()
 
         return self.vlow_confidence_mapping_df
@@ -161,28 +193,25 @@ class pairwise_term_matches:
         self.left_high_confident_matched_list = filtered_df['left_term'].to_list()
         self.right_high_confident_matched_list = filtered_df['match'].to_list()
 
-
         filtered_df = assessed_df.query('likely_map_accuracy <= 0.7 & likely_map_accuracy > 0.5')
-        ic(filtered_df)
+        # ic(filtered_df)
         self.left_medium_confident_matched_list = filtered_df['left_term'].to_list()
         self.right_medium_confident_matched_list = filtered_df['match'].to_list()
 
         filtered_df = assessed_df.query('likely_map_accuracy <= 0.5 & likely_map_accuracy >= 0')
         self.left_low_confident_matched_list = filtered_df['left_term'].to_list()
-        ic(self.left_low_confident_matched_list)
+        # ic(self.left_low_confident_matched_list)
         self.right_low_confident_matched_list = filtered_df['match'].to_list()
 
-        ic(self.left_high_confident_matched_list)
-        # ic(self.right_high_confident_matched_list)
-        ic(self.left_medium_confident_matched_list)
-        # ic(self.right_medium_confident_matched_list)
-        ic(self.left_low_confident_matched_list)
-        # ic(self.right_low_confident_matched_list)
+        # ic(self.left_high_confident_matched_list)
+        # # ic(self.right_high_confident_matched_list)
+        # ic(self.left_medium_confident_matched_list)
+        # # ic(self.right_medium_confident_matched_list)
+        # ic(self.left_low_confident_matched_list)
+        # # ic(self.right_low_confident_matched_list)
 
         ic(assessed_df.query('left_term == "total nitrogen method"'))
-        #sys.exit()
-
-
+        # sys.exit()
 
     def assess_likely_map_accuracy(self, df):
         """
@@ -194,8 +223,6 @@ class pairwise_term_matches:
         :return:
         """
         def assess_mapping(row):
-
-
             if row['match_type'] == 'none':
                 return pd.Series([0, "no match"])
             elif row['match_type'] == 'exact':
@@ -214,7 +241,7 @@ class pairwise_term_matches:
             clean_right = clean_term(row['match'])
             clean_left_set = set(clean_left.split('_'))
             clean_right_set = set(clean_right.split('_'))
-            #print(f"cleft={clean_left} cright={clean_right}")
+            # print(f"cleft={clean_left} cright={clean_right}")
             if clean_left == clean_right:
                 return pd.Series([1, "exact after simple harmonisation"])
             elif not row['match_term_duplicated'] and (clean_right in clean_left):
@@ -233,14 +260,10 @@ class pairwise_term_matches:
                 return pd.Series([0.3, "left and right two words apart"])
             else:
                 return pd.Series([0, "doubtful"])
-
         assessed_df = df.copy()
-
         assessed_df[['likely_map_accuracy', 'map_accuracy_des']] = assessed_df.apply(assess_mapping, axis = 1)
-        #assessed_df = assessed_df.query('likely_map_accuracy < 1')
-        #print(assessed_df.to_markdown(index = False))
-
-
+        # assessed_df = assessed_df.query('likely_map_accuracy < 1')
+        # print(assessed_df.to_markdown(index = False))
         self.process_assessments(assessed_df)
 
         return assessed_df
@@ -279,22 +302,20 @@ class pairwise_term_matches:
         # ic(len(self.right_fuzzy_matched_set))
         self.any_right_matched_set = set(self.right_exact_matched_set)
         self.any_right_matched_set.update(self.right_harmonised_matched_set)
-        #ic(len(self.any_right_matched_set))
+        # ic(len(self.any_right_matched_set))
 
         self.right_not_matched_set = set(self.right_term_list)
-        #ic(len(self.right_not_matched_set))
+        # ic(len(self.right_not_matched_set))
         self.right_not_matched_set.difference_update(self.any_right_matched_set)
-        #ic(len(self.right_not_matched_set))
+        # ic(len(self.right_not_matched_set))
         self.right_confident_matched_set = set(self.right_exact_matched_set)
         self.right_confident_matched_set.union(self.right_harmonised_matched_set)
-
 
     def get_right_not_matched_list(self):
         return sorted(self.right_not_matched_set)
 
     def get_any_left_match_list(self):
         return sorted(self.any_right_matched_set)
-
 
     def get_clean_hash(self):
         clean_hash = {}
@@ -312,7 +333,6 @@ class pairwise_term_matches:
     def put_left_obj(self, left_obj):
         self.left_obj = left_obj
 
-
     def get_right_no_match_freq_dict(self):
         """
         yes suboptimal as need to have a right obj!
@@ -328,7 +348,7 @@ class pairwise_term_matches:
             if freq not in right_no_match_freq["by_freq"]:
                 right_no_match_freq["by_freq"][freq] = []
             right_no_match_freq["by_freq"][freq].append(right)
-        return(right_no_match_freq)
+        return right_no_match_freq
 
     def print_stats(self):
         stats = ""
@@ -370,15 +390,15 @@ def compareAllTerms(left_list, right_list):
     :param right_list:
     :return: df: #['left_term', 'match_type:exact|harmonised|fuzzy|none', 'match', 'fuzzy_score', 'match_term_duplicated:boolean']
     """
-    #make sure that the lists are unique and sorted, note the slight name change, in case we need the original list again
+    # make sure that the lists are unique and sorted, note the slight name change, in case we need the original list again
     left_term_set = set(left_list)
     right_term_set = set(right_list)
     left_term_list = sorted(left_term_set)
     right_term_list = sorted(right_term_set)
     # ic(f"left len={len(left_term_list)} right len={len(right_term_list)}")
-
     left_clean_dict, left_raw_dict = generate_clean_dict(left_term_list)
     right_clean_dict, right_raw_dict = generate_clean_dict(right_term_list)
+
 
     left_clean_set = set(left_clean_dict.keys())
     right_clean_set = set(right_clean_dict.keys())
@@ -416,8 +436,6 @@ def compareAllTerms(left_list, right_list):
     # ic(dup_set)
     df['match_term_duplicated'] = df['match'].apply(lambda x: True if x in dup_set and x != "" else False)
     # ic(df.head(10))
-    # print(df.to_markdown(index=False))
+    #print(df.to_markdown(index=False))
 
     return df
-
-
