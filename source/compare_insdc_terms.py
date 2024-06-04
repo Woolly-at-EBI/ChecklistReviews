@@ -195,18 +195,26 @@ def get_fuzzy_matches(left_name, right_name, left_list, right_list):
         return pairwise_obj.get_medium_confidence_dict()
 
 def run_process_fuzzy_matches(df_ena, df_ena_working, left_name, right_name, left_list, right_list):
+        logger.info(f"run_process_fuzzy_matches {left_name} {right_name}")
         fuzzy_medium_confidence_dict = get_fuzzy_matches(left_name, right_name, left_list, right_list)
-        logger.info(fuzzy_medium_confidence_dict)
+        logger.debug(fuzzy_medium_confidence_dict)
         ena_long_name_set = set(df_ena['CHECKLIST_FIELD_NAME'])
-        left_terms_matched_set = set()
+        left_terms_matched_list = []
+        right_terms_matched_list = []
+        left_terms_matched_already_set = set()
         for left_term in fuzzy_medium_confidence_dict.keys():
             right_term, fuzzy_score = fuzzy_medium_confidence_dict[left_term]
-            logger.info(f"Fuzzy match for -->{left_term}<-- -->{right_term}<-- with {fuzzy_score}")
+            logger.debug(f"Fuzzy match for -->{left_term}<-- -->{right_term}<-- with {fuzzy_score}")
             if right_term in ena_long_name_set:
-                logger.info(f"\tright_term is already in ENA list: {right_term}")
+                logger.debug(f"\tright_term is already in ENA list: {right_term}")
+                left_terms_matched_already_set.add(right_term)
             else:
-                left_terms_matched_set.add(left_term)
-        return left_terms_matched_set
+                left_terms_matched_list.append(left_term)
+                right_terms_matched_list.append(right_term)
+        logger.info(f"total left_terms_matched_set len = {len(left_terms_matched_already_set)} all= {left_terms_matched_list}")
+        logger.info(f"\tIgnoring len={len(left_terms_matched_already_set)}  left_terms_matched_set already known {left_terms_matched_already_set}")
+
+        return left_terms_matched_list, right_terms_matched_list
 
 def update_mapping_dict(ena_term_matches_dict, left_list, right_list, note_list):
     logging.info(f"before ena_term_matches_dict len {len(ena_term_matches_dict)} and input is of len={len(left_list)}")
@@ -322,26 +330,13 @@ def process_ENA_terms_to_map(data_files_dict):
             sys.exit(-1)
         logger.info(sorted_names)
         for name in sorted_names:
-           logger.info(f"-->{name}<--")
+           logger.debug(f"-->{name}<--")
            if name == '':
                continue
            elif name in ncbi_multi_name_dict[name_key]:
-               logger.info(f"-->name<--")
+               logger.debug(f"-->name<--")
                ncbi_harmonised_list.append(name)
            else:
-               all_values_list = list(set(ncbi_multi_name_dict[name_key]))
-               all_values_string = '<-->'.join(str(val) for val in all_values_list)
-               matches = re.findall(name, all_values_string, re.IGNORECASE)
-               logger.info(f"1st matches-->{matches}")
-               matches = re.findall(r'geographic location \(country and/or sea[^),]*\)', all_values_string, re.IGNORECASE)
-               logger.info(f"2nd matches-->{matches}")
-
-               test_name = 'geographic location (country and/or sea)'
-               if test_name in all_values_list:
-                   logger.info("YIPPP")
-               else:
-                   logger.info("WTF")
-
                logger.error(f"ERROR: get_ncbi_harmonised_mapped_list  -->{name}<-- not present in name_key={name_key}, contact Peter and get the code fixed")
                logger.debug(ncbi_multi_name_dict[name_key])
                # ERROR: get_ncbi_harmonised_mapped_list  -->geographic location (country and/or sea)<-- not present in name_key=synonym, contact Peter and get the code fixed
@@ -372,6 +367,7 @@ def process_ENA_terms_to_map(data_files_dict):
     def print_simple_dict(ena_term_matches_dict, filter_field):
         df = pd.DataFrame.from_dict(ena_term_matches_dict, orient='index')
 
+        logger.info(f"print_simple_dict before, note counts {df['note'].value_counts()}")
         if len(filter_field) <= 2:
            logger.info(f"print_simple_dict\n{df.head(5).to_string()}")
         else:
@@ -379,7 +375,6 @@ def process_ENA_terms_to_map(data_files_dict):
             df = df.query('note == @filter_field')
             logger.info(f"\tafter filter df= {len(df)}")
             logger.info(f"print_simple_dict with filter_field -->{filter_field}<--\n{df.head(5).to_string()}")
-
 
 
     ena_long_name_set = set(df_ena['CHECKLIST_FIELD_NAME'])
@@ -466,7 +461,7 @@ def process_ENA_terms_to_map(data_files_dict):
     ena_fieldnames_ncbi_syn_by_checklist_name_list = get_name_centric_matches('ena_synonym', ena_synonym_dict, ena_syn_ncbi_syn_list)
     logger.info(f"++++++++++ena_fieldnames_ncbi_syn_by_checklist_name_set len={len(ena_fieldnames_ncbi_syn_by_checklist_name_list)} examples {ena_fieldnames_ncbi_syn_by_checklist_name_list[0:3]}")
     note_text = 'exact_match_ena_syn_ncbi_syns'
-    note_list = create_note4all_list('note_text', len(ena_fieldnames_ncbi_syn_by_checklist_name_list))
+    note_list = create_note4all_list(note_text, len(ena_fieldnames_ncbi_syn_by_checklist_name_list))
     ena_term_matches_dict = update_mapping_dict(ena_term_matches_dict, ena_fieldnames_ncbi_syn_by_checklist_name_list,
                                                 ncbi_harmonised_name_set, note_list)
     print_simple_dict(ena_term_matches_dict, note_text)
@@ -475,24 +470,43 @@ def process_ENA_terms_to_map(data_files_dict):
 
     ena_long_name_set = set(df_ena_working['CHECKLIST_FIELD_NAME'])
     logger.info(f"ena_long_name_set len = {len(ena_long_name_set)}")
-
     logger.info(f"ena_term_matches_dict keys len------{len(ena_term_matches_dict.keys())}")
 
-    sys.exit()
 
     logger.info("------------Fuzzy matching with 'NCBI_name'")
-    ena_terms_matched_set = run_process_fuzzy_matches(df_ena, df_ena_working,'ENA_long_name', 'ncbi_short_name', list(ena_long_name_set), list(ncbi_short_name_set))
-    df_ena_working = remove_ena_rows_now_matched(df_ena_working,'CHECKLIST_FIELD_NAME', list(ena_terms_matched_set))
+    ena_terms_matched_sorted, ncbi_name_matched_sorted = run_process_fuzzy_matches(df_ena, df_ena_working,'ENA_long_name', 'ncbi_short_name', list(ena_long_name_set), list(ncbi_short_name_set))
+    df_ena_working = remove_ena_rows_now_matched(df_ena_working,'CHECKLIST_FIELD_NAME', ena_terms_matched_sorted)
     logger.info(f"df_ena_working len = {len(df_ena_working)}")
+    ncbi_harmonised_name_list = get_ncbi_harmonised_mapped_list(ncbi_multi_name_dict, 'name', ncbi_name_matched_sorted)
+    note_text = 'fuzzy_match_ena_ncbi_name'
+    note_list = create_note4all_list(note_text, len(ena_terms_matched_sorted))
+    logger.info(f"++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    ena_term_matches_dict = update_mapping_dict(ena_term_matches_dict, ena_terms_matched_sorted,
+                                                ncbi_harmonised_name_list, note_list)
+    print_simple_dict(ena_term_matches_dict, note_text)
+
 
     logger.info("------------Fuzzy matching with 'NCBI_harmonised_name'")
     ena_long_name_set = set(df_ena_working['CHECKLIST_FIELD_NAME'])
-    ena_terms_matched_set = run_process_fuzzy_matches(df_ena, df_ena_working,'ENA_long_name', 'NCBI_harmonised_name', list(ena_long_name_set), list(ncbi_harmonised_name_set))
-    df_ena_working = remove_ena_rows_now_matched(df_ena_working, 'CHECKLIST_FIELD_NAME', list(ena_terms_matched_set))
-    logger.info(f"df_ena_working len = {len(df_ena_working)}")
+    ena_terms_matched_sorted, ncbi_harmonised_name_matched_sorted = run_process_fuzzy_matches(df_ena, df_ena_working,'ENA_long_name', 'NCBI_harmonised_name', list(ena_long_name_set), list(ncbi_short_name_set))
 
+    if len(ena_terms_matched_sorted) > 0:
+        df_ena_working = remove_ena_rows_now_matched(df_ena_working, 'CHECKLIST_FIELD_NAME', ena_terms_matched_sorted)
+        logger.info(f"df_ena_working len = {len(df_ena_working)}")
+        note_text = 'fuzzy_match_ena_ncbi_harmonised_name'
+        note_list = create_note4all_list(note_text, len(ena_terms_matched_sorted))
+        ena_term_matches_dict = update_mapping_dict(ena_term_matches_dict, ena_terms_matched_sorted,
+                                                ncbi_harmonised_name_matched_sorted, note_list)
+        print_simple_dict(ena_term_matches_dict, note_text)
+    else:
+        logger.info(f"No valid extra fuzzy hits, so skipping")
+        print_simple_dict(ena_term_matches_dict, '')
+
+    logger.info(f"phew got process_ENA_terms_to_map function pretty much working")
+    #df_ena_working
     sys.exit()
 
+    data_files_dict['ena_term_matches_dict'] = ena_term_matches_dict
     return data_files_dict
 
 
