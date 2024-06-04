@@ -62,6 +62,17 @@ def get_attribute_dfs(combined_xlsx_file, data_files_dict):
     return data_files_dict
 
 
+def print_simple_dict(ena_term_matches_dict, filter_field):
+        df = pd.DataFrame.from_dict(ena_term_matches_dict, orient='index')
+
+        logger.info(f"print_simple_dict before, note counts {df['note'].value_counts()}")
+        if len(filter_field) <= 2:
+           logger.info(f"print_simple_dict\n{df.head(5).to_string()}")
+        else:
+            logger.info(f"\tbefore filter df= {len(df)} filter_field -->{filter_field}<--")
+            df = df.query('note == @filter_field')
+            logger.info(f"\tafter filter df= {len(df)}")
+            logger.info(f"print_simple_dict with filter_field -->{filter_field}<--\n{df.head(5).to_string()}")
 
 def populate_input_data_structure():
     """
@@ -86,6 +97,7 @@ def add_in_easy_mappings(df, source_mapped_name, target_mapped_name, mapping_set
 
     # taking one off for the empty sets
     logging.info(f"now {target_mapped_name} has this many mapped in harmonised {len(set(df[target_mapped_name].to_list())) - 1 }")
+    logging.info(f"now {source_mapped_name} has this many mapped in harmonised {len(set(df[source_mapped_name].to_list())) - 1}")
 
     return df
 
@@ -112,6 +124,7 @@ def add_in_site_specific_names(mapped_df, site_only_set, site_df, site_df_name2i
     """
     # print("=========================================================")
     logger.info(f"add_in_site_specific_names site_df_mapped_name={site_df_mapped_name}<---,site_df_name2index={site_df_name2index}<---")
+    logging.info(f"before  {site_df_mapped_name} has this many mapped in harmonised {len(set(mapped_df[site_df_mapped_name].to_list())) - 1 }")
     site_df['my_index'] = site_df[site_df_name2index]
     site_df = site_df.set_index('my_index')
     site_only_list = list(site_only_set)
@@ -129,6 +142,11 @@ def add_in_site_specific_names(mapped_df, site_only_set, site_df, site_df_name2i
     mapped_df = pd.concat([mapped_df, tmp_df], join='outer').reset_index()
     print_mapped_3_head(mapped_df)
     logger.info(mapped_df.columns)
+
+    logging.info(f"after {site_df_mapped_name} has this many mapped in harmonised {len(set(mapped_df[site_df_mapped_name].to_list())) - 1 }")
+    logging.info(f"\tlen mapped_df: {len(mapped_df)}")
+
+
     return mapped_df
 
 def generate_syn_dict(df_ena_working,synonym_col,field_name_col):
@@ -289,6 +307,44 @@ def get_name_centric_matches(match_type, synonym_dict, syn_list):
         #logger.info(f"checkfield_names len {len(checkfield_names)}")
     return checkfield_names
 
+
+def add_ena_notes(data_files_dict):
+    logger.info("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    logger.info(f"add_ena_notes keys={data_files_dict.keys()}")
+    mapped_df = data_files_dict['mapped_df']
+    ena_term_matches_dict = data_files_dict['ena_term_matches_dict']
+    logger.info(f"mapped_df keys={mapped_df.keys()}")
+
+    #logger.info(f"ena_term_matches_dict keys={ena_term_matches_dict.keys()}")
+    #print_simple_dict(ena_term_matches_dict,'')
+    df_ena_term_matches = pd.DataFrame.from_dict(ena_term_matches_dict, orient='index')
+    logger.info(f"df_ena_term_matches notes={df_ena_term_matches['note'].value_counts()}")
+    df_ena_term_matches['ENA_mapped_name'] = df_ena_term_matches.index
+    df_2_map = df_ena_term_matches[['ENA_mapped_name', 'match', 'note']]
+    df_2_map = df_2_map.rename(columns={'match': 'NCBI_mapped_name', 'note': 'EBI_mapped_note'})
+    logger.info(f"len(df_ena_term_matches)={len(df_2_map)}")
+    ENA_NCBI_mapped_names = set(df_2_map['NCBI_mapped_name'].to_list())
+    logger.info(f"NCBI_mapped_names total={len(ENA_NCBI_mapped_names)}")
+    logger.info(f"df_2_map notes={df_2_map.head(3)}")
+
+    MAPPED_DF_NCBI_mapped_names = set(mapped_df['NCBI_mapped_name'].to_list())
+    logger.info(f"MAPPED_DF_NCBI_mapped_names total={len(MAPPED_DF_NCBI_mapped_names)}")
+    NCBI_mapped_names_intersection = MAPPED_DF_NCBI_mapped_names.intersection(ENA_NCBI_mapped_names)
+    logger.info(f"MAPPED_DF_NCBI_mapped_names intersection total={len(NCBI_mapped_names_intersection)}")
+
+    mapped_df = mapped_df.drop(columns=['ENA_mapped_name'])
+    mapped_df = pd.merge(mapped_df, df_2_map, how="left", on='NCBI_mapped_name')
+    mapped_df = mapped_df.fillna('')
+    # logger.info(f"mapped_df =\n{mapped_df.head(10).to_string(index=False)}")
+    logger.info(mapped_df.columns)
+    mapped_df_slim = mapped_df[['ENA_mapped_name', 'NCBI_mapped_name', 'DDBJ_mapped_name']]
+    logger.info(f"mapped_df =\n{mapped_df_slim.head(10).to_string(index = False)}")
+    data_files_dict['mapped_df'] = mapped_df
+
+    generate_stats(data_files_dict)
+    sys.exit()
+
+
 def process_ENA_terms_to_map(data_files_dict):
     """
     map to the NCBI_harmonized
@@ -364,17 +420,7 @@ def process_ENA_terms_to_map(data_files_dict):
         logger.info(f"\tafter updated df_ena_working len {len(df_ena_working)}")
         return df_ena_working
 
-    def print_simple_dict(ena_term_matches_dict, filter_field):
-        df = pd.DataFrame.from_dict(ena_term_matches_dict, orient='index')
 
-        logger.info(f"print_simple_dict before, note counts {df['note'].value_counts()}")
-        if len(filter_field) <= 2:
-           logger.info(f"print_simple_dict\n{df.head(5).to_string()}")
-        else:
-            logger.info(f"\tbefore filter df= {len(df)} filter_field -->{filter_field}<--")
-            df = df.query('note == @filter_field')
-            logger.info(f"\tafter filter df= {len(df)}")
-            logger.info(f"print_simple_dict with filter_field -->{filter_field}<--\n{df.head(5).to_string()}")
 
 
     ena_long_name_set = set(df_ena['CHECKLIST_FIELD_NAME'])
@@ -503,10 +549,10 @@ def process_ENA_terms_to_map(data_files_dict):
         print_simple_dict(ena_term_matches_dict, '')
 
     logger.info(f"phew got process_ENA_terms_to_map function pretty much working")
-    #df_ena_working
-    sys.exit()
-
     data_files_dict['ena_term_matches_dict'] = ena_term_matches_dict
+
+    add_ena_notes(data_files_dict)
+
     return data_files_dict
 
 
@@ -540,6 +586,8 @@ def process_NCBI_DDBJ(data_files_dict):
     logging.info(data_files_dict['mapped_df'].columns)
     mapped_df = data_files_dict['mapped_df']
     logger.info(mapped_df['DDBJ_mapped_note'].value_counts())
+    generate_stats(data_files_dict)
+
 
     return data_files_dict
 
@@ -548,6 +596,12 @@ def print_mapped_3_head(mapped_df):
     logger.info("\n" + tmp_mapped_df.head().to_markdown(index=False))
 
 def map_field_names(data_files_dict):
+    """
+    using the NCBI as the "master" and building from that, as the DDJB is very similar
+    data_files_dict['mapped_df'] = mapped_df    # this is the core!
+    :param data_files_dict:
+    :return:
+    """
     logging.warning(msg = "************ map_field_names *************")
     mapped_df = data_files_dict['NCBI']['fields_df'].copy()
     logger.info(mapped_df.columns)
@@ -555,7 +609,7 @@ def map_field_names(data_files_dict):
     mapped_df.rename(columns={'Name': 'NCBI:Name', 'Harmonized name': 'NCBI:Harmonized name', 'Synonyms': 'NCBI:Synonyms',
                               'Description': 'NCBI:Description', 'Rule': 'NCBI:Rule',
                               'Format': 'NCBI:Format'}, inplace=True)
-    mapped_df['NCBI_mapped_name'] = mapped_df['NCBI:Harmonized name']
+    mapped_df['NCBI_mapped_name'] = mapped_df['NCBI:Harmonized name']  # populating NCBI_mapped_name
     mapped_df['ENA_mapped_name'] = ""
     mapped_df['DDBJ_mapped_name'] = ""
     mapped_df = mapped_df[['DDBJ_mapped_name', 'ENA_mapped_name', 'NCBI_mapped_name',
@@ -576,6 +630,13 @@ def map_field_names(data_files_dict):
 
 
 def add_mapping_corrections(data_files_dict, INSDC_site):
+    """
+    This allows for not automated curations
+    Currently this is fairly static, it needs one to manually create a data structure here. It could be read in.
+    :param data_files_dict:
+    :param INSDC_site:
+    :return: data_files_dict
+    """
     logging.info(msg="add_mapping_corrections")
 
     logging.info(data_files_dict.keys())
@@ -588,9 +649,6 @@ def add_mapping_corrections(data_files_dict, INSDC_site):
                        'time': {'mapping_note': ddbj_omics_note}
                        }
                   }
-
-
-
     logger.info(data_files_dict[INSDC_site].keys())
     logger.info(notes_dict[INSDC_site].keys())
     logger.info(msg=notes_dict)
@@ -608,26 +666,30 @@ def add_mapping_corrections(data_files_dict, INSDC_site):
            count = count + 1
 
     data_files_dict['mapped_df'] = df
-
     return data_files_dict
+
+
+def get_INSDC_site_names():
+    return sorted(['NCBI', 'ENA', 'DDBJ'])
 
 def generate_stats(data_files_dict):
     print("++++++++++++++ Generate Statistics ++++++++++++++")
-    logger.info(type(data_files_dict))
     logger.info(data_files_dict.keys())
     mapped_df = data_files_dict['mapped_df']
     print(mapped_df.columns)
+    mapped_df = mapped_df.fillna('')
+    sites = get_INSDC_site_names()
+
     total_combined_entries = mapped_df.shape[0]
     print(f"total_combined_entries {total_combined_entries}")
-    total_ncbi_entries = mapped_df.loc[~mapped_df['NCBI_mapped_name'].isna()].shape[0]
-    print(f"total_ncbi_entries {total_ncbi_entries}")
-    total_ddbj_entries = mapped_df.loc[~mapped_df['DDBJ_mapped_name'].isna()].shape[0]
-    print(f"total_ddbj_entries {total_ddbj_entries}")
-    total_ena_entries = mapped_df.loc[~mapped_df['ENA_mapped_name'].isna()].shape[0]
-    print(f"total_ena_entries {total_ena_entries}")
-    slim_mapped_df = mapped_df[['ENA_mapped_name', 'NCBI_mapped_name', 'DDBJ_mapped_name']]
-    print(slim_mapped_df.query('ENA_mapped_name != ""'))
-    print(slim_mapped_df.query('ENA_mapped_name != ""').columns)
+    for site in sites:
+        mapped_name = site + "_mapped_name"
+        total_site_entries = mapped_df.loc[mapped_df[mapped_name] != ""].shape[0]
+        print(f"total {site} entries {total_site_entries}")
+
+    #df_tmp_ena = mapped_df['ENA_mapped_name']
+    # slim_mapped_df = mapped_df[['ENA_mapped_name', 'NCBI_mapped_name', 'DDBJ_mapped_name']]
+
 
 def main():
     logger.warning(msg='in main (should be yellow)')
