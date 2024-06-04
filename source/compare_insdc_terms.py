@@ -131,18 +131,19 @@ def add_in_site_specific_names(mapped_df, site_only_set, site_df, site_df_name2i
     return mapped_df
 
 def generate_syn_dict(df_ena_working,synonym_col,field_name_col):
-        """ generate_syn_dict
+        """
+        generate simple syn dict, with the keys being the synonyms and ENA field value being the value
 
         :param df_ena_working:
         :return: ena_synonym_dict
         """
-        logger.info(f"df_ena_working len {len(df_ena_working)}")
+        # logger.info(f"df_ena_working len {len(df_ena_working)}")
         ena_synonym_dict = dict(zip(df_ena_working[synonym_col], df_ena_working[field_name_col]))
-        logger.info(f"ena_synonym_dict len {ena_synonym_dict}")
+        # logger.info(f"ena_synonym_dict len {ena_synonym_dict}")
         ena_synonym_dict.pop('\n', None)
 
         ena_synonym_set = set(ena_synonym_dict.keys())
-        logger.info(f"ena_synonym_set len {len(ena_synonym_set)}")
+        # logger.info(f"ena_synonym_set len {len(ena_synonym_set)}")
 
         clean_syn_dict = {}
         #deal with multiple synonyms i.e. separated by a ;
@@ -154,23 +155,24 @@ def generate_syn_dict(df_ena_working,synonym_col,field_name_col):
                     clean_syn_dict[individual_ena_synonym] = ena_synonym_dict[ena_synonym]
             else:
                 clean_syn_dict[ena_synonym] = ena_synonym_dict[ena_synonym]
-        logger.info(f"ena_synonym_dict len {len(clean_syn_dict)}")
+        # logger.info(f"ena_synonym_dict len {len(clean_syn_dict)}")
         return clean_syn_dict
-def get_name_centric_matches(synonym2fieldname_dict, synonym_hit_set):
+def ena_synonym2fieldname_dict(synonym2fieldname_dict, synonym_hit_list):
     """
-            # need to add ENA_mapping_note: "mapped_on_synonyms"
+         is for ENA!
+            gives it back in synonym_hit_list order
     :param synonym2fieldname_dict:
-    :param synonym_hit_set:
-    :return:
+    :param synonym_hit_list:
+    :return: checklist_field_name_list
     """
-    fieldname_syn_intersection_set = set()
-    for ena_syn in synonym_hit_set:
+    checklist_field_name_list = []
+    for ena_syn in synonym_hit_list:
         if ena_syn in synonym2fieldname_dict:
             # logger.info(f"-->{ena_syn}<-- matching-->{synonym2fieldname_dict[ena_syn]}<--")
-            fieldname_syn_intersection_set.add(synonym2fieldname_dict[ena_syn])
-    logger.info(f"fieldname_syn_intersection_set len = {len(fieldname_syn_intersection_set)}")
+            checklist_field_name_list.append(synonym2fieldname_dict[ena_syn])
+    logger.info(f"fieldname_syn_intersection_list len = {len(fieldname_syn_intersection_list)}")
 
-    return fieldname_syn_intersection_set
+    return checklist_field_name_list
 
 def clean_ncbi_syn(ncbi_synonym_set):
     logging.debug(ncbi_synonym_set)
@@ -205,73 +207,262 @@ def run_process_fuzzy_matches(df_ena, df_ena_working, left_name, right_name, lef
                 left_terms_matched_set.add(left_term)
         return left_terms_matched_set
 
+def update_mapping_dict(ena_term_matches_dict, left_list, right_list, note_list):
+    logging.info(f"before ena_term_matches_dict len {len(ena_term_matches_dict)} and input is of len={len(left_list)}")
+    list_len = len(left_list)
+    for i in range(0, list_len - 1):
+        ena_term_matches_dict[left_list[i]] = {"match": right_list[i], "note": note_list[i] }
+
+    logging.info(f"after ena_term_matches_dict len {len(ena_term_matches_dict)}")
+    return ena_term_matches_dict
+
+def create_note4all_list(note, length):
+    note_list = []
+    for i in range(length):
+        note_list.append(note)
+    return note_list
+
+def make_ncbi_multiname_dict(df_ncbi):
+    """
+    make a dictionary keyed of both harmonised or long name and synonyms, all link to harmonised
+    keys = {'harmonised_name' , 'name', 'synonym'}
+    for synonyms does both the single and mult
+    :param df_ncbi:
+    :return:
+    """
+    ncbi_multi_name_dict = {}
+    harmonised2long = dict(zip(df_ncbi['Harmonized name'], df_ncbi['Name']))
+    long2harmonised = dict(zip(df_ncbi['Name'], df_ncbi['Harmonized name']))
+    tmp_syns2harmonised = dict(zip(df_ncbi['Synonyms'], df_ncbi['Harmonized name'])) # n.b. is the multi as well the singular
+    syns2harmonised = tmp_syns2harmonised.copy()
+    for orig_syns in tmp_syns2harmonised:
+        syns = str(orig_syns)
+        for syn in syns.split(','):
+            syns2harmonised[syn] = syns2harmonised[orig_syns]
+
+    ncbi_multi_name_dict = {'harmonised_name': harmonised2long, 'name': long2harmonised, 'synonym': syns2harmonised}
+    ic(ncbi_multi_name_dict.keys())
+    return ncbi_multi_name_dict
+
+def get_name_centric_matches(match_type, synonym_dict, syn_list):
+    """
+    Expecting the direct value of synonym_dict to be the checklist_field_name or the NCBI harmonised name
+    :param synonym_dict:
+    :param syn_list:
+    :return:
+    """
+
+    if match_type == 'ena_synonym':
+
+        #logger.info(f"syn_list len {len(syn_list)}")
+        lc_synonym_dict = {}
+        for syn in synonym_dict:
+            lc_syn = str(syn).lower
+            lc_synonym_dict[lc_syn] = synonym_dict[syn]
+
+        checkfield_names = []
+        for synonym in syn_list:
+            if synonym_dict.get(synonym) is not None:
+               checkfield_names.append(synonym_dict[synonym])
+            else:
+                lc_synonym = str(synonym).lower()
+                #logger.info(f"lc_synonym={lc_synonym} ")
+                if lc_synonym_dict.get(lc_synonym) is not None:
+                    checkfield_names.append(lc_synonym_dict[lc_synonym])
+                else:
+                    logger.warning(f"synonym {synonym} not in synonym_dict")
+        #logger.info(f"checkfield_names len {len(checkfield_names)}")
+    return checkfield_names
+
 def process_ENA_terms_to_map(data_files_dict):
+    """
+    map to the NCBI_harmonized
+    :param data_files_dict:
+    :return:
+    """
     logging.info(data_files_dict.keys())
     logger.info(f"process_ENA_terms_to_map ")
+    ena_term_matches_dict = {} # format  { CHECKLIST_FIELD_NAME: { match: right_term, ena_mapping_note: ""} #
     df_ncbi = data_files_dict['NCBI']['fields_df']
+
+    ncbi_multi_name_dict = make_ncbi_multiname_dict(df_ncbi)
+    logger.info(f"ncbi_multi_name_dict keys {ncbi_multi_name_dict.keys()}")
+
     logging.info(df_ncbi.head())
     logger.info(data_files_dict['ENA'].keys())
     df_ena = data_files_dict['ENA']['fields_df']
+    df_ena_working = df_ena.copy()
     logging.info(df_ena.head())
     logging.info(df_ena.columns)
     #harmonised name
 
+    def get_df_lists(df_left, left_set, left_col, right_col):
+        """
+        need to them back in the right order
+        :param df_left:
+        :param left_set:
+        :param left_col:
+        :param right_col:
+        :return:
+        """
+        logger.info("WTF")
+
+    def get_ncbi_harmonised_mapped_list(ncbi_multi_name_dict, name_key, sorted_names):
+        ncbi_harmonised_list = []
+        if name_key not in ncbi_multi_name_dict:
+            logger.error(
+                f"ERROR: get_ncbi_harmonised_mapped_list  key-->{name_key}<-- not present ncbi_multi_name_dict, contact Peter and get the code fixed")
+            sys.exit(-1)
+        for name in sorted_names:
+           if name in ncbi_multi_name_dict[name_key]:
+               logger.debug(name)
+               ncbi_harmonised_list.append(name)
+           else:
+               logger.error(f"ERROR: get_ncbi_harmonised_mapped_list  -->{name}<-- not present in name_key={name_key}, contact Peter and get the code fixed")
+               sys.exit(-1)
+        return ncbi_harmonised_list
+
+    def remove_ena_rows_now_matched(df_ena_working, ena_field, ena_field_list):
+        """
+        ena_field for example CHECKLIST_FIELD_NAME
+        :param df_ena_working:
+        :param ena_field_list:
+        :return:
+        """
+        logger.info(f"inside remove_ena_rows_now_matched for {ena_field} and list of len= {len(ena_field_list)} examples: {ena_field_list[0:5]}")
+        logger.debug(df_ena_working.head(2))
+        logger.debug(f"df_ena_working[ena_field].head(5) = \n{df_ena_working[ena_field].head(3)}")
+        if ena_field == 'CHECKLIST_FIELD_NAME':
+            df_ena_working = df_ena_working.query('CHECKLIST_FIELD_NAME not in @ena_field_list')
+        elif ena_field == 'SHORT_FIELD_NAME_FROM_MIXS_LINKML':
+            df_ena_working = df_ena_working.query('SHORT_FIELD_NAME_FROM_MIXS_LINKML not in @ena_field_list')
+        else:
+            logger.error(f"not recognising {ena_field} in remove_ena_rows_now_matched")
+            sys.error()
+        logger.info(f"\tafter updated df_ena_working len {len(df_ena_working)}")
+        return df_ena_working
+
+    def print_simple_dict(ena_term_matches_dict, filter_field):
+        df = pd.DataFrame.from_dict(ena_term_matches_dict, orient='index')
+
+        if len(filter_field) <= 2:
+           logger.info(f"print_simple_dict\n{df.head(5).to_string()}")
+        else:
+            logger.info(f"\tbefore filter df= {len(df)} filter_field -->{filter_field}<--")
+            df = df.query('note == @filter_field')
+            logger.info(f"\tafter filter df= {len(df)}")
+            logger.info(f"print_simple_dict with filter_field -->{filter_field}<--\n{df.head(5).to_string()}")
+
+
+
     ena_long_name_set = set(df_ena['CHECKLIST_FIELD_NAME'])
     logger.info(f"ena initial name total = {len(ena_long_name_set)}")
-    ncbi_long_name_set = set(df_ncbi['Name'])
-    logger.info(f"NCBI initial name total = {len(ncbi_long_name_set)}")
-    ncbi_harmonised_name_set = set(df_ncbi['Harmonized name'])
-    ena_long_ncbi_long_intersection_set = ena_long_name_set.intersection(ncbi_long_name_set)
-    logger.info(f"ena_long_ncbi_long_intersection_set {len(ena_long_ncbi_long_intersection_set)}")
+    ncbi_short_name_set = set(df_ncbi['Name'])
+    logger.info(f"NCBI initial name total = {len(ncbi_short_name_set)}")
 
-    df_ena_working = df_ena.query('CHECKLIST_FIELD_NAME not in @ena_long_ncbi_long_intersection_set')
-    logger.info(f"df_ena_working len {len(df_ena_working)}")
+    logger.info("-----Matching ENA CHECKLIST_FIELD_NAME with NCBI short name")
+    ena_long_ncbi_short_intersection_set = ena_long_name_set.intersection(ncbi_short_name_set)
+    logger.info(f"ena_long_ncbi_short_intersection_set {len(ena_long_ncbi_short_intersection_set)}")
+    note_text = "exact_match_2_ncbi_name"
+    note_list = create_note4all_list(note_text, len(ena_long_ncbi_short_intersection_set))
+    sorted_list = sorted(ena_long_ncbi_short_intersection_set)
+    ena_term_matches_dict = update_mapping_dict(ena_term_matches_dict, sorted_list, get_ncbi_harmonised_mapped_list(ncbi_multi_name_dict,'name', sorted_list), note_list)
+    logging.info(f"len(ena_term_matches_dict) {len(ena_term_matches_dict)}")
+    df_ena_working = remove_ena_rows_now_matched(df_ena_working, 'CHECKLIST_FIELD_NAME', list(ena_long_ncbi_short_intersection_set))
+    print_simple_dict(ena_term_matches_dict, note_text)
+
+    logger.info("-----Matching ENA CHECKLIST_FIELD_NAME with NCBI harmonised name")
+    ncbi_harmonised_name_set = set(df_ncbi['Harmonized name'])
     ena_long_name_set = set(df_ena_working['CHECKLIST_FIELD_NAME'])
     ena_long_ncbi_harmonised_intersection_set = ena_long_name_set.intersection(ncbi_harmonised_name_set)
     logger.info(f"ena_long_ncbi_harmonised_intersection_set len = {len(ena_long_ncbi_harmonised_intersection_set)}")
-    df_ena_working = df_ena_working.query('CHECKLIST_FIELD_NAME not in @ena_long_ncbi_harmonised_intersection_set')
+    note_text = "exact_match_2_ncbi_harmonised_name"
+    note_list = create_note4all_list(note_text, len(ena_long_ncbi_short_intersection_set))
+    sorted_list = sorted(ena_long_ncbi_harmonised_intersection_set)
+    ena_term_matches_dict = update_mapping_dict(ena_term_matches_dict, sorted_list, sorted_list, note_list)
+    df_ena_working = remove_ena_rows_now_matched(df_ena_working, 'CHECKLIST_FIELD_NAME', list(ena_long_ncbi_harmonised_intersection_set))
+    print_simple_dict(ena_term_matches_dict, note_text)
 
+    logger.info("-----Matching ENA short name(via MIXS_LINKML) with NCBI harmonised name")
     ena_short_name_set = set(df_ena_working['SHORT_FIELD_NAME_FROM_MIXS_LINKML'])
     ena_short_ncbi_harmonised_intersection_set = ena_short_name_set.intersection(ncbi_harmonised_name_set)
     logger.info(f"ena_short_ncbi_harmonised_intersection_set len= {len(ena_short_ncbi_harmonised_intersection_set)}")
-    df_ena_working = df_ena_working.query('SHORT_FIELD_NAME_FROM_MIXS_LINKML not in @ena_short_ncbi_harmonised_intersection_set')
+    df_ena_working = remove_ena_rows_now_matched(df_ena_working, 'SHORT_FIELD_NAME_FROM_MIXS_LINKML',
+                                                 list(ena_short_ncbi_harmonised_intersection_set))
+    note_list = create_note4all_list("exact_match_ena_short_2_ncbi_harmonised_name", len(ena_short_ncbi_harmonised_intersection_set))
+    sorted_list = list(ena_short_ncbi_harmonised_intersection_set)
+    
+    ena_term_matches_dict = update_mapping_dict(ena_term_matches_dict, list(ena_short_ncbi_harmonised_intersection_set),
+                                                sorted_list, note_list)
 
+    logger.info("-------Matching ENA synonyms with NCBI (short)Name---------")
     ena_synonym_dict = generate_syn_dict(df_ena_working, "SYNONYMS", "CHECKLIST_FIELD_NAME")
     ena_synonym_set = set(ena_synonym_dict.keys())
-    ena_syn_ncbi_long_intersection_set = ena_synonym_set.intersection(ncbi_long_name_set)
-    logger.info(f"ena_syn_ncbi_long_intersection_set len = {len(ena_syn_ncbi_long_intersection_set)}")
-    ena_syn_ncbi_harmonised_intersection_set = ena_synonym_set.intersection(ncbi_long_name_set)
-    logger.info(f"ena_syn_ncbi_harmonised_intersection_set len = {len(ena_syn_ncbi_harmonised_intersection_set)}")
-    ena_syn_ncbi_long_or_harmonised_intersection_set = ena_syn_ncbi_harmonised_intersection_set.union(ena_syn_ncbi_long_intersection_set)
-    logger.info(f"ena_syn_ncbi_long_or_harmonised_intersection_set len = {len(ena_syn_ncbi_long_or_harmonised_intersection_set)}")
+    ena_syn_ncbi_short_intersection_list = sorted(ena_synonym_set.intersection(ncbi_short_name_set))
+    ena_fieldname_syn_intersection_list = get_name_centric_matches('ena_synonym',  ena_synonym_dict,
+                                                                   ena_syn_ncbi_short_intersection_list)
+    logger.info(f"ena_syn_ncbi_short_intersection_list len = {len(ena_syn_ncbi_short_intersection_list)}")
+    logger.info("Adding info to ena_term_matches_dict ---------")
+    df_ena_working = remove_ena_rows_now_matched(df_ena_working, 'CHECKLIST_FIELD_NAME', ena_fieldname_syn_intersection_list)
+    note_list = create_note4all_list("exact_match_ena_syn_ncbi_short_name", len(ena_fieldname_syn_intersection_list))
+    # logger.info(f"ena_term_matches_dict keys = {ena_term_matches_dict.keys()}")
+    ena_term_matches_dict = update_mapping_dict(ena_term_matches_dict, ena_fieldname_syn_intersection_list,
+                                                get_ncbi_harmonised_mapped_list(ncbi_multi_name_dict,'name', ena_syn_ncbi_short_intersection_list), note_list)
 
-    ena_fieldname_syn_intersection_set = get_name_centric_matches(ena_synonym_dict, ena_syn_ncbi_long_or_harmonised_intersection_set)
-    df_ena_working = df_ena_working.query('CHECKLIST_FIELD_NAME not in @ena_fieldname_syn_intersection_set')
-    logger.info(f"df_ena_working len = {len(df_ena_working)}")
+    logger.info("-------Matching ENA synonyms with NCBI Harmonised Name---------")
+    ena_synonym_dict = generate_syn_dict(df_ena_working, "SYNONYMS", "CHECKLIST_FIELD_NAME")
+    ena_synonym_set = set(ena_synonym_dict.keys())
+    ena_syn_ncbi_harmonised_intersection_list = sorted(ena_synonym_set.intersection(ncbi_harmonised_name_set))
+    logger.info(f"ena_syn_ncbi_harmonised_intersection_list: {ena_syn_ncbi_harmonised_intersection_list}")
+    ena_fieldname_ncbi_harmonised_intersection_list = get_name_centric_matches('ena_synonym', ena_synonym_dict,
+                                                                     ena_syn_ncbi_harmonised_intersection_list)
+    logger.info(f"ena_fieldname_ncbi_harmonised_intersection_list {len(ena_fieldname_ncbi_harmonised_intersection_list)}")
 
+    logger.info("Adding info to ena_term_matches_dict ---------")
+    note_text = 'exact_match_ena_syn_ncbi_harmonised_name'
+    note_list = create_note4all_list(note_text, len(ena_fieldname_ncbi_harmonised_intersection_list))
+    df_ena_working = remove_ena_rows_now_matched(df_ena_working, 'CHECKLIST_FIELD_NAME',
+                                                 list(ena_fieldname_ncbi_harmonised_intersection_list))
+    ena_term_matches_dict = update_mapping_dict(ena_term_matches_dict, ena_fieldname_ncbi_harmonised_intersection_list,
+                                                ena_syn_ncbi_harmonised_intersection_list, note_list)
+    print_simple_dict(ena_term_matches_dict, note_text)
+
+    logger.info("-------------------------------------------------------------")
+    logger.info("-------Matching ENA synonyms with NCBI synonyms---------")
     ncbi_synonym_set = clean_ncbi_syn(set(df_ncbi['Synonyms']))
-    logger.debug(ncbi_synonym_set)
-
-    ena_long_ncbi_synonyms_intersection_set = ena_long_name_set.intersection(ncbi_synonym_set)
-    logger.info(f"ena_long_ncbi_synonyms_intersection_set {len(ena_long_ncbi_synonyms_intersection_set)}")
-    logger.info(f"ena_long_ncbi_synonyms_intersection_set = {ena_long_ncbi_synonyms_intersection_set}")
-    df_ena_working = df_ena_working.query('CHECKLIST_FIELD_NAME not in @ena_long_ncbi_synonyms_intersection_set')
+    logger.info(df_ena_working.columns)
+    ena_synonym_set = clean_ncbi_syn(set(df_ena_working['SYNONYMS']))
+    ena_syn_ncbi_syn_list = sorted(ena_synonym_set.intersection(ncbi_synonym_set))
+    logger.info(f"ena_syn_ncbi_syn_list matching syn len= {len(ena_syn_ncbi_syn_list)}")
+    logger.debug(f"ena_synonym_dict keys------{ena_synonym_dict.keys()}")
+    ncbi_harmonised_name_set = get_ncbi_harmonised_mapped_list(ncbi_multi_name_dict, 'synonym', ena_syn_ncbi_syn_list)
+    ena_fieldnames_ncbi_syn_by_checklist_name_list = get_name_centric_matches('ena_synonym', ena_synonym_dict, ena_syn_ncbi_syn_list)
+    logger.info(f"++++++++++ena_fieldnames_ncbi_syn_by_checklist_name_set len={len(ena_fieldnames_ncbi_syn_by_checklist_name_list)} examples {ena_fieldnames_ncbi_syn_by_checklist_name_list[0:3]}")
+    note_text = 'exact_match_ena_syn_ncbi_syns'
+    note_list = create_note4all_list('note_text', len(ena_fieldnames_ncbi_syn_by_checklist_name_list))
+    ena_term_matches_dict = update_mapping_dict(ena_term_matches_dict, ena_fieldnames_ncbi_syn_by_checklist_name_list,
+                                                ncbi_harmonised_name_set, note_list)
+    print_simple_dict(ena_term_matches_dict, note_text)
+    df_ena_working = remove_ena_rows_now_matched(df_ena_working, 'CHECKLIST_FIELD_NAME', ena_fieldnames_ncbi_syn_by_checklist_name_list)
     logger.info(f"df_ena_working len = {len(df_ena_working)}")
 
-    ena_long_ncbi_synonyms_intersection_set = ena_long_name_set.intersection(ncbi_synonym_set)
-    logger.info(f"ena_long_ncbi_synonyms_intersection_set {len(ena_long_ncbi_synonyms_intersection_set)}")
-    logger.info(f"ena_long_ncbi_synonyms_intersection_set = {ena_long_ncbi_synonyms_intersection_set}")
-    df_ena_working = df_ena_working.query('CHECKLIST_FIELD_NAME not in @ena_long_ncbi_synonyms_intersection_set')
-    logger.info(f"df_ena_working len = {len(df_ena_working)}")
-
-
-
-    ena_long_name_set = df_ena_working['CHECKLIST_FIELD_NAME']
+    ena_long_name_set = set(df_ena_working['CHECKLIST_FIELD_NAME'])
     logger.info(f"ena_long_name_set len = {len(ena_long_name_set)}")
 
+    logger.info(f"ena_term_matches_dict keys len------{len(ena_term_matches_dict.keys())}")
+
+    sys.exit()
+
+    logger.info("------------Fuzzy matching with 'NCBI_name'")
+    ena_terms_matched_set = run_process_fuzzy_matches(df_ena, df_ena_working,'ENA_long_name', 'ncbi_short_name', list(ena_long_name_set), list(ncbi_short_name_set))
+    df_ena_working = remove_ena_rows_now_matched(df_ena_working,'CHECKLIST_FIELD_NAME', list(ena_terms_matched_set))
+    logger.info(f"df_ena_working len = {len(df_ena_working)}")
+
+    logger.info("------------Fuzzy matching with 'NCBI_harmonised_name'")
+    ena_long_name_set = set(df_ena_working['CHECKLIST_FIELD_NAME'])
     ena_terms_matched_set = run_process_fuzzy_matches(df_ena, df_ena_working,'ENA_long_name', 'NCBI_harmonised_name', list(ena_long_name_set), list(ncbi_harmonised_name_set))
-    ena_long_name_set = df_ena_working['CHECKLIST_FIELD_NAME']
-    logger.info(f"ena_long_name_set len = {len(ena_long_name_set)}")
+    df_ena_working = remove_ena_rows_now_matched(df_ena_working, 'CHECKLIST_FIELD_NAME', list(ena_terms_matched_set))
+    logger.info(f"df_ena_working len = {len(df_ena_working)}")
 
     sys.exit()
 
