@@ -16,6 +16,7 @@ import coloredlogs
 import numpy as np
 import re
 from analyse_mixs import *
+import string
 
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
@@ -237,8 +238,14 @@ def make_ncbi_multiname_dict(df_ncbi):
     syns2harmonised = tmp_syns2harmonised.copy()
     for orig_syns in tmp_syns2harmonised:
         syns = str(orig_syns)
+        # syns = ''.join([str(char) for char in syns_string if char in string.printable])     #making sure no strange chars...
         for syn in syns.split(','):
-            syns2harmonised[syn] = syns2harmonised[orig_syns]
+            syn = syn.strip()
+            syns2harmonised[syn] = syns2harmonised[orig_syns]      # if synonym twice, will only keep the last one.
+    #         if "geog" in syn:
+    #             logger.info("-->" + syn + "<--")
+    #             logger.info("WTTTTTTTT")
+    # sys.exit()
 
     ncbi_multi_name_dict = {'harmonised_name': harmonised2long, 'name': long2harmonised, 'synonym': syns2harmonised}
     ic(ncbi_multi_name_dict.keys())
@@ -313,12 +320,32 @@ def process_ENA_terms_to_map(data_files_dict):
             logger.error(
                 f"ERROR: get_ncbi_harmonised_mapped_list  key-->{name_key}<-- not present ncbi_multi_name_dict, contact Peter and get the code fixed")
             sys.exit(-1)
+        logger.info(sorted_names)
         for name in sorted_names:
-           if name in ncbi_multi_name_dict[name_key]:
-               logger.debug(name)
+           logger.info(f"-->{name}<--")
+           if name == '':
+               continue
+           elif name in ncbi_multi_name_dict[name_key]:
+               logger.info(f"-->name<--")
                ncbi_harmonised_list.append(name)
            else:
+               all_values_list = list(set(ncbi_multi_name_dict[name_key]))
+               all_values_string = '<-->'.join(str(val) for val in all_values_list)
+               matches = re.findall(name, all_values_string, re.IGNORECASE)
+               logger.info(f"1st matches-->{matches}")
+               matches = re.findall(r'geographic location \(country and/or sea[^),]*\)', all_values_string, re.IGNORECASE)
+               logger.info(f"2nd matches-->{matches}")
+
+               test_name = 'geographic location (country and/or sea)'
+               if test_name in all_values_list:
+                   logger.info("YIPPP")
+               else:
+                   logger.info("WTF")
+
                logger.error(f"ERROR: get_ncbi_harmonised_mapped_list  -->{name}<-- not present in name_key={name_key}, contact Peter and get the code fixed")
+               logger.debug(ncbi_multi_name_dict[name_key])
+               # ERROR: get_ncbi_harmonised_mapped_list  -->geographic location (country and/or sea)<-- not present in name_key=synonym, contact Peter and get the code fixed
+
                sys.exit(-1)
         return ncbi_harmonised_list
 
