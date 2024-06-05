@@ -337,7 +337,7 @@ def add_ena_notes(data_files_dict):
     mapped_df = mapped_df.fillna('')
     # logger.info(f"mapped_df =\n{mapped_df.head(10).to_string(index=False)}")
     logger.info(mapped_df.columns)
-    mapped_df_slim = mapped_df[['ENA_mapped_name', 'NCBI_mapped_name', 'DDBJ_mapped_name']]
+    mapped_df_slim = mapped_df[['ENA_mapped_name', 'NCBI_mapped_name', 'NCBI:Harmonized_name', 'DDBJ_mapped_name']]
     logger.info(f"mapped_df =\n{mapped_df_slim.head(10).to_string(index = False)}")
     data_files_dict['mapped_df'] = mapped_df
 
@@ -379,19 +379,26 @@ def process_ENA_terms_to_map(data_files_dict):
         logger.info("WTF")
 
     def get_ncbi_harmonised_mapped_list(ncbi_multi_name_dict, name_key, sorted_names):
+        """
+        This is to allow one to get the 'NCBI harmonised name"
+        :param ncbi_multi_name_dict:
+        :param name_key:
+        :param sorted_names:
+        :return:
+        """
         ncbi_harmonised_list = []
         if name_key not in ncbi_multi_name_dict:
             logger.error(
                 f"ERROR: get_ncbi_harmonised_mapped_list  key-->{name_key}<-- not present ncbi_multi_name_dict, contact Peter and get the code fixed")
             sys.exit(-1)
-        logger.info(sorted_names)
+        # logger.info(sorted_names)
         for name in sorted_names:
            logger.debug(f"-->{name}<--")
            if name == '':
                continue
            elif name in ncbi_multi_name_dict[name_key]:
                logger.debug(f"-->name<--")
-               ncbi_harmonised_list.append(name)
+               ncbi_harmonised_list.append(ncbi_multi_name_dict[name_key][name])
            else:
                logger.error(f"ERROR: get_ncbi_harmonised_mapped_list  -->{name}<-- not present in name_key={name_key}, contact Peter and get the code fixed")
                logger.debug(ncbi_multi_name_dict[name_key])
@@ -420,24 +427,10 @@ def process_ENA_terms_to_map(data_files_dict):
         logger.info(f"\tafter updated df_ena_working len {len(df_ena_working)}")
         return df_ena_working
 
-
-
-
     ena_long_name_set = set(df_ena['CHECKLIST_FIELD_NAME'])
     logger.info(f"ena initial name total = {len(ena_long_name_set)}")
     ncbi_short_name_set = set(df_ncbi['Name'])
     logger.info(f"NCBI initial name total = {len(ncbi_short_name_set)}")
-
-    logger.info("-----Matching ENA CHECKLIST_FIELD_NAME with NCBI short name")
-    ena_long_ncbi_short_intersection_set = ena_long_name_set.intersection(ncbi_short_name_set)
-    logger.info(f"ena_long_ncbi_short_intersection_set {len(ena_long_ncbi_short_intersection_set)}")
-    note_text = "exact_match_2_ncbi_name"
-    note_list = create_note4all_list(note_text, len(ena_long_ncbi_short_intersection_set))
-    sorted_list = sorted(ena_long_ncbi_short_intersection_set)
-    ena_term_matches_dict = update_mapping_dict(ena_term_matches_dict, sorted_list, get_ncbi_harmonised_mapped_list(ncbi_multi_name_dict,'name', sorted_list), note_list)
-    logging.info(f"len(ena_term_matches_dict) {len(ena_term_matches_dict)}")
-    df_ena_working = remove_ena_rows_now_matched(df_ena_working, 'CHECKLIST_FIELD_NAME', list(ena_long_ncbi_short_intersection_set))
-    print_simple_dict(ena_term_matches_dict, note_text)
 
     logger.info("-----Matching ENA CHECKLIST_FIELD_NAME with NCBI harmonised name")
     ncbi_harmonised_name_set = set(df_ncbi['Harmonized name'])
@@ -445,12 +438,25 @@ def process_ENA_terms_to_map(data_files_dict):
     ena_long_ncbi_harmonised_intersection_set = ena_long_name_set.intersection(ncbi_harmonised_name_set)
     logger.info(f"ena_long_ncbi_harmonised_intersection_set len = {len(ena_long_ncbi_harmonised_intersection_set)}")
     note_text = "exact_match_2_ncbi_harmonised_name"
-    note_list = create_note4all_list(note_text, len(ena_long_ncbi_short_intersection_set))
+    note_list = create_note4all_list(note_text, len(ena_long_ncbi_harmonised_intersection_set))
     sorted_list = sorted(ena_long_ncbi_harmonised_intersection_set)
     ena_term_matches_dict = update_mapping_dict(ena_term_matches_dict, sorted_list, sorted_list, note_list)
     df_ena_working = remove_ena_rows_now_matched(df_ena_working, 'CHECKLIST_FIELD_NAME', list(ena_long_ncbi_harmonised_intersection_set))
     print_simple_dict(ena_term_matches_dict, note_text)
 
+    print('-----------------------------------------------------------------------------------------------------')
+    logger.info("-----Matching ENA CHECKLIST_FIELD_NAME with NCBI short name")
+    ena_long_ncbi_short_intersection_set = ena_long_name_set.intersection(ncbi_short_name_set)
+    logger.info(f"ena_long_ncbi_short_intersection_set {len(ena_long_ncbi_short_intersection_set)}")
+    note_text = "exact_match_2_ncbi_name"
+    note_list = create_note4all_list(note_text, len(ena_long_ncbi_short_intersection_set))
+    sorted_list = sorted(ena_long_ncbi_short_intersection_set)
+    sorted_ncbi_harmonised_list = get_ncbi_harmonised_mapped_list(ncbi_multi_name_dict, 'name', sorted_list)
+    ena_term_matches_dict = update_mapping_dict(ena_term_matches_dict, sorted_list, sorted_ncbi_harmonised_list, note_list)
+    logging.info(f"len(ena_term_matches_dict) {len(ena_term_matches_dict)}")
+    df_ena_working = remove_ena_rows_now_matched(df_ena_working, 'CHECKLIST_FIELD_NAME', list(ena_long_ncbi_short_intersection_set))
+    print_simple_dict(ena_term_matches_dict, note_text)
+    #
     logger.info("-----Matching ENA short name(via MIXS_LINKML) with NCBI harmonised name")
     ena_short_name_set = set(df_ena_working['SHORT_FIELD_NAME_FROM_MIXS_LINKML'])
     ena_short_ncbi_harmonised_intersection_set = ena_short_name_set.intersection(ncbi_harmonised_name_set)
@@ -459,7 +465,7 @@ def process_ENA_terms_to_map(data_files_dict):
                                                  list(ena_short_ncbi_harmonised_intersection_set))
     note_list = create_note4all_list("exact_match_ena_short_2_ncbi_harmonised_name", len(ena_short_ncbi_harmonised_intersection_set))
     sorted_list = list(ena_short_ncbi_harmonised_intersection_set)
-    
+
     ena_term_matches_dict = update_mapping_dict(ena_term_matches_dict, list(ena_short_ncbi_harmonised_intersection_set),
                                                 sorted_list, note_list)
 
@@ -606,14 +612,14 @@ def map_field_names(data_files_dict):
     mapped_df = data_files_dict['NCBI']['fields_df'].copy()
     logger.info(mapped_df.columns)
 
-    mapped_df.rename(columns={'Name': 'NCBI:Name', 'Harmonized name': 'NCBI:Harmonized name', 'Synonyms': 'NCBI:Synonyms',
+    mapped_df.rename(columns={'Name': 'NCBI:Name', 'Harmonized name': 'NCBI:Harmonized_name', 'Synonyms': 'NCBI:Synonyms',
                               'Description': 'NCBI:Description', 'Rule': 'NCBI:Rule',
                               'Format': 'NCBI:Format'}, inplace=True)
-    mapped_df['NCBI_mapped_name'] = mapped_df['NCBI:Harmonized name']  # populating NCBI_mapped_name
+    mapped_df['NCBI_mapped_name'] = mapped_df['NCBI:Harmonized_name']  # populating NCBI_mapped_name
     mapped_df['ENA_mapped_name'] = ""
     mapped_df['DDBJ_mapped_name'] = ""
     mapped_df = mapped_df[['DDBJ_mapped_name', 'ENA_mapped_name', 'NCBI_mapped_name',
-     'NCBI:Name', 'NCBI:Harmonized name', 'NCBI:Synonyms',
+     'NCBI:Name', 'NCBI:Harmonized_name', 'NCBI:Synonyms',
      'NCBI:Description', 'NCBI:Rule', 'NCBI:Format']]
     print_mapped_3_head(mapped_df)
     data_files_dict['mapped_df'] = mapped_df
