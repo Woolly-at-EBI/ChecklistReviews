@@ -342,7 +342,7 @@ def add_ena_notes(data_files_dict):
     data_files_dict['mapped_df'] = mapped_df
 
     generate_stats(data_files_dict)
-    sys.exit()
+    return data_files_dict
 
 
 def process_ENA_terms_to_map(data_files_dict):
@@ -557,7 +557,14 @@ def process_ENA_terms_to_map(data_files_dict):
     logger.info(f"phew got process_ENA_terms_to_map function pretty much working")
     data_files_dict['ena_term_matches_dict'] = ena_term_matches_dict
 
-    add_ena_notes(data_files_dict)
+    add_ena_notes(data_files_dict)  # includes adding in matches
+    mapped_df = data_files_dict["mapped_df"]
+    df_ena_working["ENA_mapped_name"] = df_ena_working["CHECKLIST_FIELD_NAME"]
+    logger.info(f"before mapped_df len = {len(mapped_df)}<***********************************")
+    mapped_df = pd.concat([mapped_df, df_ena_working], ignore_index=True)
+    logger.info(f"after merging in remaning ENA mapped_df len = {len(mapped_df)}<***********************************")
+    data_files_dict["mapped_df"] = mapped_df
+    generate_stats(data_files_dict)
 
     return data_files_dict
 
