@@ -1,0 +1,561 @@
+CHECKLIST_FIELD_NAME	CHECKLIST_ID	CHECKLIST_NAME	CHECKLIST_ID_count
+16S recovery software	ERC000055	GSC MIxS agriculture	1
+16s recovered	ERC000055	GSC MIxS agriculture	1
+Chlorophyll Sensor	ERC000030	ENA Tara Oceans	1
+Citation	ERC000030	ENA Tara Oceans	1
+Event Date/Time End	ERC000030	ENA Tara Oceans	1
+Event Date/Time Start	ERC000030	ENA Tara Oceans	1
+Event Label	ERC000030	ENA Tara Oceans	1
+Further Details	ERC000030	ENA Tara Oceans	1
+GAL	ERC000053	Tree of Life Checklist	1
+GAL_sample_id	ERC000053	Tree of Life Checklist	1
+Last Update Date	ERC000030	ENA Tara Oceans	1
+Latitude End	ERC000027, ERC000030, ERC000053	ENA Micro B3, ENA Tara Oceans, Tree of Life Checklist	3
+Latitude Start	ERC000027, ERC000030, ERC000053	ENA Micro B3, ENA Tara Oceans, Tree of Life Checklist	3
+Longitude End	ERC000027, ERC000030, ERC000053	ENA Micro B3, ENA Tara Oceans, Tree of Life Checklist	3
+Longitude Start	ERC000027, ERC000030, ERC000053	ENA Micro B3, ENA Tara Oceans, Tree of Life Checklist	3
+Marine Region	ERC000027, ERC000030	ENA Micro B3, ENA Tara Oceans	2
+Nitrate Sensor	ERC000030	ENA Tara Oceans	1
+Oxygen Sensor	ERC000030	ENA Tara Oceans	1
+Protocol Label	ERC000027, ERC000030	ENA Micro B3, ENA Tara Oceans	2
+Salinity Sensor	ERC000030	ENA Tara Oceans	1
+Sample Status	ERC000030	ENA Tara Oceans	1
+Sampling Campaign	ERC000027, ERC000030	ENA Micro B3, ENA Tara Oceans	2
+Sampling Platform	ERC000027, ERC000030	ENA Micro B3, ENA Tara Oceans	2
+Sampling Site	ERC000027	ENA Micro B3	1
+Sampling Station	ERC000030	ENA Tara Oceans	1
+absolute air humidity	ERC000031	GSC MIxS built environment	1
+adapters	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+address	ERC000031	GSC MIxS built environment	1
+adjacent rooms	ERC000031	GSC MIxS built environment	1
+aerospace structure	ERC000031	GSC MIxS built environment	1
+air particulate matter concentration	ERC000012	GSC MIxS air	1
+air temperature	ERC000031	GSC MIxS built environment	1
+air temperature regimen	ERC000020	GSC MIxS plant associated	1
+alkalinity	ERC000021, ERC000023, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	5
+alkalinity method	ERC000024	GSC MIxS water	1
+alkyl diethers	ERC000021, ERC000024, ERC000027	GSC MIxS sediment, GSC MIxS water, ENA Micro B3	3
+altitude	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, GSC MIxS built environment, GSC MIxS agriculture	9
+aminopeptidase activity	ERC000021, ERC000024, ERC000027	GSC MIxS sediment, GSC MIxS water, ENA Micro B3	3
+ammonium	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+amount of light	ERC000031	GSC MIxS built environment	1
+amount or size of sample collected	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000036	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, ENA sewage checklist	10
+ancestral data	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+animal water delivery method	ERC000055	GSC MIxS agriculture	1
+annotation source	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+antibiotic regimen	ERC000020	GSC MIxS plant associated	1
+architectural structure	ERC000031	GSC MIxS built environment	1
+area of sampling site	ERC000036	ENA sewage checklist	1
+atmospheric data	ERC000024, ERC000027	GSC MIxS water, ENA Micro B3	2
+average daily occupancy	ERC000031	GSC MIxS built environment	1
+average dew point	ERC000031	GSC MIxS built environment	1
+average temperature	ERC000031	GSC MIxS built environment	1
+bacterial carbon production	ERC000021, ERC000024, ERC000027	GSC MIxS sediment, GSC MIxS water, ENA Micro B3	3
+bacterial production	ERC000024, ERC000027	GSC MIxS water, ENA Micro B3	2
+bacterial respiration	ERC000024, ERC000027	GSC MIxS water, ENA Micro B3	2
+barcoding center	ERC000053	Tree of Life Checklist	1
+barometric pressure	ERC000012	GSC MIxS air	1
+bathroom count	ERC000031	GSC MIxS built environment	1
+bedroom count	ERC000031	GSC MIxS built environment	1
+bio_material	ERC000011, ERC000053	ENA default sample checklist, Tree of Life Checklist	2
+biochemical oxygen demand	ERC000023	GSC MIxS wastewater sludge	1
+biomass	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+biotic regimen	ERC000020	GSC MIxS plant associated	1
+biotic relationship [deprecated]	ERC000055	GSC MIxS agriculture	1
+bishomohopanol	ERC000021, ERC000024, ERC000027	GSC MIxS sediment, GSC MIxS water, ENA Micro B3	3
+broad-scale environmental context	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000030, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, ENA Tara Oceans, GSC MIxS built environment, GSC MIxS agriculture	11
+bromide	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+building occupancy type	ERC000031	GSC MIxS built environment	1
+building setting	ERC000031	GSC MIxS built environment	1
+built structure age	ERC000031	GSC MIxS built environment	1
+built structure setting	ERC000031	GSC MIxS built environment	1
+built structure type	ERC000031	GSC MIxS built environment	1
+calcium	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+carbon dioxide	ERC000012, ERC000031	GSC MIxS air, GSC MIxS built environment	2
+carbon monoxide	ERC000012	GSC MIxS air	1
+carbon/nitrogen ratio	ERC000021, ERC000024, ERC000027	GSC MIxS sediment, GSC MIxS water, ENA Micro B3	3
+ceiling area	ERC000031	GSC MIxS built environment	1
+ceiling condition	ERC000031	GSC MIxS built environment	1
+ceiling finish material	ERC000031	GSC MIxS built environment	1
+ceiling signs of water/mold	ERC000031	GSC MIxS built environment	1
+ceiling structure	ERC000031	GSC MIxS built environment	1
+ceiling texture	ERC000031	GSC MIxS built environment	1
+ceiling thermal mass	ERC000031	GSC MIxS built environment	1
+ceiling type	ERC000031	GSC MIxS built environment	1
+cell_line	ERC000011	ENA default sample checklist	1
+cell_type	ERC000011	ENA default sample checklist	1
+chemical administration	ERC000012, ERC000020, ERC000021, ERC000023, ERC000024, ERC000025, ERC000027, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS agriculture	8
+chemical mutagen	ERC000020	GSC MIxS plant associated	1
+chemical oxygen demand	ERC000023	GSC MIxS wastewater sludge	1
+chimera check software	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+chloride	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+chlorophyll	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+climate environment	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+collected_by	ERC000011, ERC000053	ENA default sample checklist, Tree of Life Checklist	2
+collecting institution	ERC000053	Tree of Life Checklist	1
+collection date	ERC000011, ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000030, ERC000031, ERC000036, ERC000053, ERC000055	ENA default sample checklist, GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, ENA Tara Oceans, GSC MIxS built environment, ENA sewage checklist, Tree of Life Checklist, GSC MIxS agriculture	14
+conductivity	ERC000024, ERC000027	GSC MIxS water, ENA Micro B3	2
+cooling system identifier	ERC000031	GSC MIxS built environment	1
+crop yield	ERC000055	GSC MIxS agriculture	1
+cultivar	ERC000011	ENA default sample checklist	1
+culture isolation date	ERC000055	GSC MIxS agriculture	1
+culture rooting medium	ERC000020	GSC MIxS plant associated	1
+culture_collection	ERC000011	ENA default sample checklist	1
+culture_or_strain_id	ERC000053	Tree of Life Checklist	1
+current land use	ERC000022	GSC MIxS soil	1
+current vegetation	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+current vegetation method	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+date last rain	ERC000031	GSC MIxS built environment	1
+density	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+depth	ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000030, ERC000031, ERC000053, ERC000055	GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, ENA Tara Oceans, GSC MIxS built environment, Tree of Life Checklist, GSC MIxS agriculture	11
+design, construction, and operation documents	ERC000031	GSC MIxS built environment	1
+dev_stage	ERC000011	ENA default sample checklist	1
+dew point	ERC000031	GSC MIxS built environment	1
+diether lipids	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+dissolved carbon dioxide	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+dissolved hydrogen	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+dissolved inorganic carbon	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+dissolved inorganic nitrogen	ERC000024, ERC000027	GSC MIxS water, ENA Micro B3	2
+dissolved inorganic phosphorus	ERC000024, ERC000027	GSC MIxS water, ENA Micro B3	2
+dissolved organic carbon	ERC000021, ERC000024, ERC000027	GSC MIxS sediment, GSC MIxS water, ENA Micro B3	3
+dissolved organic nitrogen	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+dissolved oxygen	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+door area or size	ERC000031	GSC MIxS built environment	1
+door condition	ERC000031	GSC MIxS built environment	1
+door direction of opening	ERC000031	GSC MIxS built environment	1
+door location	ERC000031	GSC MIxS built environment	1
+door material	ERC000031	GSC MIxS built environment	1
+door movement	ERC000031	GSC MIxS built environment	1
+door signs of water/mold	ERC000031	GSC MIxS built environment	1
+door type	ERC000031	GSC MIxS built environment	1
+door type, composite	ERC000031	GSC MIxS built environment	1
+door type, metal	ERC000031	GSC MIxS built environment	1
+door type, wood	ERC000031	GSC MIxS built environment	1
+downward PAR	ERC000024, ERC000027	GSC MIxS water, ENA Micro B3	2
+drainage classification	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+drawings	ERC000031	GSC MIxS built environment	1
+ecotype	ERC000011	ENA default sample checklist	1
+efficiency percent	ERC000023	GSC MIxS wastewater sludge	1
+elevation	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000031, ERC000053, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, GSC MIxS built environment, Tree of Life Checklist, GSC MIxS agriculture	10
+elevator count	ERC000031	GSC MIxS built environment	1
+emulsions	ERC000023	GSC MIxS wastewater sludge	1
+encoded traits	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+enrichment protocol	ERC000055	GSC MIxS agriculture	1
+environment adjacent to site	ERC000055	GSC MIxS agriculture	1
+environmental medium	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000030, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, ENA Tara Oceans, GSC MIxS built environment, GSC MIxS agriculture	11
+environmental package	ERC000027, ERC000030	ENA Micro B3, ENA Tara Oceans	2
+environmental_sample	ERC000011	ENA default sample checklist	1
+equipment shared with other farms	ERC000055	GSC MIxS agriculture	1
+escalator count	ERC000031	GSC MIxS built environment	1
+estimated size	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+experimental factor	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+exposed ductwork	ERC000031	GSC MIxS built environment	1
+exposed pipes	ERC000031	GSC MIxS built environment	1
+exterior door count	ERC000031	GSC MIxS built environment	1
+extrachromosomal elements	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+extreme_unusual_properties/Al saturation	ERC000022	GSC MIxS soil	1
+extreme_unusual_properties/Al saturation method	ERC000022	GSC MIxS soil	1
+extreme_unusual_properties/heavy metals	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+extreme_unusual_properties/heavy metals method	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+farm equipment sanitization	ERC000055	GSC MIxS agriculture	1
+farm equipment used	ERC000055	GSC MIxS agriculture	1
+farm watering water source	ERC000055	GSC MIxS agriculture	1
+fertilizer administration	ERC000020	GSC MIxS plant associated	1
+fertilizer administration date	ERC000055	GSC MIxS agriculture	1
+filter type	ERC000031	GSC MIxS built environment	1
+finishing strategy	ERC000027	ENA Micro B3	1
+fireplace type	ERC000031	GSC MIxS built environment	1
+floor age	ERC000031	GSC MIxS built environment	1
+floor area	ERC000031	GSC MIxS built environment	1
+floor condition	ERC000031	GSC MIxS built environment	1
+floor count	ERC000031	GSC MIxS built environment	1
+floor finish material	ERC000031	GSC MIxS built environment	1
+floor signs of water/mold	ERC000031	GSC MIxS built environment	1
+floor structure	ERC000031	GSC MIxS built environment	1
+floor thermal mass	ERC000031	GSC MIxS built environment	1
+fluorescence	ERC000024, ERC000027	GSC MIxS water, ENA Micro B3	2
+food harvesting process	ERC000055	GSC MIxS agriculture	1
+food product type	ERC000055	GSC MIxS agriculture	1
+food production characteristics	ERC000055	GSC MIxS agriculture	1
+food production system characteristics	ERC000055	GSC MIxS agriculture	1
+food shipping transportation method	ERC000055	GSC MIxS agriculture	1
+food shipping transportation vehicle	ERC000055	GSC MIxS agriculture	1
+food source	ERC000055	GSC MIxS agriculture	1
+frequency of cleaning	ERC000031	GSC MIxS built environment	1
+frequency of cooking	ERC000031	GSC MIxS built environment	1
+fungicide regimen	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+furniture	ERC000031	GSC MIxS built environment	1
+gaseous environment	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+gaseous substances	ERC000023	GSC MIxS wastewater sludge	1
+gender of restroom	ERC000031	GSC MIxS built environment	1
+genetic modification	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+geographic location (country and/or sea)	ERC000011, ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000030, ERC000031, ERC000036, ERC000053, ERC000055	ENA default sample checklist, GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, ENA Tara Oceans, GSC MIxS built environment, ENA sewage checklist, Tree of Life Checklist, GSC MIxS agriculture	14
+geographic location (latitude)	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000031, ERC000036, ERC000053, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, GSC MIxS built environment, ENA sewage checklist, Tree of Life Checklist, GSC MIxS agriculture	11
+geographic location (longitude)	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000031, ERC000036, ERC000053, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, GSC MIxS built environment, ENA sewage checklist, Tree of Life Checklist, GSC MIxS agriculture	11
+geographic location (region and locality)	ERC000011, ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000031, ERC000036, ERC000053, ERC000055	ENA default sample checklist, GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, GSC MIxS built environment, ENA sewage checklist, Tree of Life Checklist, GSC MIxS agriculture	12
+germline	ERC000011	ENA default sample checklist	1
+glucosidase activity	ERC000021, ERC000024, ERC000027	GSC MIxS sediment, GSC MIxS water, ENA Micro B3	3
+gravity	ERC000020	GSC MIxS plant associated	1
+growth facility	ERC000020	GSC MIxS plant associated	1
+growth habit	ERC000020	GSC MIxS plant associated	1
+growth hormone regimen	ERC000020	GSC MIxS plant associated	1
+growth media	ERC000020	GSC MIxS plant associated	1
+habitat	ERC000053	Tree of Life Checklist	1
+hallway/corridor count	ERC000031	GSC MIxS built environment	1
+handidness	ERC000031	GSC MIxS built environment	1
+health or disease status of specific host	ERC000027	ENA Micro B3	1
+heating and cooling system type	ERC000031	GSC MIxS built environment	1
+heating delivery locations	ERC000031	GSC MIxS built environment	1
+heating system delivery method	ERC000031	GSC MIxS built environment	1
+height carpet fiber mat	ERC000031	GSC MIxS built environment	1
+herbicide regimen	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+history/agrochemical additions	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+history/crop rotation	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+history/extreme events	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+history/fire	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+history/flooding	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+history/previous land use	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+history/tillage	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+horizon method	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+host age	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+host common name	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+host disease status	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, GSC MIxS built environment, GSC MIxS agriculture	9
+host dry mass	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+host genotype	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+host height	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+host length	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+host life stage	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+host phenotype	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+host scientific name	ERC000011, ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000031, ERC000055	ENA default sample checklist, GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, GSC MIxS built environment, GSC MIxS agriculture	10
+host specificity or range	ERC000022, ERC000031, ERC000055	GSC MIxS soil, GSC MIxS built environment, GSC MIxS agriculture	3
+host subspecific genetic lineage	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+host taxid	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+host total mass	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+host wet mass	ERC000020	GSC MIxS plant associated	1
+humidity	ERC000012, ERC000055	GSC MIxS air, GSC MIxS agriculture	2
+humidity regimen	ERC000020	GSC MIxS plant associated	1
+identified_by	ERC000011, ERC000053	ENA default sample checklist, Tree of Life Checklist	2
+identifier_affiliation	ERC000053	Tree of Life Checklist	1
+indoor space	ERC000031	GSC MIxS built environment	1
+indoor surface	ERC000031	GSC MIxS built environment	1
+industrial effluent percent	ERC000023	GSC MIxS wastewater sludge	1
+inorganic particles	ERC000023	GSC MIxS wastewater sludge	1
+inside lux light	ERC000031	GSC MIxS built environment	1
+interior wall condition	ERC000031	GSC MIxS built environment	1
+investigation type	ERC000036	ENA sewage checklist	1
+isolate	ERC000011	ENA default sample checklist	1
+isolation and growth condition	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+isolation_source	ERC000011	ENA default sample checklist	1
+known pathogenicity	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+lab_host	ERC000011	ENA default sample checklist	1
+last time swept/mopped/vacuumed	ERC000031	GSC MIxS built environment	1
+lat_lon	ERC000011	ENA default sample checklist	1
+library construction method	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+library preparation kit	ERC000055	GSC MIxS agriculture	1
+library reads sequenced	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+library screening strategy	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+library size	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+library vector	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+lifestage	ERC000053	Tree of Life Checklist	1
+light intensity	ERC000024, ERC000027	GSC MIxS water, ENA Micro B3	2
+light regimen	ERC000020	GSC MIxS plant associated	1
+light type	ERC000031	GSC MIxS built environment	1
+link to classification information	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+link to climate information	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+links to additional analysis	ERC000022	GSC MIxS soil	1
+local environmental context	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000030, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, ENA Tara Oceans, GSC MIxS built environment, GSC MIxS agriculture	11
+lot number	ERC000055	GSC MIxS agriculture	1
+magnesium	ERC000021, ERC000024, ERC000027	GSC MIxS sediment, GSC MIxS water, ENA Micro B3	3
+mating_type	ERC000011	ENA default sample checklist	1
+maximum occupancy	ERC000031	GSC MIxS built environment	1
+mean annual precipitation	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+mean annual temperature	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+mean friction velocity	ERC000021, ERC000024, ERC000027	GSC MIxS sediment, GSC MIxS water, ENA Micro B3	3
+mean peak friction velocity	ERC000021, ERC000024, ERC000027	GSC MIxS sediment, GSC MIxS water, ENA Micro B3	3
+mean seasonal humidity	ERC000055	GSC MIxS agriculture	1
+mean seasonal precipitation	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+mean seasonal temperature	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+mechanical damage	ERC000020	GSC MIxS plant associated	1
+mechanical structure	ERC000031	GSC MIxS built environment	1
+methane	ERC000012, ERC000021	GSC MIxS air, GSC MIxS sediment	2
+microbial biomass	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+microbial biomass method	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+mineral nutrient regimen	ERC000020	GSC MIxS plant associated	1
+miscellaneous parameter	ERC000027	ENA Micro B3	1
+multiplex identifiers	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+n-alkanes	ERC000021, ERC000024, ERC000027	GSC MIxS sediment, GSC MIxS water, ENA Micro B3	3
+name of the sampling site	ERC000036	ENA sewage checklist	1
+negative control type	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, GSC MIxS built environment, GSC MIxS agriculture	9
+nitrate	ERC000021, ERC000023, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	5
+nitrite	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+non-mineral nutrient regimen	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+nucleic acid amplification	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000036, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, ENA sewage checklist, GSC MIxS agriculture	11
+nucleic acid extraction	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000036, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, ENA sewage checklist, GSC MIxS agriculture	11
+number of houseplants	ERC000031	GSC MIxS built environment	1
+number of inoculated individuals	ERC000031	GSC MIxS built environment	1
+number of pets	ERC000031	GSC MIxS built environment	1
+number of replicons	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+number of residents	ERC000031	GSC MIxS built environment	1
+observed biotic relationship	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment	9
+observed host symbionts	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+occupancy at sampling	ERC000031	GSC MIxS built environment	1
+occupancy documentation	ERC000031	GSC MIxS built environment	1
+occupant density at sampling	ERC000031	GSC MIxS built environment	1
+organic carbon	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+organic matter	ERC000021, ERC000022, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS soil, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	5
+organic nitrogen	ERC000021, ERC000022, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS soil, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	5
+organic particles	ERC000023	GSC MIxS wastewater sludge	1
+organism count	ERC000012, ERC000020, ERC000021, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	9
+organism part	ERC000053	Tree of Life Checklist	1
+orientations of exterior window	ERC000031	GSC MIxS built environment	1
+original collection date	ERC000053	Tree of Life Checklist	1
+original geographic location	ERC000053	Tree of Life Checklist	1
+original geographic location (latitude)	ERC000053	Tree of Life Checklist	1
+original geographic location (longitude)	ERC000053	Tree of Life Checklist	1
+outside relative humidity	ERC000031	GSC MIxS built environment	1
+oxygen	ERC000012	GSC MIxS air	1
+oxygenation status of sample	ERC000012, ERC000020, ERC000021, ERC000023, ERC000024, ERC000025, ERC000027, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS agriculture	8
+pH	ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	6
+pH method	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+pH regimen	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+particle classification	ERC000021	GSC MIxS sediment	1
+particulate organic carbon	ERC000021, ERC000024, ERC000027	GSC MIxS sediment, GSC MIxS water, ENA Micro B3	3
+particulate organic nitrogen	ERC000024, ERC000027	GSC MIxS water, ENA Micro B3	2
+pcr conditions	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+pcr primers	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+perturbation	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+pesticide regimen	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+petroleum hydrocarbon	ERC000021, ERC000024, ERC000027	GSC MIxS sediment, GSC MIxS water, ENA Micro B3	3
+phaeopigments	ERC000021, ERC000024, ERC000027	GSC MIxS sediment, GSC MIxS water, ENA Micro B3	3
+phosphate	ERC000021, ERC000023, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	5
+phospholipid fatty acid	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+photon flux	ERC000024, ERC000027	GSC MIxS water, ENA Micro B3	2
+photosynthetic activity	ERC000055	GSC MIxS agriculture	1
+photosynthetic activity method	ERC000055	GSC MIxS agriculture	1
+plant body site	ERC000020	GSC MIxS plant associated	1
+plant growth medium	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+plant product	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+plant sex	ERC000020	GSC MIxS plant associated	1
+plant structure	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+plant water delivery method	ERC000055	GSC MIxS agriculture	1
+ploidy	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+pollutants	ERC000012	GSC MIxS air	1
+pooled DNA extract total	ERC000055	GSC MIxS agriculture	1
+population size of the catchment area	ERC000036	ENA sewage checklist	1
+porosity	ERC000021, ERC000055	GSC MIxS sediment, GSC MIxS agriculture	2
+positive control type	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, GSC MIxS built environment, GSC MIxS agriculture	9
+potassium	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+pre-treatment	ERC000023	GSC MIxS wastewater sludge	1
+presence of pets, animals, or insects	ERC000055	GSC MIxS agriculture	1
+pressure	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+previous land use method	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+primary production	ERC000024, ERC000027	GSC MIxS water, ENA Micro B3	2
+primary treatment	ERC000023	GSC MIxS wastewater sludge	1
+profile position	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+project name	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000030, ERC000031, ERC000053, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, ENA Tara Oceans, GSC MIxS built environment, Tree of Life Checklist, GSC MIxS agriculture	12
+propagation	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+proxy biomaterial	ERC000053	Tree of Life Checklist	1
+proxy voucher	ERC000053	Tree of Life Checklist	1
+quadrant position	ERC000031	GSC MIxS built environment	1
+radiation regimen	ERC000020	GSC MIxS plant associated	1
+rainfall regimen	ERC000020	GSC MIxS plant associated	1
+reactor type	ERC000023	GSC MIxS wastewater sludge	1
+receipt date	ERC000036	ENA sewage checklist	1
+redox potential	ERC000021, ERC000024, ERC000027	GSC MIxS sediment, GSC MIxS water, ENA Micro B3	3
+reference for biomaterial	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+relationship	ERC000053	Tree of Life Checklist	1
+relationship to oxygen	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+relative air humidity	ERC000031	GSC MIxS built environment	1
+relative location of sample	ERC000055	GSC MIxS agriculture	1
+relevant electronic resources	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+relevant standard operating procedures	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+room air exchange rate	ERC000031	GSC MIxS built environment	1
+room architectural elements	ERC000031	GSC MIxS built environment	1
+room condition	ERC000031	GSC MIxS built environment	1
+room count	ERC000031	GSC MIxS built environment	1
+room dimensions	ERC000031	GSC MIxS built environment	1
+room door distance	ERC000031	GSC MIxS built environment	1
+room location in building	ERC000031	GSC MIxS built environment	1
+room moisture damage or mold history	ERC000031	GSC MIxS built environment	1
+room net area	ERC000031	GSC MIxS built environment	1
+room occupancy	ERC000031	GSC MIxS built environment	1
+room sampling position	ERC000031	GSC MIxS built environment	1
+room type	ERC000031	GSC MIxS built environment	1
+room volume	ERC000031	GSC MIxS built environment	1
+room window count	ERC000031	GSC MIxS built environment	1
+rooms connected by a doorway	ERC000031	GSC MIxS built environment	1
+rooms that are on the same hallway	ERC000031	GSC MIxS built environment	1
+rooms that share a door with sampling room	ERC000031	GSC MIxS built environment	1
+rooms that share a wall with sampling room	ERC000031	GSC MIxS built environment	1
+rooting conditions	ERC000020	GSC MIxS plant associated	1
+rooting medium carbon	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+rooting medium macronutrients	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+rooting medium micronutrients	ERC000020	GSC MIxS plant associated	1
+rooting medium organic supplements	ERC000020	GSC MIxS plant associated	1
+rooting medium pH	ERC000020	GSC MIxS plant associated	1
+rooting medium regulators	ERC000020	GSC MIxS plant associated	1
+rooting medium solidifier	ERC000020	GSC MIxS plant associated	1
+salinity	ERC000012, ERC000020, ERC000021, ERC000023, ERC000024, ERC000025, ERC000027	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	7
+salinity method	ERC000022	GSC MIxS soil	1
+salt regimen	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+sample capture status	ERC000020	GSC MIxS plant associated	1
+sample collection device	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000030, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Tara Oceans, GSC MIxS built environment, GSC MIxS agriculture	10
+sample collection method	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000053, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, Tree of Life Checklist, GSC MIxS agriculture	11
+sample coordinator	ERC000053	Tree of Life Checklist	1
+sample coordinator affiliation	ERC000053	Tree of Life Checklist	1
+sample derived from	ERC000053	Tree of Life Checklist	1
+sample disease stage	ERC000020	GSC MIxS plant associated	1
+sample disease status	ERC000020	GSC MIxS plant associated	1
+sample material processing	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+sample pooling	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+sample same as	ERC000053	Tree of Life Checklist	1
+sample size sorting method	ERC000031	GSC MIxS built environment	1
+sample storage conditions	ERC000022	GSC MIxS soil	1
+sample storage device	ERC000030	ENA Tara Oceans	1
+sample storage duration	ERC000012, ERC000020, ERC000021, ERC000023, ERC000024, ERC000025, ERC000027, ERC000036	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, ENA sewage checklist	8
+sample storage location	ERC000012, ERC000020, ERC000021, ERC000023, ERC000024, ERC000025, ERC000027, ERC000036, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, ENA sewage checklist, GSC MIxS agriculture	9
+sample storage temperature	ERC000012, ERC000020, ERC000021, ERC000023, ERC000024, ERC000025, ERC000027, ERC000036, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, ENA sewage checklist, GSC MIxS agriculture	9
+sample symbiont of	ERC000053	Tree of Life Checklist	1
+sample transportation date	ERC000036	ENA sewage checklist	1
+sample transportation temperature	ERC000036	ENA sewage checklist	1
+sample transportation time	ERC000036	ENA sewage checklist	1
+sample volume or weight for DNA extraction	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+sampling day weather	ERC000031	GSC MIxS built environment	1
+sampling floor	ERC000031	GSC MIxS built environment	1
+sampling room id or name	ERC000031	GSC MIxS built environment	1
+sampling time outside	ERC000031	GSC MIxS built environment	1
+sampling time point	ERC000036	ENA sewage checklist	1
+season	ERC000031, ERC000055	GSC MIxS built environment, GSC MIxS agriculture	2
+seasonal environment	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+seasonal use	ERC000031	GSC MIxS built environment	1
+secondary treatment	ERC000023	GSC MIxS wastewater sludge	1
+sediment type	ERC000021	GSC MIxS sediment	1
+sequence quality check	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+sequencing location	ERC000055	GSC MIxS agriculture	1
+serotype	ERC000011	ENA default sample checklist	1
+serovar	ERC000011	ENA default sample checklist	1
+sewage type	ERC000023, ERC000036	GSC MIxS wastewater sludge, ENA sewage checklist	2
+sex	ERC000011, ERC000053	ENA default sample checklist, Tree of Life Checklist	2
+shading device condition	ERC000031	GSC MIxS built environment	1
+shading device location	ERC000031	GSC MIxS built environment	1
+shading device material	ERC000031	GSC MIxS built environment	1
+shading device signs of water/mold	ERC000031	GSC MIxS built environment	1
+shading device type	ERC000031	GSC MIxS built environment	1
+sieving	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+silicate	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+single cell or viral particle lysis approach	ERC000055	GSC MIxS agriculture	1
+single cell or viral particle lysis kit protocol	ERC000055	GSC MIxS agriculture	1
+size of the catchment area	ERC000036	ENA sewage checklist	1
+size-fraction lower threshold	ERC000024, ERC000030, ERC000055	GSC MIxS water, ENA Tara Oceans, GSC MIxS agriculture	3
+size-fraction upper threshold	ERC000024, ERC000030, ERC000055	GSC MIxS water, ENA Tara Oceans, GSC MIxS agriculture	3
+slope aspect	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+slope gradient	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+sludge retention time	ERC000023	GSC MIxS wastewater sludge	1
+sodium	ERC000021, ERC000023, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	5
+soil cover	ERC000055	GSC MIxS agriculture	1
+soil horizon	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+soil pH	ERC000055	GSC MIxS agriculture	1
+soil texture measurement	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+soil texture method	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+soil type	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+soil type method	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+soil_taxonomic/FAO classification	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+soil_taxonomic/local classification	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+soil_taxonomic/local classification method	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+solar irradiance	ERC000012, ERC000055	GSC MIxS air, GSC MIxS agriculture	2
+soluble inorganic material	ERC000023	GSC MIxS wastewater sludge	1
+soluble organic material	ERC000023	GSC MIxS wastewater sludge	1
+soluble reactive phosphorus	ERC000024, ERC000027	GSC MIxS water, ENA Micro B3	2
+source material identifiers	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+space typical state	ERC000031	GSC MIxS built environment	1
+specific host	ERC000027	ENA Micro B3	1
+specific humidity	ERC000031	GSC MIxS built environment	1
+specifications	ERC000031	GSC MIxS built environment	1
+specimen_id	ERC000053	Tree of Life Checklist	1
+specimen_voucher	ERC000011, ERC000053	ENA default sample checklist, Tree of Life Checklist	2
+spike-in microbial strain	ERC000055	GSC MIxS agriculture	1
+standing water regimen	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+strain	ERC000011	ENA default sample checklist	1
+sub_species	ERC000011	ENA default sample checklist	1
+sub_strain	ERC000011	ENA default sample checklist	1
+subspecific genetic lineage	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+substructure type	ERC000031	GSC MIxS built environment	1
+sulfate	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+sulfide	ERC000021, ERC000024, ERC000025, ERC000027	GSC MIxS sediment, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	4
+surface humidity	ERC000031	GSC MIxS built environment	1
+surface material	ERC000031	GSC MIxS built environment	1
+surface moisture	ERC000031	GSC MIxS built environment	1
+surface moisture pH	ERC000031	GSC MIxS built environment	1
+surface temperature	ERC000031	GSC MIxS built environment	1
+surface-air contaminant	ERC000031	GSC MIxS built environment	1
+surveillance target	ERC000036	ENA sewage checklist	1
+suspended particulate matter	ERC000024, ERC000027	GSC MIxS water, ENA Micro B3	2
+suspended solids	ERC000023	GSC MIxS wastewater sludge	1
+symbiont	ERC000053	Tree of Life Checklist	1
+target gene	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+target subfragment	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+taxonomic classification	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, GSC MIxS built environment, GSC MIxS agriculture	9
+temperature	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000031, ERC000036, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, GSC MIxS built environment, ENA sewage checklist, GSC MIxS agriculture	10
+temperature outside house	ERC000031	GSC MIxS built environment	1
+tertiary treatment	ERC000023	GSC MIxS wastewater sludge	1
+tidal stage	ERC000021, ERC000024, ERC000027	GSC MIxS sediment, GSC MIxS water, ENA Micro B3	3
+tissue culture growth media	ERC000020	GSC MIxS plant associated	1
+tissue_lib	ERC000011	ENA default sample checklist	1
+tissue_type	ERC000011	ENA default sample checklist	1
+tolid	ERC000053	Tree of Life Checklist	1
+total carbon	ERC000021, ERC000055	GSC MIxS sediment, GSC MIxS agriculture	2
+total depth of water column	ERC000021, ERC000024, ERC000027	GSC MIxS sediment, GSC MIxS water, ENA Micro B3	3
+total dissolved nitrogen	ERC000024, ERC000027	GSC MIxS water, ENA Micro B3	2
+total inorganic nitrogen	ERC000024, ERC000027	GSC MIxS water, ENA Micro B3	2
+total nitrogen concentration	ERC000021, ERC000023, ERC000024, ERC000025, ERC000027, ERC000055	GSC MIxS sediment, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS agriculture	6
+total nitrogen content	ERC000021, ERC000022, ERC000023, ERC000024, ERC000027	GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, ENA Micro B3	5
+total nitrogen content method	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+total organic carbon	ERC000021, ERC000022, ERC000055	GSC MIxS sediment, GSC MIxS soil, GSC MIxS agriculture	3
+total organic carbon method	ERC000022, ERC000055	GSC MIxS soil, GSC MIxS agriculture	2
+total particulate carbon	ERC000024, ERC000027	GSC MIxS water, ENA Micro B3	2
+total phosphate	ERC000023, ERC000055	GSC MIxS wastewater sludge, GSC MIxS agriculture	2
+total phosphorus	ERC000024, ERC000027	GSC MIxS water, ENA Micro B3	2
+train line	ERC000031	GSC MIxS built environment	1
+train station collection location	ERC000031	GSC MIxS built environment	1
+train stop collection location	ERC000031	GSC MIxS built environment	1
+trophic level	ERC000012, ERC000020, ERC000021, ERC000022, ERC000023, ERC000024, ERC000025, ERC000027, ERC000031, ERC000055	GSC MIxS air, GSC MIxS plant associated, GSC MIxS sediment, GSC MIxS soil, GSC MIxS wastewater sludge, GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3, GSC MIxS built environment, GSC MIxS agriculture	10
+turbidity	ERC000021, ERC000024, ERC000027	GSC MIxS sediment, GSC MIxS water, ENA Micro B3	3
+typical occupant density	ERC000031	GSC MIxS built environment	1
+variety	ERC000011	ENA default sample checklist	1
+ventilation rate	ERC000012	GSC MIxS air	1
+ventilation type	ERC000012, ERC000031	GSC MIxS air, GSC MIxS built environment	2
+visual media	ERC000031	GSC MIxS built environment	1
+volatile organic compounds	ERC000012	GSC MIxS air	1
+wall area	ERC000031	GSC MIxS built environment	1
+wall construction type	ERC000031	GSC MIxS built environment	1
+wall finish material	ERC000031	GSC MIxS built environment	1
+wall height	ERC000031	GSC MIxS built environment	1
+wall location	ERC000031	GSC MIxS built environment	1
+wall signs of water/mold	ERC000031	GSC MIxS built environment	1
+wall surface treatment	ERC000031	GSC MIxS built environment	1
+wall texture	ERC000031	GSC MIxS built environment	1
+wall thermal mass	ERC000031	GSC MIxS built environment	1
+wastewater type	ERC000023	GSC MIxS wastewater sludge	1
+water content	ERC000021, ERC000022	GSC MIxS sediment, GSC MIxS soil	2
+water content method	ERC000022	GSC MIxS soil	1
+water current	ERC000024, ERC000025, ERC000027	GSC MIxS water, GSC MIxS miscellaneous natural or artificial environment, ENA Micro B3	3
+water feature size	ERC000031	GSC MIxS built environment	1
+water feature type	ERC000031	GSC MIxS built environment	1
+water pH	ERC000055	GSC MIxS agriculture	1
+water source shared	ERC000055	GSC MIxS agriculture	1
+water temperature	ERC000027, ERC000030	ENA Micro B3, ENA Tara Oceans	2
+water temperature regimen	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+watering regimen	ERC000020, ERC000055	GSC MIxS plant associated, GSC MIxS agriculture	2
+wind direction	ERC000012	GSC MIxS air	1
+wind speed	ERC000012	GSC MIxS air	1
+window area/size	ERC000031	GSC MIxS built environment	1
+window condition	ERC000031	GSC MIxS built environment	1
+window covering	ERC000031	GSC MIxS built environment	1
+window horizontal position	ERC000031	GSC MIxS built environment	1
+window location	ERC000031	GSC MIxS built environment	1
+window material	ERC000031	GSC MIxS built environment	1
+window open frequency	ERC000031	GSC MIxS built environment	1
+window signs of water/mold	ERC000031	GSC MIxS built environment	1
+window status	ERC000031	GSC MIxS built environment	1
+window type	ERC000031	GSC MIxS built environment	1
+window vertical position	ERC000031	GSC MIxS built environment	1
