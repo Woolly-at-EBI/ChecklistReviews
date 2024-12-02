@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 import os
 import pandas as pd
 from pairwise_term_matches import compareAllTerms
+import sys
 
 class BGE_sample_mapping:
 
@@ -75,6 +76,12 @@ class BGE_sample_mapping:
     def print_stats(self):
         print("BGE_sample_mapping - print_stats")
 
+def get_bge_ibol_field_list():
+    return ['2D Barcode ID DNA','2D Barcode ID Tissue','Additional ID','Associated Specimens','Associated Taxa','Biobanked tissue type','Class','Collection Code','Collection Date Accuracy','Collection End Date','Collection Event ID','Collection Notes','Collection Start Date','Collectors','Coordinate Accuracy','Country/ Ocean','DNA Biobank ID','DNA Biobank Name','DNA Concentration [ng/µL]','DNA Volume [µL]','Depth','Depth Precision','ENA Sample Accession','ENA_BIOSAMPLE_ID','ENA_PROJECT_ID','Elev','Elevation Precision','Event Time','Exact Site','External URLs','Extra Info','Extraction Date','Extraction Method','Extraction Staff or Lab','Family','Field ID','GGBN Upload Mechanism','GPS Source','Genus','Habitat','Identification Date','Identification Method','Identifier','Identifier Email','Identifier ORCID','Institution Storing','Lab status','Lat','Life Stage','Lon','Museum ID','NCBI Tax ID','Notes','Order','Permits','Phylum','Plate ID','Preparation Type (DNA)','Preparation type (Tissue)','Preservation history','Quantification Date','Quantification Method','Region','Relation To Voucher','Reproduction','Sample Alias','Sample ID','Sampling Protocol','Sector','Sex','Site Code','Species','State/ Province','Subfamily','Subspecies','Taxonomy Notes','Tissue Biobank ID','Tissue Biobank Name','Tissue Descriptor','Tissue biobanked?','Tribe','Type Status','Type of Additional ID','Voucher Status','Voucher preservation','Well Position','institution ID']
+
+
+def get_old_bge_ibol_field_list():
+    return ['Associated Specimens','Associated Taxa','Class','Collection Date','Collection End Date','Collection Event ID','Collection Notes','Collection code','Collectors','Coordinate Accuracy','Country/Ocean','Depth','Depth Precision','Elev','Elevation Precision','Event Time','Exact Site','External URLs','Family','Field ID','GPS source','Genus','Habitat','Identification Method','Identifier','Identifier Email','Institution storing','Lat','Life Stage','Long','Museum ID','Notes','Order','Phylum','Region','Reproduction','Sample ID','Sampling Protocol','Sector','Sex','Site Code','Species','State/Province','Subfamily','Subspecies','Taxonomy Notes','Tissue Descriptor','Tribe','Voucher Status']
 
 def exact_compare2lists(source_list, target_list, outfile):
     """
@@ -96,6 +103,7 @@ def exact_compare2lists(source_list, target_list, outfile):
 def fuzzy_compare2lists(source_list, target_list, fuzzy_threshold, outfile):
     """
 
+    :param fuzzy_threshold:
     :param outfile:
     :param source_list:
     :param target_list:
@@ -122,7 +130,22 @@ def get_ena_field_names():
 
     return sorted(field_names_set)
 
+
+def compare_ibol_lists():
+    new_bge_ibol_field_set =  set(get_bge_ibol_field_list())
+    old_bge_ibol_field_set =  set(get_old_bge_ibol_field_list())
+    print(f"new_bge_ibol_field_set total={len(new_bge_ibol_field_set)}")
+    print(f"old_bge_ibol_field_set total={len(old_bge_ibol_field_set)}")
+    intersection_set = new_bge_ibol_field_set & old_bge_ibol_field_set
+    print(f"intersection total={len(intersection_set)}")
+    print(f"unique to old_bge_ibol_field_set={sorted(old_bge_ibol_field_set.difference(new_bge_ibol_field_set))}")
+    print(f"unique to new_bge_ibol_field_set={sorted(new_bge_ibol_field_set.difference(old_bge_ibol_field_set))}")
+
+
 def main():
+    compare_ibol_lists()
+    sys.exit()
+
     BGE_sample_mapping_obj = BGE_sample_mapping()
     BGE_sample_mapping_obj.print_stats()
     out_data_dir = "../data/out_files"
