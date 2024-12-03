@@ -50,10 +50,16 @@ class BGE_sample_mapping:
         self.df_dict = self.parse_bg_mapping_file()
 
     def get_target_fields_df(self, target):
+        logger.info(f"in get_target_fields_df target={target}===")
         if target in self.sheet_mapping_dict:
             my_df_name = self.sheet_mapping_dict[target]['name']
         else:
             my_df_name = target
+        # logger.info(f"all targets = {sorted(self.df_dict)}")
+        # print(self.df_dict[my_df_name])
+        # logger.info(f"columns={sorted(self.df_dict[my_df_name].columns)}")
+        # logger.info(type(my_df_name))
+
         return self.df_dict[my_df_name]
 
     def get_target_field_list(self, target):
@@ -72,9 +78,15 @@ class BGE_sample_mapping:
 
         return my_df.to_dict(orient='records')
 
+    def get_bcdm_field_list(self):
+        return sorted(self.get_target_field_list(target='bcdm'))
 
     def print_stats(self):
         print("BGE_sample_mapping - print_stats")
+        sheet_name_list = sorted(self.df_dict)
+        print(f"sheet_names: {sheet_name_list}")
+        # print(f"bcdm terms: {self.get_bcdm_field_list()}")
+
 
 def get_bge_ibol_field_list():
     return ['2D Barcode ID DNA','2D Barcode ID Tissue','Additional ID','Associated Specimens','Associated Taxa','Biobanked tissue type','Class','Collection Code','Collection Date Accuracy','Collection End Date','Collection Event ID','Collection Notes','Collection Start Date','Collectors','Coordinate Accuracy','Country/ Ocean','DNA Biobank ID','DNA Biobank Name','DNA Concentration [ng/µL]','DNA Volume [µL]','Depth','Depth Precision','ENA Sample Accession','ENA_BIOSAMPLE_ID','ENA_PROJECT_ID','Elev','Elevation Precision','Event Time','Exact Site','External URLs','Extra Info','Extraction Date','Extraction Method','Extraction Staff or Lab','Family','Field ID','GGBN Upload Mechanism','GPS Source','Genus','Habitat','Identification Date','Identification Method','Identifier','Identifier Email','Identifier ORCID','Institution Storing','Lab status','Lat','Life Stage','Lon','Museum ID','NCBI Tax ID','Notes','Order','Permits','Phylum','Plate ID','Preparation Type (DNA)','Preparation type (Tissue)','Preservation history','Quantification Date','Quantification Method','Region','Relation To Voucher','Reproduction','Sample Alias','Sample ID','Sampling Protocol','Sector','Sex','Site Code','Species','State/ Province','Subfamily','Subspecies','Taxonomy Notes','Tissue Biobank ID','Tissue Biobank Name','Tissue Descriptor','Tissue biobanked?','Tribe','Type Status','Type of Additional ID','Voucher Status','Voucher preservation','Well Position','institution ID']
@@ -115,7 +127,7 @@ def fuzzy_compare2lists(source_list, target_list, fuzzy_threshold, outfile):
 
     for match_type in ['exact', 'fuzzy']:
         filter_df = df.query('match_type == @match_type')
-        logger.info(f"match_type=\n{filter_df.head(100).to_markdown(index=False)}")
+        logger.info(f"match_type={match_type}\n{filter_df.head(100).to_markdown(index=False)}")
 
 def get_ena_field_names():
     """
@@ -141,13 +153,73 @@ def compare_ibol_lists():
     print(f"unique to old_bge_ibol_field_set={sorted(old_bge_ibol_field_set.difference(new_bge_ibol_field_set))}")
     print(f"unique to new_bge_ibol_field_set={sorted(new_bge_ibol_field_set.difference(old_bge_ibol_field_set))}")
 
+def BCDM_iBOL_comparison(BGE_sample_mapping_obj):
+    print("-------------------------------------------------------------------------")
+    out_data_dir = "../data/out_files"
+    out_file = os.path.join(out_data_dir, f"{'bcdm_ibol_comparison.txt'}")
+    new_bge_ibol_field_list =  sorted(get_bge_ibol_field_list())
+
+    print(f"bcdm_list={BGE_sample_mapping_obj.get_bcdm_field_list()}")
+    print()
+    print(f"new_bge_ibol_field_list={new_bge_ibol_field_list}")
+    fuzzy_compare2lists(BGE_sample_mapping_obj.get_bcdm_field_list(), new_bge_ibol_field_list, 50, out_file)
+
+
+def generate_SSOM(mapped_sheet, BGE_sample_mapping_obj, out_data_dir):
+    print("-----------------------------------------------------------------------------------------")
+    #f 'BCDM-BGE_iBOL'
+    if mapped_sheet == 'BCDM-BGE_iBOL':
+        BGE_sample_mapping_obj.print_stats()
+        my_df = BGE_sample_mapping_obj.get_target_fields_df(mapped_sheet)
+        new_df = my_df[['field','BGE iBOL metadata sheet']]
+        new_df = new_df.rename(columns={'field': 'subject_label', 'BGE iBOL metadata sheet': 'object_label'})
+
+        new_df['subject_label'] = new_df['subject_label'].apply(lambda x: f"bcdm:{x}" if pd.notna(x) and x else x)
+        new_df['object_label'] = new_df['object_label'].apply(lambda x: f"iboleu:{x}" if pd.notna(x) and x else x)
+        out_file = os.path.join(out_data_dir, f"{'bcdm_iBOL_SSSOM.tsv'}")
+    else:
+        logger.error(f"mapped_sheet {mapped_sheet} not in BGE_sample_mapping_obj")
+
+    new_df['subject_id'] = new_df['subject_label']
+
+    new_df['object_id'] = new_df['object_label']
+    # https://academic.oup.com/database/article/doi/10.1093/database/baac035/6591806
+    new_df['predicate_id'] = new_df.apply( lambda row: f"skos:exactMatch"  if pd.notna(row['object_label']) and pd.notna(row['subject_label']) else f"notApplicable",  axis=1)
+    narrow_subject_list = ["bcdm:coord", "bcdm:insdc_acs"]
+    broader_subject_list = ["bcdm:specimen_linkout"]
+    new_df['predicate_id'] = new_df.apply(lambda row: f"skos:narrowMatch" if row['subject_label'] in narrow_subject_list else row['predicate_id'], axis = 1)
+    new_df['predicate_id'] = new_df.apply(
+        lambda row: f"skos:broaderMatch" if row['subject_label'] in broader_subject_list else row['predicate_id'],
+        axis = 1)
+    new_df['mapping_justification'] = 'semapv:ManualMappingCuration'
+    new_df['mapping_date'] = '2024-04-24'
+    for my_col in ['author_id', 'confidence', 'comment',	'examples']:
+        new_df[my_col] = ""
+    new_df['subject_source'] = 'https://github.com/boldsystems-central/BCDM/blob/main/field_definitions.tsv'
+    new_df['subject_source_version'] = '2024-08-31'
+    new_df['object_source'] = 'iBOL-EU spreadsheet'
+    new_df['object_source_version'] = '2024-O8'
+    new_df = new_df[['subject_id', 'subject_label', 'predicate_id', 'object_id', 'object_label',
+                     'mapping_justification', 'mapping_date', 'author_id', 'subject_source', 'subject_source_version',
+                     'object_source', 'object_source_version', 'confidence', 'comment',	'examples']]
+
+    print(new_df.head(10))
+    logger.info(f"writing to {out_file}")
+    new_df.to_csv(out_file,sep="\t", index=False)
+    sys.exit()
+
+    logger.info(my_df.columns)
+    logger.info(f"left=\n{new_df['subject_label'].to_string(index=False)}")
+
 
 def main():
     compare_ibol_lists()
-    sys.exit()
 
     BGE_sample_mapping_obj = BGE_sample_mapping()
     BGE_sample_mapping_obj.print_stats()
+
+    BCDM_iBOL_comparison(BGE_sample_mapping_obj)
+
     out_data_dir = "../data/out_files"
 
     field_list_dict = {}
@@ -169,6 +241,8 @@ def main():
         print("\n--------Comparison of source=bcdm of new(Nov 2024) and target=old(April 2024))---------")
         exact_compare2lists(field_list_dict['bcdm'], field_list_dict['bcdm_old'], out_file)
 
+    BCDM_iBOL_comparison(BGE_sample_mapping_obj)
+    generate_SSOM('BCDM-BGE_iBOL', BGE_sample_mapping_obj, out_data_dir)
 
 if __name__ == '__main__':
     logging.basicConfig(level = logging.INFO, format = '%(levelname)s - %(message)s')
