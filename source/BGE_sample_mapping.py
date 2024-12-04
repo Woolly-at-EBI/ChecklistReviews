@@ -14,6 +14,10 @@ import os
 import pandas as pd
 from pairwise_term_matches import compareAllTerms
 import sys
+from ena_info import EnaInfo
+
+def get_out_dir():
+    return "../data/"
 
 class BGE_sample_mapping:
 
@@ -155,7 +159,7 @@ def compare_ibol_lists():
 
 def BCDM_iBOL_comparison(BGE_sample_mapping_obj):
     print("-------------------------------------------------------------------------")
-    out_data_dir = "../data/out_files"
+    out_data_dir = get_out_dir()
     out_file = os.path.join(out_data_dir, f"{'bcdm_ibol_comparison.txt'}")
     new_bge_ibol_field_list =  sorted(get_bge_ibol_field_list())
 
@@ -165,40 +169,69 @@ def BCDM_iBOL_comparison(BGE_sample_mapping_obj):
     fuzzy_compare2lists(BGE_sample_mapping_obj.get_bcdm_field_list(), new_bge_ibol_field_list, 50, out_file)
 
 
-def generate_SSOM(mapped_sheet, BGE_sample_mapping_obj, out_data_dir):
+def generate_SSOM(mapped_sheet, BGE_sample_mapping_obj):
     print("-----------------------------------------------------------------------------------------")
     #f 'BCDM-BGE_iBOL'
+    out_file = os.path.join(f"{get_out_dir()}{mapped_sheet}_SSSOM.tsv")
+    unmatched_list = ["unmatched"]
+    close_subject_list = []
     if mapped_sheet == 'BCDM-BGE_iBOL':
         BGE_sample_mapping_obj.print_stats()
         my_df = BGE_sample_mapping_obj.get_target_fields_df(mapped_sheet)
         new_df = my_df[['field','BGE iBOL metadata sheet']]
         new_df = new_df.rename(columns={'field': 'subject_label', 'BGE iBOL metadata sheet': 'object_label'})
 
+        new_df['mapping_date'] = '2024-04-24'
+        narrow_subject_list = ["bcdm:coord", "bcdm:insdc_acs"]
+        broader_subject_list = ["bcdm:specimen_linkout"]
+        new_df['subject_source'] = 'https://github.com/boldsystems-central/BCDM/blob/main/field_definitions.tsv'
+        new_df['subject_source_version'] = '2024-08-31'
+        new_df['object_source'] = 'iBOL-EU spreadsheet'
+        new_df['object_source_version'] = '2024-O8'
         new_df['subject_label'] = new_df['subject_label'].apply(lambda x: f"bcdm:{x}" if pd.notna(x) and x else x)
         new_df['object_label'] = new_df['object_label'].apply(lambda x: f"iboleu:{x}" if pd.notna(x) and x else x)
-        out_file = os.path.join(out_data_dir, f"{'bcdm_iBOL_SSSOM.tsv'}")
+    elif  mapped_sheet == 'ENA-iBOL':
+        my_df = BGE_sample_mapping_obj.get_target_fields_df(mapped_sheet)
+
+        logger.info(my_df.head())
+        my_df = my_df.rename(columns = {'ENA': 'subject_label', 'BIOSCAN single sample (BOLD)': 'object_label'})
+        new_df = my_df[['subject_label', 'object_label']]
+        logger.info(new_df.head())
+        narrow_subject_list = [""]
+        broader_subject_list = ["ena:taxon_id", "ena:scientific_name", "ena:organism part"]
+        close_subject_list = ['ena:sample collection method', 'ena:identified_by', 'ena:collected_by']
+        new_df['mapping_date'] = '2024-04-24'
+        new_df['subject_source'] = ''
+        new_df['subject_source_version'] = '2024-08-31'
+        new_df['object_source'] = 'ENA-iBOL spreadsheet'
+        new_df['object_source_version'] = '2024-O8'
+        new_df['subject_label'] = new_df['subject_label'].apply(lambda x: f"ena:{x}" if pd.notna(x) and x and x != "unmatched" else x)
+        new_df['object_label'] = new_df['object_label'].apply(lambda x: f"iboleu:{x}" if pd.notna(x) and x and x != "unmatched" else x)
+
     else:
         logger.error(f"mapped_sheet {mapped_sheet} not in BGE_sample_mapping_obj")
 
     new_df['subject_id'] = new_df['subject_label']
-
     new_df['object_id'] = new_df['object_label']
     # https://academic.oup.com/database/article/doi/10.1093/database/baac035/6591806
     new_df['predicate_id'] = new_df.apply( lambda row: f"skos:exactMatch"  if pd.notna(row['object_label']) and pd.notna(row['subject_label']) else f"notApplicable",  axis=1)
-    narrow_subject_list = ["bcdm:coord", "bcdm:insdc_acs"]
-    broader_subject_list = ["bcdm:specimen_linkout"]
     new_df['predicate_id'] = new_df.apply(lambda row: f"skos:narrowMatch" if row['subject_label'] in narrow_subject_list else row['predicate_id'], axis = 1)
     new_df['predicate_id'] = new_df.apply(
         lambda row: f"skos:broaderMatch" if row['subject_label'] in broader_subject_list else row['predicate_id'],
         axis = 1)
+    new_df['predicate_id'] = new_df.apply(
+        lambda row: f"skos:closeMatch" if row['subject_label'] in close_subject_list else row['predicate_id'],
+        axis = 1)
+    new_df['predicate_id'] = new_df.apply(
+        lambda row: f"notApplicable" if row['subject_label'] in unmatched_list or  row['object_label'] in unmatched_list else row['predicate_id'],
+        axis = 1)
+
+
     new_df['mapping_justification'] = 'semapv:ManualMappingCuration'
-    new_df['mapping_date'] = '2024-04-24'
+
     for my_col in ['author_id', 'confidence', 'comment',	'examples']:
         new_df[my_col] = ""
-    new_df['subject_source'] = 'https://github.com/boldsystems-central/BCDM/blob/main/field_definitions.tsv'
-    new_df['subject_source_version'] = '2024-08-31'
-    new_df['object_source'] = 'iBOL-EU spreadsheet'
-    new_df['object_source_version'] = '2024-O8'
+
     new_df = new_df[['subject_id', 'subject_label', 'predicate_id', 'object_id', 'object_label',
                      'mapping_justification', 'mapping_date', 'author_id', 'subject_source', 'subject_source_version',
                      'object_source', 'object_source_version', 'confidence', 'comment',	'examples']]
@@ -206,10 +239,89 @@ def generate_SSOM(mapped_sheet, BGE_sample_mapping_obj, out_data_dir):
     print(new_df.head(10))
     logger.info(f"writing to {out_file}")
     new_df.to_csv(out_file,sep="\t", index=False)
-    sys.exit()
 
-    logger.info(my_df.columns)
-    logger.info(f"left=\n{new_df['subject_label'].to_string(index=False)}")
+
+def removeNaN_from_list(my_list):
+    return [x for x in my_list if x == x]
+
+def compare_ena_ibol(ena_info, BGE_sample_mapping_obj):
+    print(f"checklist_field_names (total={len(ena_info.all_checklist_field_names_list)})")
+    print()
+
+    mapped_sheet = 'ENA-iBOL'
+    my_df = BGE_sample_mapping_obj.get_target_fields_df(mapped_sheet)
+    logger.info(f"my_df={my_df}")
+    ena_field_name = 'ENA Tree of Life Checklist (ERC000053)'
+    ena_field_name = 'ENA'
+    ibol_field_name = 'BIOSCAN single sample (BOLD)'
+    logger.info(f"left_field_name={ena_field_name}  values={my_df[ena_field_name].to_list()}")
+    logger.info(f"right_field_name={ibol_field_name}  values={my_df[ibol_field_name].to_list()}")
+    my_left_dict = dict(zip(my_df[ena_field_name], my_df[ibol_field_name]))
+    logger.info(f"my_left_dict={my_left_dict}")
+    my_right_dict = dict(zip(my_df[ibol_field_name], my_df[ena_field_name]))
+    logger.info(f"my_right_dict={my_right_dict}")
+
+    my_new_dict = {}
+    ibol_remaining_set = set(my_df[ibol_field_name])
+    ena_unmatched_set = set()
+    unmatched_pattern_list = ["", "unmatched"]
+    for ena_field_name in ena_info.all_checklist_field_names_list:
+
+        if ena_field_name in my_left_dict and  my_left_dict[ena_field_name] not in unmatched_pattern_list:
+            my_new_dict[ena_field_name] = my_left_dict[ena_field_name]
+            if my_left_dict[ena_field_name] in ibol_remaining_set:
+                ibol_remaining_set.remove(my_left_dict[ena_field_name])
+        else:
+            my_new_dict[ena_field_name] = "unmatched"
+            ena_unmatched_set.add(ena_field_name)
+    logger.info(f"remaining_set={ibol_remaining_set}")
+    new_df = pd.DataFrame.from_dict(my_new_dict, orient='index')
+    logger.info(f"new_df={new_df.head(1000)}")
+    # logger.info(f"going in ena_unmatched_set={ena_unmatched_set}")
+    ena_unmatched_set = set(removeNaN_from_list(ena_unmatched_set))
+    logger.info(f"ena_unmatched_set={ena_unmatched_set}")
+    ibol_remaining_set = set(removeNaN_from_list(ibol_remaining_set))
+    logger.info(f"ibol_remaining_set={ibol_remaining_set}")
+
+    mapped_df = compareAllTerms(list(ena_unmatched_set), list(ibol_remaining_set), 50)
+    logger.info(f"mapped_df match_type(s)={mapped_df['match_type'].value_counts()}")
+    # logger.info(f"mapped_df={mapped_df.head(30).to_markdown()}")
+    exact_df = mapped_df.query('match_type == "harmonised"')
+    logger.info(f"exact_df={exact_df.to_markdown(index=False)}")
+    exact_dict = exact_df.to_dict(orient='records')
+    logger.info(exact_dict)
+
+    def process_matches(my_matching_dict):
+        for my_record in my_matching_dict:
+            logger.info(f"my_record={my_record}")
+            left_term = my_record['left_term']
+            right_term = my_record['match']
+            logger.info(f"left_term={left_term} right_term={right_term}")
+            my_new_dict[left_term] = right_term
+            ena_unmatched_set.remove(left_term)
+            ibol_remaining_set.remove(right_term)
+
+    process_matches(exact_dict)
+
+    fuzzy_df = mapped_df.query('match_type == "fuzzy"')
+    logger.info(f"fuzzy_df={fuzzy_df.to_markdown(index=False)}")
+
+    for ibol_field_name in ibol_remaining_set:
+        my_new_dict[ibol_field_name] = "unmatched"
+
+    # logger.info(my_new_dict)
+    new_df = pd.DataFrame.from_dict(my_new_dict, orient='index')
+    new_df['left_term'] = new_df.index
+    new_df.columns = ['right_term', 'left_term']
+    new_df = new_df[['left_term', 'right_term']]
+    new_df = new_df.sort_values(by='left_term', key=lambda col: col.str.lower())
+    logger.info(f"new_df=\n{new_df.sample(n=10)}")
+    outfile = f"{get_out_dir()}/new_ena_ibol.tsv"
+    logger.info(f"writing to {outfile}")
+    new_df.to_csv(outfile, sep="\t", index=False)
+
+    outfile = f"{get_out_dir()}/ena_ibol_sssom.tsv"
+    generate_SSOM(mapped_sheet, BGE_sample_mapping_obj)
 
 
 def main():
@@ -220,7 +332,7 @@ def main():
 
     BCDM_iBOL_comparison(BGE_sample_mapping_obj)
 
-    out_data_dir = "../data/out_files"
+    out_data_dir = get_out_dir()
 
     field_list_dict = {}
 
@@ -242,7 +354,10 @@ def main():
         exact_compare2lists(field_list_dict['bcdm'], field_list_dict['bcdm_old'], out_file)
 
     BCDM_iBOL_comparison(BGE_sample_mapping_obj)
-    generate_SSOM('BCDM-BGE_iBOL', BGE_sample_mapping_obj, out_data_dir)
+    generate_SSOM('BCDM-BGE_iBOL', BGE_sample_mapping_obj)
+
+    ena_info = EnaInfo()
+    compare_ena_ibol(ena_info, BGE_sample_mapping_obj)
 
 if __name__ == '__main__':
     logging.basicConfig(level = logging.INFO, format = '%(levelname)s - %(message)s')
