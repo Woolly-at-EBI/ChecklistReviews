@@ -377,6 +377,9 @@ def term_alignment_dict2df(my_dict):
     df["fuzzy_score"] = df["fuzzy_score"].astype(int)
     return df
 
+def removeNaN_from_list(my_list):
+    return [x for x in my_list if x == x]
+
 def compareAllTerms(left_list, right_list, fuzzy_threshold):
     """
     The most important method of the lot as this compares all terms in one list with another.
@@ -396,8 +399,8 @@ def compareAllTerms(left_list, right_list, fuzzy_threshold):
     # make sure that the lists are unique and sorted, note the slight name change, in case we need the original list again
     left_term_set = set(left_list)
     right_term_set = set(right_list)
-    left_term_list = sorted(left_term_set)
-    right_term_list = sorted(right_term_set)
+    left_term_list = sorted(removeNaN_from_list(left_term_set))
+    right_term_list = sorted(removeNaN_from_list(right_term_set))
     # print(f"left len={len(left_term_list)} right len={len(right_term_list)}")
     left_clean_dict, left_raw_dict = generate_clean_dict(left_term_list)
     right_clean_dict, right_raw_dict = generate_clean_dict(right_term_list)
