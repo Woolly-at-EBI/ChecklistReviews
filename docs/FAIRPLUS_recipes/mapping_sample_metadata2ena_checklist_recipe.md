@@ -214,9 +214,20 @@ and then use webin
          opt2-->opt3[" Read the description "]
          opt3-->opt4[" Look at the field name and\n even mouse over description "]
          opt4-->opt5["Download from here for detail in XML\n if desired"]
+         
         end
         
 
+      subgraph "Download and Fill out the ENA Sample TEMPLATE"
+         opt5-->apt1["see https://ena-docs.readthedocs.io/en/latest/submit/samples/interactive.html"]
+         apt1-->apt2["go to the checklist,\n and to the checklist template\n you identified before"]
+         apt2-->apt3["add any extra sample related field_names"]
+         apt3-->apt4["download"]
+         apt4-->apt5["in separate TSV or spreadsheet organise\n your sample rows with columns in the same order as the field_names"]
+         apt5-- "check that values will likely pass the regex" -->apt5
+         apt5-->apt6["add sample rows from row 4 downwards"]
+
+        end  
      
 
       
@@ -228,6 +239,12 @@ and then use webin
       style opt3 fill:#0A749B,stroke:#333,stroke-width:2px
       style opt4 fill:#0A749B,stroke:#333,stroke-width:2px
       style opt5 fill:#0A749B,stroke:#333,stroke-width:2px
+      style apt1 fill:#0A749B,stroke:#333,stroke-width:2px
+      style apt2 fill:#0A749B,stroke:#333,stroke-width:2px
+      style apt3 fill:#0A749B,stroke:#333,stroke-width:2px
+      style apt4 fill:#0A749B,stroke:#333,stroke-width:2px
+      style apt5 fill:#FF5733,stroke:#333,stroke-width:2px
+      style apt6 fill:#FF5733,stroke:#333,stroke-width:2px
 
       style no_definitions fill:#008000,stroke:#333,stroke-width:2px
 ```
