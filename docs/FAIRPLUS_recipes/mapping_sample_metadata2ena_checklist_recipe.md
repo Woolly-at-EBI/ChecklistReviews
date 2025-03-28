@@ -161,15 +161,41 @@ graph TD;
     style D fill:#0A749B,stroke:#333,stroke-width:2px
 </div>
 ````
-
+### Find out what metadata it is and what standards they follow
 ```mermaid
   graph TD; 
-      A[input data]-->B[conversion to open format]
-      A[input data]-->C[automatic annotation]
-      B[conversion to open format]-->D((output data))
-      C[automatic annotation]-->D((output data))  
-      style A fill:#FF5733,stroke:#333,stroke-width:2px
+      A([Collected metadata])-->B[used institutional system]
+      A-->C[custom]
+      subgraph mystds ["standards being used"]
+        
+        C-->D
+        B-->D(mainstream standard)
+        D-->main-standard[Note what standard]
+        B-->E
+        C-->E(institutional standard)
+        C-->F(no standard)
+        end
+      E-->schema[("tables of field_names\n(schema)")]
+      schema-->definitions(["table of categories,\n field_names, field_ids\nand descriptions"])
+      F-->IF{"if fields described"}
+      IF-->definitions
+      IF-->no_definitions(["table of categories,\n field names"])
+      categories{{"Categories of metadata\n- study\n- project\n- sample\n- experiment"}}
+      categories-->definitions
+      categories-->no_definitions
+      main-standard -..-> definitions
+ 
+      
+      style A fill:#008000,stroke:#333,stroke-width:2px
+      style B fill:#FF5733,stroke:#333,stroke-width:2px
+      style C fill:#FF5733,stroke:#333,stroke-width:2px
       style D fill:#0A749B,stroke:#333,stroke-width:2px
+      style E fill:#0A749B,stroke:#333,stroke-width:2px
+      style F fill:#0A749B,stroke:#333,stroke-width:2px
+      style main-standard fill:#008000,stroke:#333,stroke-width:2px
+      style definitions fill:#008000,stroke:#333,stroke-width:2px
+      style no_definitions fill:#008000,stroke:#333,stroke-width:2px
+      
       
       
 ```
