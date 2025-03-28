@@ -134,15 +134,12 @@ This style of referencing will show up in text like this {footcite}`Gu2020`, and
 
 If you want to include figures, please use the following 
 
-
 <!-- 
 ```{figure_fairplus} ./my_figure.svg
 name: fcb-help-recipe-template-figure1
 subtitle: the proper caption for the figure.
 ```
 -->
-
-
 
 one may use the following **[mermaid](https://mermaid-js.github.io/mermaid/#/)** syntax:
 
@@ -166,8 +163,8 @@ graph TD;
   graph TD; 
       A([Collected metadata])-->B[used institutional system]
       A-->C[custom]
-      subgraph mystds ["standards being used"]
-        
+      
+      subgraph mystds ["systems used for storing field_names and values"]
         C-->D
         B-->D(mainstream standard)
         D-->main-standard[Note what standard]
@@ -175,17 +172,20 @@ graph TD;
         C-->E(institutional standard)
         C-->F(no standard)
         end
-      E-->schema[("tables of field_names\n(schema)")]
+        
+      subgraph "collate field_names"  
+        E-->schema[("tables of field_names\n(schema)")]
+        F-->IF{"if fields described"}
+        categories{{"Categories of metadata\n- study\n- project\n- sample\n- experiment"}}
+        end
+
       schema-->definitions(["table of categories,\n field_names, field_ids\nand descriptions"])
-      F-->IF{"if fields described"}
       IF-->definitions
       IF-->no_definitions(["table of categories,\n field names"])
-      categories{{"Categories of metadata\n- study\n- project\n- sample\n- experiment"}}
-      categories-->definitions
+            categories-->definitions
       categories-->no_definitions
       main-standard -..-> definitions
  
-      
       style A fill:#008000,stroke:#333,stroke-width:2px
       style B fill:#FF5733,stroke:#333,stroke-width:2px
       style C fill:#FF5733,stroke:#333,stroke-width:2px
@@ -195,9 +195,41 @@ graph TD;
       style main-standard fill:#008000,stroke:#333,stroke-width:2px
       style definitions fill:#008000,stroke:#333,stroke-width:2px
       style no_definitions fill:#008000,stroke:#333,stroke-width:2px
+```
+
+### Aligning your Metadata with ENA's
+
+see checklists in https://www.ebi.ac.uk/ena/browser/checklists
+see https://ena-docs.readthedocs.io/en/latest/submit/samples/interactive.html
+and then use webin 
+
+```mermaid
+  graph TD; 
+      A([Collected metadata])-->B{"standard in [\n'GSC MIxS',\n'DarwinCore']"}
+      B-- True -->SampleCat["Sample Category"]
+      SampleCat-->opt1
+      B-- False -->C[custom]
+      subgraph "choose the appropriate ENA Sample sheet"
+         opt1["https://www.ebi.ac.uk/ena/browser/checklists"] -->opt2[" click on a checklist "]
+         opt2-->opt3[" Read the description "]
+         opt3-->opt4[" Look at the field name and\n even mouse over description "]
+         opt4-->opt5["Download from here for detail in XML\n if desired"]
+        end
+        
+
+     
+
       
-      
-      
+      style A fill:#008000,stroke:#333,stroke-width:2px
+      style B fill:#FF5733,stroke:#333,stroke-width:2px
+      style C fill:#FF5733,stroke:#333,stroke-width:2px
+      style opt1 fill:#0A749B,stroke:#333,stroke-width:2px
+      style opt2 fill:#0A749B,stroke:#333,stroke-width:2px
+      style opt3 fill:#0A749B,stroke:#333,stroke-width:2px
+      style opt4 fill:#0A749B,stroke:#333,stroke-width:2px
+      style opt5 fill:#0A749B,stroke:#333,stroke-width:2px
+
+      style no_definitions fill:#008000,stroke:#333,stroke-width:2px
 ```
 ---
 
