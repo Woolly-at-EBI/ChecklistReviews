@@ -98,7 +98,7 @@ Ideally, authors should mark up the information using either EDAM Ontology URI o
 ## Main Content
 
 ### Introduction
-The European Nucleotide Archive(ENA) is one of the INSDC members where much of the worlds nucleotide data is submitted to and archived. 
+The European Nucleotide Archive(ENA) is one of the INSDC members where much of the world's nucleotide data is submitted to and archived. 
 Sample related metadata submitted via checklist templates. 
 The field names on the templates are usually based on [GSC MIxS](https://www.gensc.org//pages/projects/mixs-gsc-project.html) standards. 
 This is particularly true of sample related metadata. Project, sequencing experiment and other metadata is collected separately usually with manifests.
@@ -110,54 +110,6 @@ The challenge and the focus of this recipe are the approaches to shape the metad
 ### In
 
 
-### ... write executable code
-
-
-
-### ...insert bibliographic references
-
-````{admonition} Tip
-:class: tip
-
-If you need to include bibliographic reference, use the following syntax: 
-
-```md
-{footcite}`Gu2020`
-```
-
-````
-
-This style of referencing will show up in text like this {footcite}`Gu2020`, and clicking on the link will take you to the `Reference`section at the bottom of the page.
-
-
-### ... create workflow figures
-
-If you want to include figures, please use the following 
-
-<!-- 
-```{figure_fairplus} ./my_figure.svg
-name: fcb-help-recipe-template-figure1
-subtitle: the proper caption for the figure.
-```
--->
-
-one may use the following **[mermaid](https://mermaid-js.github.io/mermaid/#/)** syntax:
-
-````{panels} 
-:container: container-lg pb-3
-:column: col-lg-12 p-2
-:card: rounded
-
-<div class="mermaid">
-graph TD;
-    A[input data]-->B[conversion to open format]
-    A[input data]-->C[automatic annotation]
-    B[conversion to open format]-->D((output data))
-    C[automatic annotation]-->D((output data))  
-    style A fill:#FF5733,stroke:#333,stroke-width:2px
-    style D fill:#0A749B,stroke:#333,stroke-width:2px
-</div>
-````
 ### Find out what metadata it is and what standards they follow
 ```mermaid
   graph TD; 
@@ -251,13 +203,12 @@ and then use webin
 ---
 
 ## Conclusion
-
-> Summarize Key Learnings of the recipe.
-> 
-> Suggest further reading using the following:
-> ### What should I read next?
-> * 
-
+- Mapping In-house Metadata to other checklists or standards is important.
+- For a handful of terms, manual mapping is the quickest.
+- When over twenty or so terms, semi-automation is wise as it saves time and 
+also means that you are less likely to miss obvious things.
+- Some manual checking is essential and almost always needed.
+- Once you have the mapping it allows you to automate submission, saving time and reducing errors.
 
 ---
 
