@@ -41,6 +41,133 @@ subtitle: C-3PO_droid
 ---
 
 
+
+````{panels_fairplus}
+:identifier_text: RX.X
+:identifier_link: 
+:difficulty_level: 2
+:recipe_type: Guidance
+:reading_time_minutes: 15
+:intended_audience: data_manager, Terminology Manager, Data Curator
+:has_executable_code: nope
+:recipe_name: Recipe Template
+```` 
+
+
+## Main Objectives
+
+The main purpose of this recipe is:
+
+> To guide how to map in-house metadata to ENA's sample checklists and other input objects.
+> This is quite simplistic in that it is mainly just using the field names.
+
+---
+
+
+## Graphical Overview
+
+```{note} 
+use this section to provide a decision tree for the overall process described in the recipe
+For more information about the syntax used to generate the diagram, please refer to the [following documentation](https://mermaid-js.github.io/mermaid/#/flowchart)
+```
+
+```{figure_fairplus} ./images/C-3PO_droid.png
+name: fcb-help-recipe-template-figure1
+subtitle: C-3PO_droid
+```
+
+### Find out what metadata it is and what standards they follow
+```mermaid
+  graph TD; 
+      A([Collected metadata])-->mystds["identify systems used for storing field names and values"]
+      mystds--"if standard mappings exist"-->mappingsAlreadyExist("Mappings already exist, so done.\n e.g. if your metadata standards are already based on DwC or MIxS")
+      mystds-->myCollation["collate my field names as list"]
+      myCollation-->ENAChecklist("choose appropriate ENA sample list")
+      ENAChecklist-->stringMap("Programmatically map the two lists")
+      stringMap--"Exact or close match"-->sanityReview("Sanity review of high confidence mappings")
+      
+      stringMap--"No or low confidence mapping"-->manualAnalysis("Manual review of low confidence mappings\n and making new mappings were assessed")
+      sanityReview--"pass"-->mapping("mapping of your and ENA checklist field names")
+      sanityReview--"fail"-->manualAnalysis
+      manualAnalysis--"valid mappings exist"-->mapping
+      manualAnalysis--"no valid mappings exist"-->no("List of your and ENA checklist field names\n where no valid mappings exist")
+      classDef default fill:#0A749B,stroke:#333,stroke-width:4px;  #blue
+```
+---
+
+
+## Requirements
+
+* technical requirements:
+   * Excel skills
+   * possibly basis scripting to compare terms
+
+* knowledge requirement:
+   * know what your source metadata schema is.
+   * understand what you are trying to achieve and why, this helps 
+   * [understand in general about GSC and MIxS](https://www.gensc.org//pages/projects/mixs-gsc-project.html)
+   * [understand the ENA metadata model]( https://ena-docs.readthedocs.io/en/latest/submit/general-guide/metadata.html) 
+
+---
+
+## Capability & Maturity Table
+
+This section is meant for authors to describe the specific `capability` which they aim to bring from one `maturity level` to the next.
+This is therefore to document the methods used **to enable change** at the level of information process
+The table is therefore structure to identify the capability, the **initial** maturity level it is estimated to be and the **final** maturity it has been brought to.
+
+
+| Capability       | Initial Maturity Level | Final Maturity Level |
+|:-----------------|:-----------------------|:---------------------|
+| Interoperability | minimal                | repeatable           |
+
+
+
+---
+
+## FAIRification Objectives, Inputs and Outputs
+
+```{admonition} Important
+:class: tip
+this section is relied upon by another component developed by FAIRplus to enhance search and presentation. It is therefore important to comply with the layout. 
+```
+
+| Actions.Objectives.Tasks                                  | Input                                                                   | Output                                               |
+|:----------------------------------------------------------|:------------------------------------------------------------------------|:-----------------------------------------------------|
+
+
+## Table of Data Standards
+
+```{admonition} Important
+:class: tip
+this section is relied upon by another component developed by FAIRplus to enhance search and presentation. It is therefore important to comply with the layout. 
+```
+
+Authors should list all the data standards, format specification, syntax and controlled terminologies used in the FAIRification process applied to the IMI project data.
+Ideally, authors should mark up the information using either EDAM Ontology URI or FAIRsharing identifiers (which are DOIs)
+
+| Data Formats                                        | Terminologies                                                          | Models                                                |
+|:----------------------------------------------------|:-----------------------------------------------------------------------|:------------------------------------------------------|
+---
+
+## Main Content
+
+### Introduction
+The European Nucleotide Archive(ENA) is one of the INSDC members where much of the world's nucleotide data is submitted to and archived. 
+Sample related metadata submitted via checklist templates. 
+The field names on the templates are usually based on [GSC MIxS](https://www.gensc.org//pages/projects/mixs-gsc-project.html) standards. 
+This is particularly true of sample related metadata. Project, sequencing experiment and other metadata is collected separately usually with manifests.
+
+Well resourced scientific institutions often have their own sample and sequence data management platforms.
+The metadata concepts and metadata architecture will usually be somewhat different to that of the ENA. 
+The challenge and the focus of this recipe are the approaches to shape the metadata appropriately.
+
+### In
+
+
+
+
+
 ## Requirements
 
 * technical requirements:
@@ -120,6 +247,8 @@ The challenge and the focus of this recipe are the approaches to shape the metad
         C-->D
         B-->D(mainstream standard)
         D-->main-standard[Note what standard]
+              main-standard--"if standard mappings exist"-->mappingsAlreadyExist("Mappings already exist, so done.\n e.g. if your metadata standards are already based on DwC or MIxS")
+
         B-->E
         C-->E(institutional standard)
         C-->F(no standard)
@@ -146,6 +275,7 @@ The challenge and the focus of this recipe are the approaches to shape the metad
       style F fill:#0A749B,stroke:#333,stroke-width:2px
       style main-standard fill:#008000,stroke:#333,stroke-width:2px
       style definitions fill:#008000,stroke:#333,stroke-width:2px
+      style mappingsAlreadyExist fill:#008000,stroke:#333,stroke-width:2px
       style no_definitions fill:#008000,stroke:#333,stroke-width:2px
 ```
 
