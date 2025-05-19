@@ -76,7 +76,7 @@ name: fcb-help-recipe-template-figure1
 subtitle: C-3PO_droid
 ```
 
-### Find out what metadata it is and what standards they follow
+### Figure: Overview of discovering what metadata you are using(if any), map and analysis, to get a mapping
 ```mermaid
   graph TD; 
       A([Collected metadata])-->mystds["identify systems used for storing field names and values"]
@@ -90,7 +90,10 @@ subtitle: C-3PO_droid
       sanityReview--"pass"-->mapping("mapping of your and ENA checklist field names")
       sanityReview--"fail"-->manualAnalysis
       manualAnalysis--"valid mappings exist"-->mapping
+      mappingsAlreadyExist-->mapping
       manualAnalysis--"no valid mappings exist"-->no("List of your and ENA checklist field names\n where no valid mappings exist")
+      
+      
       classDef default fill:#0A749B,stroke:#333,stroke-width:4px;  #blue
 ```
 ---
@@ -329,6 +332,46 @@ and then use webin
       style apt6 fill:#FF5733,stroke:#333,stroke-width:2px
 
       style no_definitions fill:#008000,stroke:#333,stroke-width:2px
+```
+
+### mapping of your field names to ENA checklist field names
+Now that you have both your own field names and those of the appropriate ENA checklist you can then 
+proceed with the actual mapping. Unless you only have a small number of field names to map, it is best to utilise some 
+computing help to this. Doing exact strong matching is straight forwards.  Many field names differ by something simple like upper or lower case, spaces, dialect spelling(American/British English), 
+plurals etc. Fortunately, "fuzzy string matching" will cope with these simple differences.
+
+- Programmatically, as simple way of doing this is using a fuzzy string matcher library in python such as
+https://github.com/rapidfuzz/RapidFuzz and similar exist in R.
+- Excel now allows fuzzy string matching too (https://www.microsoft.com/en-gb/download/details.aspx?id=15011).
+- For the more techie familiar with Linkml, there is an even better resource for doing the mappings: https://github.com/cidgoh/DataHarmonizer 
+This takes into account more of the other information of the field name that just the string content of it, but using 
+associated properties.
+
+Whatever way you choose the recipe will be very similar. You will always have to do at least do some manual checking. 
+Often you will also have to decide whether two field_names are close enough, it is worth reading the definitions/descriptions
+to help with this. Sometimes the granularities being captured are different, or there are two field names in your 
+metadata and just one in ENA. These can be difficult to decide to map these.
+
+You will end up with a file of pairwise matches of field_names that are equivalent in an ENA checklist and in your 
+own metadata. You will often have a list of field names from your own metadata and in ENA that do not match. It is sensible
+to prioritise unmapped ENA field_names which are mandatory or recommended, for trying to find conceptually similar terms to map to. 
+
+```mermaid
+  graph TD; 
+      myCollation["my field names as list"]-->stringMap
+     
+      ENAChecklist["ENA checklist field names as list"]-->stringMap("Programmatically map the two lists")
+      stringMap("appropriate ENA sample list")--"Exact or close match"-->sanityReview("Sanity review of high confidence mappings")
+      
+      stringMap--"No or low confidence mapping"-->manualAnalysis("Manual review of low confidence mappings\n and making new mappings were assessed")
+      sanityReview--"pass"-->mapping("mapping of your and ENA checklist field names")
+      sanityReview--"fail"-->manualAnalysis
+      manualAnalysis--"valid mappings exist"-->mapping
+      mappingsAlreadyExist-->mapping
+      manualAnalysis--"no valid mappings exist"-->no("Lists where no valid mappings exist:\n 1) of your field names\n 2) ENA checklist field names\n ")
+      
+      
+      classDef default fill:#0A749B,stroke:#333,stroke-width:4px;  #blue
 ```
 ---
 
