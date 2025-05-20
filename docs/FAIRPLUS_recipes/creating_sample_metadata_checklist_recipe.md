@@ -20,7 +20,7 @@
 
 The main purpose of this recipe is:
 
-> To guide how to create a biological metadata checklists and making them standards. With the obvious _priviso_ that 
+> To guide how to create a biological metadata checklist and make it a standard. With the obvious _priviso_ that 
 > it is usually better to be able to reuse and improve an existing one.
 
 ---
@@ -57,9 +57,9 @@ The main purpose of this recipe is:
    * Excel skills
 
 * knowledge requirement:
-   * Know your biological domain and what typical metadata, scientists collect
+   * Know your biological domain and what typical metadata scientists collect.
    * Also know what metadata scientists in your domain like to query and or view.
-   * Understand in general about standards bodies such as GSC (for MIxS), TDWG (for DwC) etc.
+   * Understand in general about standards bodies such as GSC (for MIxS), TDWG (for DwC), etc.
 
 
 ---
@@ -110,44 +110,45 @@ Much of science involves collecting samples, processing them
 and then measuring different aspects of them. Most of the principles and even in data flow
 will apply generically, but here we want to focus on samples of biological material.
 
-
-
-### In
-
 Checklists of controlled field_names and values are part of good data management. 
 Done well, they intuitively guide the data generators on what field_names are mandatory, 
 highly recommended or optional for the biological domain of study.  
-Importantly checklists also helps findability and reusability of the data.
+Importantly, checklists also help findability and reusability of the data, i.e. applying some of the FAIR principles.
+
+### In
+- Knowledge of what metadata you or your project team are currently collecting.
+- Knowledge of what questions you would like to ask of the (meta)data. 
+
+
+### Considerations
+- Using established standards such as [GSC MIxS](https://www.gensc.org//pages/projects/mixs-gsc-project.html) 
+or [TDWG DwC](https://www.tdwg.org/standards/dwc/) increases interoperability.
+- By reusing existing checklists, the whole scientific community benefits, and also it will save time in reinvention.
+- Even if a new checklist is needed, it is good practice to use the standardised field names that map to your
+desired metadata concepts.
+
+### Find out what metadata is important to your study domain
+There is much common metadata like *project name*, *collection date*, *country* and *sample name* that will
+apply to most study's sample metadata. However, different areas of biology and the environment, e.g., collecting 
+eDNA from a stream, taking a tissue sample of a whale, collecting insects in a field, or the microbiome 
+of laboratory animals will have many additional relevant pieces of metadata. Sometimes it can be complex, and it 
+can help to engage your wider community.
 
 - An important first step is to determine what metadata is important for your domain of study.
 - Are there already checklists for your or very similar domains?
 - Can you get input from your collaborators and rivals?
 
-### Considerations
-
-- By reusing existing checklists, the whole scientific community benefits and also it will save time in reinvention.
-- Even if brand new checklists are needed, it similarly makes sense 
-If the field names on the checklist templates are based on established standards such as [GSC MIxS](https://www.gensc.org//pages/projects/mixs-gsc-project.html) 
-or [TDWG DwC](https://www.tdwg.org/standards/dwc/) standards that improves interoperability. 
-
-
-### Find out what metadata is important to your study domain
-There is much common metadata like *project name*, *collection date*, *country* and *sample name* that will
-apply to most study's sample metadata. However different areas of biology and the environment, e.g. collecting 
-eDNA from a stream, taking a tissue sample of a whale, collecting insects in a field, or the microbiome 
-of laboratory animals will have many additional relevant pieces of metadata. Sometimes it can be very complex and it 
-can help to engage your wider community.
-
 *Figure: Finding out what metadata is important to your study domain*
+
 ```mermaid
   graph TD; 
 
      my_dom["study domain"]-->current_metadata["What metadata is currently collected"]
      my_dom-->existing
-     existing["Are there existing checklists?"]--"yes"-->review
-     review["Review what metadata concepts\n are important"]--"community initial feedback"-->review
-     existing--"no"-->FAIR["general concepts important to FAIR of this type of data"]
-     FAIR--"see MIxS/DwC"-->FAIR
+     existing["Are there existing checklists?"]-- "yes" -->review
+     review["Review what metadata concepts\n are important"]-- "community initial feedback" -->review
+     existing-- "no" -->FAIR["general concepts important to FAIR of this type of data"]
+     FAIR-- "see MIxS/DwC" -->FAIR
      FAIR-->review
      review-->clarity
      current_metadata-->review
@@ -155,15 +156,15 @@ can help to engage your wider community.
 
      classDef default fill:#0A749B,stroke:#333,stroke-width:4px;  #blue
 ```
-There are many alternatives to the above, for example some teams go straight to their community and 
-request them to all contribute to generate a list of important metadata concepts. Nevertheless the important principle of this
+There are many alternatives to the above, for example, some teams go straight to their community and 
+request them to all contribute to generate a list of important metadata concepts. Nevertheless, the important principle of this
 is to make use of several different sources and to get some community involvement.
 
 
 ### Going from metadata concepts to a productionised checklist
-In the previous steps we have at least collected metadata concepts. Now we need to transform these concepts
-to field_names and controlled vocabularies(ontologies are even better) or allowed patterns for the values. 
-Also we need to then get it adopted by the community and ideally be a sustainable state.
+In the previous steps, we have at least collected metadata concepts. Now we need to transform these concepts
+to field_names and controlled vocabularies (ontologies are even better) or allowed patterns for the values. 
+Also, we need to then get it adopted by the community and ideally be a sustainable state.
 
 *Figure: Going from metadata concepts to a productionised checklist*
 ```mermaid
@@ -178,12 +179,12 @@ Also we need to then get it adopted by the community and ideally be a sustainabl
      adapt-->standardsBody
      noSimilar-->standardsBody
      minorChanges-->standardsBody["Work with the appropriate standards body"]
-     standardsBody--"iterate with community"-->standardsBody
+     standardsBody-- "iterate with community" -->standardsBody
      field_names["standardised field_names"]-->right_standards["standard terms/values/patterns"]
      values["standardised values"]-->right_standards
      right_standards-->standardsBody
      standardsBody-->checklist["Finalised Checklist"]
-     checklist--"consider"-->paper["Prepare and publish about your checklist"]
+     checklist-- "consider" -->paper["Prepare and publish about your checklist"]
      checklist-->repositories["Encourage the relevant repository to implement checklist"]
      repositories-->production["Productionised checklist"]
            
@@ -192,21 +193,21 @@ Also we need to then get it adopted by the community and ideally be a sustainabl
 ```
 
 ### Regularly review and improve the checklist
-Every few years, particularly if there has been a paradigm shift in your domain consider reviewing
+Every few years, particularly if there has been a paradigm shift in your domain, consider reviewing
 and updating the checklist. 
 
 **Figure: Reviewing and improve the checklist regularly**
 ```mermaid
   graph TD; 
-      review["Review Checklist"]--"feedback on metadata to \nadd/remove/adapt"-->anyChangesNeeded
-      anyChangesNeeded--yes-->minorChanges
+      review["Review Checklist"]-- "feedback on metadata to\n add/remove/adapt" -->anyChangesNeeded
+      anyChangesNeeded-- yes -->minorChanges
       minorChanges["Additions or changes needed"]-->standardsBody
-     standardsBody["Work with the appropriate standards body"]--"iterate with community"-->standardsBody
+     standardsBody["Work with the appropriate standards body"]-- "iterate with community" -->standardsBody
      field_names["standardised field_names"]-->right_standards["standard terms/values/patterns"]
      values["standardised values"]-->right_standards
      right_standards-->standardsBody
      standardsBody-->checklist["Updated Checklist"]
-     checklist--"consider"-->paper["Prepare and publish further\n about your updated checklist"]
+     checklist--" consider" -->paper["Prepare and publish further\n about your updated checklist"]
      checklist-->repositories["Encourage the relevant repository to\n update their implemented checklist"]
      repositories-->production["Productionised checklist"]
      classDef default fill:#0A749B,stroke:#333,stroke-width:4px;  #blue
@@ -253,7 +254,7 @@ List the recipe contributors following the structure below and using the CASRAI 
     - Validation
     - Visualization
     - Writing - original draft - Peter Woollard
-    - Writing - review & editing - Peter Woollard
+    - Writing - review & editing - 
 ```
 
 ```{admonition} Important
