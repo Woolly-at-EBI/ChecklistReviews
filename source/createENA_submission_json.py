@@ -36,7 +36,7 @@ def get_checklist(checklist_id):
     root = tree.getroot()
     logger.debug(f"root={root}")
     for child in root:
-        print(child.tag, child.attrib)
+        logger.debug(child.tag, child.attrib)
 
     my_checklist_sample_set = set()
     for field in root.findall("./CHECKLIST/DESCRIPTOR/FIELD_GROUP/FIELD"):
@@ -165,13 +165,13 @@ def get_project_json_example():
 
 def get_sample_json(specific_base_template):
     sample_json = get_sample_json_template()
-    logger.debug(f"------------------------------------------")
-    logger.debug(f"sample_json={sample_json}")
-    logger.debug(f"------------------------------------------\n")
+    # logger.debug(f"------------------------------------------")
+    # logger.debug(f"sample_json={sample_json}")
+    # logger.debug(f"------------------------------------------\n")
     all_tags = specific_base_template[1]
-    logger.debug(f"all_tags={all_tags}")
+    # logger.debug(f"all_tags={all_tags}")
     already_done = {'tax_id', 'sample_alias', 'sample_title'}
-    logger.debug(f"already_done={already_done}")
+    # logger.debug(f"already_done={already_done}")
     all_tags.append("ena-checklist")
     checklist_id = specific_base_template[0][1]
     logger.debug(f"checklist_id={checklist_id}")
@@ -179,10 +179,10 @@ def get_sample_json(specific_base_template):
     for tag_name in all_tags:
         #logger.debug(f"tag_name-->{tag_name}<---")
         if tag_name in already_done:
-            logger.debug(f"YIPPEE Found tag_name-->{tag_name}<--")
+            # logger.debug(f"YIPPEE Found tag_name-->{tag_name}<--")
             continue
-        else:
-            logger.debug(f"              NOT Found tag_name=-->{tag_name}<---")
+        # else:
+        #     logger.debug(f"              NOT Found tag_name=-->{tag_name}<---")
 
         tag_json = {
             "tag" :  f"{tag_name}",
@@ -198,7 +198,7 @@ def get_sample_json(specific_base_template):
 
         sample_json["samples"][0]["attributes"].append(tag_json)
 
-    logger.info(f"sample_json={json.dumps(sample_json,indent=4)}")
+    # logger.info(f"sample_json={json.dumps(sample_json,indent=4)}")
     return sample_json
 
 
@@ -218,7 +218,7 @@ def  get_sample_json_template():
         ]
     }
 
-    logger.debug(sample_json)
+    # logger.debug(sample_json)
     return sample_json
 
 def get_sample_example_json():
@@ -314,7 +314,7 @@ def add_checklist2base(base_template, field_name_set, checklist_id, checklist_na
     checklist_fields_to_add = sorted(difference_set)
     # logger.debug(f"checklist_fields_to_add={checklist_fields_to_add}")
     base_template[1].extend(checklist_fields_to_add)
-    logger.debug(f"base_template={base_template}")
+    # logger.debug(f"base_template={base_template}")
     return base_template
 
 
@@ -325,6 +325,19 @@ def get_base_template():
     base[2] = ['# units']
     return base
 
+def combine_jsons(new_base_template):
+    sample_json = get_sample_json(new_base_template)
+    project_json = get_project_json_template()
+
+    submission_json = get_submission_json()
+    logger.debug(f"project_json={project_json}")
+    # combined_json = set([sample_json, project_json, submission_json])
+    combined_json = {}
+    combined_json["samples"] = sample_json["samples"]
+    combined_json["projects"] = project_json["projects"]
+    combined_json["submission"] = submission_json["submission"]
+    # logger.debug(f"combined_json={json.dumps(combined_json, indent=4)}")
+    return combined_json
 
 def main():
 
@@ -333,14 +346,14 @@ def main():
     base_template = get_base_template()
     logger.debug(f"base_template={base_template}")
     new_base_template = add_checklist2base(base_template, field_name_set, checklist_id, checklist_name)
-    outfile = f"base_{checklist_id}.tsv"
+    outfile = f"base_submission_{checklist_id}.json"
     logger.debug(f"outfile={outfile}")
+    combine_json = combine_jsons(new_base_template)
+    with open(outfile, "w") as outfile:
+        json.dump(combine_json, outfile)
 
-    sample_json = get_sample_json(new_base_template)
-    project_json = get_project_json_template()
-    logger.debug(f"project_json={project_json}")
-    submission_json = get_submission_json()
+
 
 if __name__ == '__main__':
-    logging.basicConfig(level = logging.DEBUG, format = '%(levelname)s - %(message)s')
+    logging.basicConfig(level = logging.INFO, format = '%(levelname)s - %(message)s')
     main()
